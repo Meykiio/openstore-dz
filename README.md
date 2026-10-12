@@ -23,8 +23,8 @@ moment each one is verified.
 |---|---|---|
 | 0 | Project foundation, quality gate, design system | **Done** |
 | 1 | Skill library, design reference, governance docs | **Done** |
-| 2 | `supabase/schema.sql`: tables, RLS, grants, seed demo shop | Next |
-| 3 | Admin sign-in and store profile | Planned |
+| 2 | `supabase/schema.sql`: tables, RLS, grants, seed demo shop | **Written, unverified** |
+| 3 | Admin sign-in and store profile | Next |
 | 4 | Products, packs, size guide builder | Planned |
 | 5 | Orders and the confirmation call queue | Planned |
 | 6 | Storefront, product pages, installable PWA | Planned |
@@ -32,6 +32,10 @@ moment each one is verified.
 | 8 | Guepex delivery, tracking, webhook | Planned |
 | 9 | Full accessibility and performance gates | Planned |
 | 10 | Launch readiness | Planned |
+
+> **Sprint 2 is written but not proven.** `supabase/schema.sql` has been authored and
+> reviewed, never executed against a running database. Run `npx supabase db reset --local`
+> before you rely on it, then `supabase/verify.sql`, then `npx supabase db advisors`.
 
 `docs/CHANGELOG.md` records verified state. If it is not in the changelog, it does not
 work yet.

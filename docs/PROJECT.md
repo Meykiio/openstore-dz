@@ -9,19 +9,29 @@ master files; they never weaken a `[HARD]` rule.
 
 | | |
 |---|---|
-| **Phase** | Sprint 1 complete. Sprint 2 next. |
-| **Works** | App builds, serves and renders. `npm run check` exits 0: typecheck, ESLint (250-line file / 120-line function limit), 19 Vitest tests, knip dead-code scan, production build. Algerian Emerald design tokens in both themes, Arabic-first typography via self-hosted Fraunces/Outfit/IBM Plex Mono with Cairo fallback, `data-theme` switching with a pre-paint bootstrap, RTL as the default. Setup health check reports connected / not configured / unreachable with the exact fix. Full README with one-click agent setup prompt in English, Arabic and French. Governance and architecture documentation set. |
-| **In progress** | Nothing. Working tree clean at the last commit. |
-| **Next sprint** | **Sprint 2** — write `supabase/schema.sql`: `store_settings`, `admin_users`, `products`, `product_variants`, `variant_images`, `pack_items`, `orders`, `reviews`; RLS plus base grants; server-side price triggers; `product-media` storage policies; idempotent demo seed shop. |
-| **Blocked on** | Nothing. Sprint 2 needs no live database. A Supabase project is only required at Sprint 3. |
+| **Phase** | Sprint 2 written, not yet proven against a live database. |
+| **Works** | App builds, serves and renders. Algerian Emerald design tokens in both themes, Arabic-first typography via self-hosted Fraunces/Outfit/IBM Plex Mono with Cairo fallback, `data-theme` switching with a pre-paint bootstrap, RTL as the default. Setup health check reports connected / not configured / unreachable with the exact fix. README with a one-click agent setup prompt in English, Arabic and French. Governance and architecture documentation. |
+| **Gate status** | `typecheck` 0, `lint` 0, `test` 0 (19 tests), `build` 0. **`knip` exits 1** with `RangeError: Array buffer allocation failed` — machine memory pressure, not a code fault. It fails identically on a clean checkout of the previous commit, so treat it as environmental until memory is freed. |
+| **In progress** | Nothing. |
+| **Next** | Run `npx supabase db reset --local` once, then `supabase/verify.sql`, then `npx supabase db advisors`. Then Sprint 3: admin sign-in and store profile. |
+| **Blocked on** | Nothing that stops writing code. The schema is unverified, so Sprint 3 UI work should not assume it is correct until the reset runs. |
 
 ### Verified commands
 
 ```bash
-npm run check     # the one gate. Exits 0.
-npx supabase db reset --local   # Sprint 2 onward: applies schema.sql plus seed
-npx supabase db advisors        # run after any schema change
+npm run check                       # the one gate, currently red on knip only
+npx supabase db reset --local       # applies schema.sql plus seed, from scratch
+npx supabase db advisors            # RLS, security and performance review
 ```
+
+### Schema honesty
+
+`supabase/schema.sql` was written and reviewed, never run end to end. A partial run caught a
+real syntax error, and a later read caught two trigger defects that compile cleanly and fail
+only on the first real row (`coalesce(new.order_id, old.order_id)` in a DECLARE default, and
+`coalesce(new, old)` on composite records). All three are fixed. The rest of the file has not
+been executed. `supabase/verify.sql` asserts the 17 properties the schema claims and is the
+cheapest way to find whatever is still wrong.
 
 ### Not yet built
 

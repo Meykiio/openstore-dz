@@ -5,8 +5,33 @@ migration files by design, so a shop owner can install this by pasting one docum
 This is a deliberate, documented departure from the owner's general rule that every
 schema change is a versioned migration. See `docs/DECISIONS.md` entry 4.
 
-`supabase/schema.sql` is not written yet. It is Sprint 2. This page documents the rules
-it will follow, so the rules are decided before the tables are.
+`supabase/schema.sql` now exists and is the whole database: 9 tables, RLS and grants on
+every one, the order-placement and order-tracking RPCs, storage policies, and a demo shop.
+It has **not** been executed against a live database. Run `npx supabase db reset --local`
+once before trusting it, and `npx supabase db advisors` after.
+
+## Order placement is a function, not three inserts
+
+The first draft gave `anon` an INSERT policy on `orders` and `order_items` and let the
+browser post them separately. That was wrong twice over:
+
+- Three round trips leave half-written orders behind whenever the connection drops, and
+  those orphans still consume a confirmation slot in the phone queue.
+- An INSERT policy on `order_items` guarded by `exists (select 1 from orders where id =
+  order_id)` is satisfied by *any* order whose id the caller can name. Guessing an order
+  id is enough to append lines to someone else's order.
+
+So `anon` gets no table privileges on `orders` or `order_items` at all. They are reached
+only through two `SECURITY DEFINER` functions:
+
+| Function | Caller | Returns |
+|---|---|---|
+| `place_order(p_customer jsonb, p_items jsonb)` | `anon`, `authenticated` | the tracking token |
+| `track_order(p_token uuid)` | `anon`, `authenticated` | order plus lines, or `null` |
+
+`place_order` writes the order and its lines in one transaction and never reads a price
+from the caller. `track_order` is the only way anyone learns about an order without a
+session, and it returns nothing for a token that does not exist.
 
 ## The three rules that prevent the most common bugs
 
@@ -46,7 +71,28 @@ using ((select auth.uid()) = owner_id)     -- good
 using (auth.uid() = owner_id)               -- slow
 ```
 
-## Planned tables
+**4. To lock one column, never grant the table-level privilege.**
+
+This is the trap that makes rule 4 feel like it works when it does not:
+
+```sql
+grant update on public.orders to authenticated;      -- every column
+revoke update (total) on public.orders to authenticated;   -- NO-OP
+```
+
+Column privileges are a *separate* grant set. The table-level `UPDATE` still covers
+`total`, so the revoke does nothing and the dashboard can type its own order totals. The
+only correct shape is to never issue the table-level grant at all and enumerate columns:
+
+```sql
+grant select, insert, delete on public.orders to authenticated;
+grant update (customer_name, phone, wilaya, commune, address, note, status,
+              confirmed_at, carrier, tracking_number, ...)
+  on public.orders to authenticated;
+-- subtotal, delivery_fee and total are absent on purpose
+```
+
+## Tables as built
 
 | Table | Holds | Public read | Admin write |
 |---|---|---|---|
@@ -57,6 +103,7 @@ using (auth.uid() = owner_id)               -- slow
 | `variant_images` | gallery per variant | yes | yes |
 | `pack_items` | child variants inside a pack | yes | yes |
 | `orders` | customer, delivery, status, computed totals | no | yes |
+| `order_items` | snapshot of what was bought, at the price it was bought for | no | yes |
 | `reviews` | rating, comment, image | approved only | yes |
 
 Money is stored as `integer` in Algerian dinar. Never floating point: dinar amounts with
@@ -65,9 +112,18 @@ does not match the sum of its parts.
 
 ## Prices are computed server-side
 
-A BEFORE INSERT trigger recomputes `subtotal`, `delivery_fee` and `total` from the stored
-product rows and ignores whatever the browser sent. A tampered payload must not be able
-to change what a buyer is charged.
+A tampered payload must not be able to change what a buyer is charged. Two triggers split
+the job:
+
+- `validate_order_item` is BEFORE INSERT on `order_items`. It reads `unit_price`, the
+  variant label and the product name straight from the catalogue and overwrites whatever
+  the caller sent. The caller only ever names a `variant_id` and a `quantity`.
+- `recalculate_for_order` sums the stored lines and rewrites `subtotal`, `delivery_fee` and
+  `total` on the parent order. It is called from `place_order` and from an AFTER trigger on
+  `order_items`, so totals stay right even when an admin edits lines from the dashboard.
+
+`order_items` copies names and prices instead of joining back to the catalogue, so a price
+change tomorrow does not rewrite the history of an order placed today.
 
 ## Validation lives in triggers, not only in the UI
 
@@ -119,5 +175,34 @@ business, remains the shop owner's legal obligation. This is not legal advice.
 npx supabase db reset --local   # applies schema.sql plus seed, from scratch
 npx supabase db advisors        # RLS, security and performance review
 ```
+
+`supabase/verify.sql` goes further. It asserts the 17 properties this schema claims to
+have, including the three that are easy to get wrong and hard to notice:
+
+- `anon` holds no INSERT and no SELECT privilege on `orders`
+- `authenticated` holds no UPDATE privilege on `subtotal`, `delivery_fee` or `total`
+- a caller's price is overwritten by the catalogue price
+
+It also runs five statements that are *supposed* to fail, so each one prints its error.
+Run it after every schema change:
+
+```bash
+npx supabase db reset --local
+docker exec -i supabase_db_<project>-<slug> psql -U postgres -d postgres -f - < supabase/verify.sql
+```
+
+### Current status: authored, not executed
+
+The schema has been written and read through, but has **not** been run end to end against a
+working database. Treat the first `db reset` as a real test that may surface errors. The
+`order_items` index had a typo caught by a partial run; a later pass found two trigger bugs
+that compile cleanly and only fail on the first real row:
+
+- a DECLARE default of `coalesce(new.order_id, old.order_id)` raises `record "old" is not
+  assigned yet` on INSERT, because `old` does not exist there
+- `coalesce(new, old)` on composite records raises `COALESCE could not identify a record
+  type`
+
+Both are fixed, and both are why the remaining statements are worth running once by hand.
 
 Run `db advisors` after every schema change and fix what it reports before committing.
