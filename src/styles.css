@@ -1,0 +1,328 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+ * OpenStore DZ — design system
+ *
+ * Design thesis (inherited): product photography sells, every pixel of chrome
+ * must yield to the image. Neutral-first, one confident accent, so any seller's
+ * products lead regardless of vertical.
+ *
+ * Palette: Algerian Emerald. Green and white is the most loaded pair in
+ * Algeria, so the platform reads as native without explaining itself.
+ *
+ * Tokens, structure, motion, spacing, radius, elevation and component layout
+ * follow the Commerce Storefront reference system (system 02). Only colour
+ * values and the Arabic font fallback were changed.
+ */
+
+:root,
+[data-theme="light"] {
+  /* Surfaces — faint green cast so the palette reads as one system */
+  --bg: #f6f8f7;
+  --bg-dim: #eef1ef;
+  --surface: #ffffff;
+  --surface-mid: #f6f8f7;
+  --surface-high: #e9eeeb;
+  --surface-highest: #dde5e0;
+
+  /* Text */
+  --on-surface: #101815;
+  --on-surface-muted: #5c6b64;
+
+  /* Borders */
+  --outline: #dfe6e1;
+  --outline-hi: #b8c6bd;
+
+  /* Brand */
+  --primary: #047857;
+  --primary-solid: #047857;
+  --on-primary: #ffffff;
+  --primary-glow: rgba(4, 120, 87, 0.18);
+  --primary-glow-sm: rgba(4, 120, 87, 0.08);
+  --brand-green: #059669;
+
+  /* Sale / discount flags stay red, universally read as "off" */
+  --secondary: #be123c;
+  --secondary-dim: #9f1239;
+  --on-secondary: #ffffff;
+
+  /* Star ratings stay amber */
+  --tertiary: #b45309;
+  --on-tertiary: #ffffff;
+
+  /* Rare accents, far enough from primary to be distinct */
+  --quaternary: #6d28d9;
+  --on-quaternary: #ffffff;
+
+  --positive: #15803d;
+  --on-positive: #ffffff;
+  --error: #dc2626;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 3px rgba(4, 40, 30, 0.08);
+  --shadow-md: 0 6px 16px rgba(4, 40, 30, 0.1);
+  --shadow-lg: 0 16px 40px rgba(4, 40, 30, 0.14);
+
+  /* Chrome */
+  --nav-bg: #ffffff;
+  --scroll-track: #eef1ef;
+  --scroll-thumb: #dde5e0;
+  --scroll-thumb-hi: #047857;
+  --toggle-bg: rgba(4, 120, 87, 0.06);
+  --toggle-border: rgba(4, 120, 87, 0.22);
+  --table-header-bg: #e9eeeb;
+  --table-header-fg: #065f46;
+  --table-row-bg: #ffffff;
+  --table-row-hover: #f6f8f7;
+  --table-border: #dfe6e1;
+  --section-alt: #eef1ef;
+}
+
+[data-theme="dark"] {
+  --bg: #0b1210;
+  --bg-dim: #070d0b;
+  --surface: #111a17;
+  --surface-mid: #16211d;
+  --surface-high: #1c2925;
+  --surface-highest: #24332d;
+
+  --on-surface: #eef5f1;
+  --on-surface-muted: #9aaea4;
+
+  --outline: #26332e;
+  --outline-hi: #3a4b44;
+
+  --primary: #34d399;
+  --primary-solid: #34d399;
+  --on-primary: #04241a;
+  --primary-glow: rgba(52, 211, 153, 0.2);
+  --primary-glow-sm: rgba(52, 211, 153, 0.1);
+  --brand-green: #34d399;
+
+  --secondary: #fb7185;
+  --secondary-dim: #f43f5e;
+  --on-secondary: #2a050e;
+
+  --tertiary: #fbbf24;
+  --on-tertiary: #422006;
+
+  --quaternary: #a78bfa;
+  --on-quaternary: #1c1033;
+
+  --positive: #4ade80;
+  --on-positive: #052e16;
+  --error: #f87171;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 16px 44px rgba(0, 0, 0, 0.5);
+
+  --nav-bg: #070d0b;
+  --scroll-track: #111a17;
+  --scroll-thumb: #24332d;
+  --scroll-thumb-hi: #34d399;
+  --toggle-bg: rgba(52, 211, 153, 0.08);
+  --toggle-border: rgba(52, 211, 153, 0.25);
+  --table-header-bg: #16211d;
+  --table-header-fg: #34d399;
+  --table-row-bg: #0b1210;
+  --table-row-hover: #111a17;
+  --table-border: #26332e;
+  --section-alt: #070d0b;
+}
+
+:root {
+  /* Typefaces. The reference system is Latin-only (Fraunces, Outfit, IBM Plex
+     Mono). Cairo is added so Arabic renders in a real face instead of silently
+     falling back to whatever the OS has. Prices use Western digits, so the
+     Latin-only mono face is correct for them. */
+  --font-display: "Fraunces Variable", "Cairo Variable", serif;
+  --font-body: "Outfit Variable", "Cairo Variable", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Radius — soft scale */
+  --r-xs: 4px;
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+  --r-full: 9999px;
+
+  /* Spacing — Fibonacci */
+  --s-xs: 4px;
+  --s-sm: 8px;
+  --s-md: 16px;
+  --s-lg: 24px;
+  --s-xl: 40px;
+  --s-2xl: 64px;
+
+  --content-max: 1100px;
+
+  /* Motion */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-back: cubic-bezier(0.68, -0.4, 0.32, 1.4);
+  --ease-glide: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 0.15s;
+  --dur-med: 0.3s;
+  --dur-slow: 0.5s;
+
+  --transition: background var(--dur-med) var(--ease-glide),
+    color var(--dur-med) var(--ease-glide), border-color var(--dur-med) var(--ease-glide),
+    box-shadow var(--dur-med) var(--ease-glide);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-dim: var(--bg-dim);
+  --color-surface: var(--surface);
+  --color-surface-mid: var(--surface-mid);
+  --color-surface-high: var(--surface-high);
+  --color-surface-highest: var(--surface-highest);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-muted: var(--on-surface-muted);
+  --color-outline: var(--outline);
+  --color-outline-hi: var(--outline-hi);
+
+  --color-primary: var(--primary);
+  --color-primary-solid: var(--primary-solid);
+  --color-on-primary: var(--on-primary);
+  --color-brand: var(--brand-green);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-dim: var(--secondary-dim);
+  --color-on-secondary: var(--on-secondary);
+  --color-tertiary: var(--tertiary);
+  --color-on-tertiary: var(--on-tertiary);
+  --color-quaternary: var(--quaternary);
+  --color-on-quaternary: var(--on-quaternary);
+
+  --color-positive: var(--positive);
+  --color-on-positive: var(--on-positive);
+  --color-error: var(--error);
+
+  --color-nav-bg: var(--nav-bg);
+  --color-section-alt: var(--section-alt);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+
+  --radius-xs: var(--r-xs);
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-xl);
+
+  --ease-out-soft: var(--ease-out-soft);
+  --ease-back: var(--ease-back);
+  --ease-glide: var(--ease-glide);
+}
+
+@layer base {
+  * {
+    border-color: var(--outline);
+  }
+
+  html {
+    background-color: var(--bg);
+    color-scheme: light;
+  }
+
+  [data-theme="dark"] html,
+  html[data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--on-surface);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Arabic needs more air than Latin at the same nominal size: smaller
+     x-height, taller ascenders and descenders. The reference system's Latin
+     density is 15px / 1.5; Arabic overrides rather than the whole scale. */
+  [lang="ar"] body,
+  [lang="ar"] {
+    font-size: 17px;
+    line-height: 1.75;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+
+  [lang="ar"] h1,
+  [lang="ar"] h2,
+  [lang="ar"] h3,
+  [lang="ar"] h4 {
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: 0;
+  }
+
+  /* Prices are Western digits with a latin currency suffix. Lock them LTR even
+     inside an RTL paragraph, or the comma and the unit reorder. */
+  [dir="ltr"] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: var(--r-xs);
+  }
+
+  ::selection {
+    background: var(--primary-glow);
+  }
+}
+
+@layer utilities {
+  .container-page {
+    width: 100%;
+    max-width: var(--content-max);
+    margin-inline: auto;
+    padding-inline: var(--s-md);
+  }
+
+  /* Phone Feelings: respect the home-indicator inset on every fixed bottom bar */
+  .safe-bottom {
+    padding-bottom: calc(var(--s-md) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .safe-bottom-tight {
+    padding-bottom: calc(var(--s-xs) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
