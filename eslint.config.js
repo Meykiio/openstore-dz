@@ -8,7 +8,10 @@ import maxLines from "./eslint-rules/index.mjs";
 
 export default tseslint.config(
   {
-    // Build output and generated files are not hand-written.
+    // Build output, generated files, and vendored third-party code.
+    // `docs/` holds the shipped Guepex skill, which is MIT-licensed code from
+    // another author. Reformatting it would fork it away from its upstream and
+    // break the sync, and the 250-line rule is ours, not theirs.
     ignores: [
       "dist",
       ".output",
@@ -18,8 +21,9 @@ export default tseslint.config(
       "coverage",
       "playwright-report",
       "test-results",
+      "docs/**",
       "src/routeTree.gen.ts",
-      "src/integrations/supabase/types.ts",
+      "src/lib/supabase/types.ts",
       "eslint-rules/**",
     ],
   },

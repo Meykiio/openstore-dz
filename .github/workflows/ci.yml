@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Typecheck, lint, tests, dead code, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests
+        run: npm test
+
+      - name: Dead code and unused dependencies
+        run: npm run knip
+
+      - name: Production build
+        run: npm run build
+
+  security:
+    name: Dependency, secret and misconfiguration scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Trivy scan
+        uses: aquasecurity/trivy-action@v0.33.1
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+
+  secrets:
+    name: Secret history scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Full history matters: a secret committed and removed is still compromised.
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      # The gitleaks Action is commercially licensed for organisation-owned
+      # repos, so the CLI runs through Docker instead. Same scanner, no licence
+      # dependency for anyone who forks this into an org.
+      - name: Gitleaks
+        run: docker run -v "$PWD:/repo" zricethezav/gitleaks:latest git /repo --redact
+
+  accessibility:
+    name: Accessibility (axe)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build
+        run: npm run build
+
+      # Runs after `a11y` lands in Sprint 9. Kept as a commented step so the
+      # job structure is ready without failing the build on a missing script.
+      - name: Accessibility gate
+        if: hashFiles('package.json') != ''
+        run: npm run a11y --if-present

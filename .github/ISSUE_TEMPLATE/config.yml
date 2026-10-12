@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Setup help
+    url: https://github.com/Meykiio/openstore-dz/discussions
+    about: Installation problems. Paste the one-click prompt into your AI agent first.
+  - name: Security report
+    url: https://github.com/Meykiio/openstore-dz/security/advisories/new
+    about: Report a vulnerability privately. Please do not open a public issue.

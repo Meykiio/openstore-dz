@@ -9,11 +9,26 @@ master files; they never weaken a `[HARD]` rule.
 
 | | |
 |---|---|
-| **Phase** | Sprint 0 — foundation |
-| **Works** | App builds, serves, and renders. Quality gate `npm run check` is green: typecheck, lint (250-line limit), 19 Vitest tests, knip dead-code scan, production build. Algerian Emerald design tokens in both themes. Arabic font fallback wired. Setup health check explains a missing database instead of white-screening. |
-| **In progress** | Documentation set, GitHub Actions, README setup prompt. |
-| **Next sprint** | Sprint 2 — `supabase/schema.sql`: tables, RLS, grants, triggers, storage, demo seed shop. |
-| **Blocked on** | Nothing. A live Supabase project is only needed at Sprint 3. |
+| **Phase** | Sprint 1 complete. Sprint 2 next. |
+| **Works** | App builds, serves and renders. `npm run check` exits 0: typecheck, ESLint (250-line file / 120-line function limit), 19 Vitest tests, knip dead-code scan, production build. Algerian Emerald design tokens in both themes, Arabic-first typography via self-hosted Fraunces/Outfit/IBM Plex Mono with Cairo fallback, `data-theme` switching with a pre-paint bootstrap, RTL as the default. Setup health check reports connected / not configured / unreachable with the exact fix. Full README with one-click agent setup prompt in English, Arabic and French. Governance and architecture documentation set. |
+| **In progress** | Nothing. Working tree clean at the last commit. |
+| **Next sprint** | **Sprint 2** — write `supabase/schema.sql`: `store_settings`, `admin_users`, `products`, `product_variants`, `variant_images`, `pack_items`, `orders`, `reviews`; RLS plus base grants; server-side price triggers; `product-media` storage policies; idempotent demo seed shop. |
+| **Blocked on** | Nothing. Sprint 2 needs no live database. A Supabase project is only required at Sprint 3. |
+
+### Verified commands
+
+```bash
+npm run check     # the one gate. Exits 0.
+npx supabase db reset --local   # Sprint 2 onward: applies schema.sql plus seed
+npx supabase db advisors        # run after any schema change
+```
+
+### Not yet built
+
+The catalogue, checkout, dashboard and Guepex delivery do not exist. Sprints 3 to 8.
+`README.md` and `docs/FEATURES.md` both say so explicitly, and both name this project as
+v0.1.0 foundation rather than a usable shop. Do not let documentation drift ahead of the
+code.
 
 ## What this project is
 
