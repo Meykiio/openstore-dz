@@ -196,4 +196,18 @@ export const en: Record<TranslationKey, string> = {
   "home.cta.title": "Ready to order?",
   "home.cta.body": "Add your items to the cart and order in under a minute.",
   "home.browseAll": "Browse all products",
+  "setup.title": "Create your admin account",
+  "setup.body":
+    "This shop is brand new. Create the first administrator account to begin — this can only be done once.",
+  "setup.password": "Password",
+  "setup.confirm": "Confirm password",
+  "setup.submit": "Create account and continue",
+  "setup.haveAccount": "I already have an account",
+  "setup.passMismatch": "The passwords do not match",
+  "setup.weakPassword": "Password is too short (8 characters minimum)",
+  "setup.confirmEmail":
+    "Account created. Confirm your email, then sign in to become the shop administrator.",
+  "setup.alreadyClaimed": "This shop already has an administrator.",
+  "shop.closed": "Shop temporarily closed",
+  "shop.closedBody": "We are not accepting new orders right now. Please try again later.",
 };

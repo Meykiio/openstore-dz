@@ -197,4 +197,19 @@ export const fr: Record<TranslationKey, string> = {
   "home.cta.title": "Prêt à commander ?",
   "home.cta.body": "Ajoutez vos articles au panier et commandez en moins d'une minute.",
   "home.browseAll": "Voir tous les produits",
+  "setup.title": "Créez votre compte administrateur",
+  "setup.body":
+    "Cette boutique est neuve. Créez le premier compte administrateur pour commencer — vous ne pourrez plus le refaire.",
+  "setup.password": "Mot de passe",
+  "setup.confirm": "Confirmer le mot de passe",
+  "setup.submit": "Créer le compte et continuer",
+  "setup.haveAccount": "J'ai déjà un compte",
+  "setup.passMismatch": "Les mots de passe ne correspondent pas",
+  "setup.weakPassword": "Mot de passe trop court (8 caractères minimum)",
+  "setup.confirmEmail":
+    "Compte créé. Confirmez votre e-mail puis connectez-vous pour devenir administrateur.",
+  "setup.alreadyClaimed": "Cette boutique a déjà un administrateur.",
+  "shop.closed": "Boutique fermée temporairement",
+  "shop.closedBody":
+    "Nous n'acceptons pas de nouvelles commandes pour le moment. Réessayez plus tard.",
 };

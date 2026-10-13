@@ -74,7 +74,7 @@ function CarrierCard({ origin, flatFee }: { origin: string; flatFee: number }) {
           <Select value={origin} onChange={(event) => saveOrigin.mutate(event.target.value)}>
             <option value="">{t("checkout.selectWilaya")}</option>
             {WILAYAS.map((w) => (
-              <option key={w.code} value={locale === "ar" ? w.ar : w.fr}>
+              <option key={w.code} value={w.fr}>
                 {String(w.code).padStart(2, "0")} — {locale === "ar" ? w.ar : w.fr}
               </option>
             ))}
@@ -141,7 +141,7 @@ function ZoneForm() {
         <Select value={wilaya} onChange={(event) => setWilaya(event.target.value)}>
           <option value="">{t("checkout.selectWilaya")}</option>
           {WILAYAS.map((w) => (
-            <option key={w.code} value={locale === "ar" ? w.ar : w.fr}>
+            <option key={w.code} value={w.fr}>
               {String(w.code).padStart(2, "0")} — {locale === "ar" ? w.ar : w.fr}
             </option>
           ))}

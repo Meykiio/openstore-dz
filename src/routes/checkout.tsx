@@ -35,6 +35,27 @@ function CheckoutPage() {
 
   if (placedToken) return <OrderPlaced token={placedToken} phone={form.phone} />;
 
+  // The owner can close the shop without deleting it. Cash on delivery is the
+  // only payment method, so `accepts_cod = false` means no orders at all. The
+  // database refuses them too, via validate_order.
+  if (settings && !settings.accepts_cod) {
+    return (
+      <StoreLayout>
+        <div className="container-page py-16">
+          <EmptyState
+            title={t("shop.closed")}
+            body={t("shop.closedBody")}
+            action={
+              <Button asChild variant="secondary">
+                <Link to="/">{t("cart.emptyAction")}</Link>
+              </Button>
+            }
+          />
+        </div>
+      </StoreLayout>
+    );
+  }
+
   if (cart.items.length === 0) {
     return (
       <StoreLayout>

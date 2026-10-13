@@ -554,6 +554,14 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      admin_exists: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
+      claim_store: {
+        Args: Record<PropertyKey, never>;
+        Returns: Database["public"]["Enums"]["admin_role"];
+      };
       has_admin_role: {
         Args: {
           _roles: Database["public"]["Enums"]["admin_role"][];

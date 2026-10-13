@@ -5,6 +5,7 @@ import { useCart } from "@/lib/cart";
 import { useI18n } from "@/lib/i18n-context";
 import { formatDzd } from "@/lib/format";
 import { WILAYAS } from "@/lib/wilayas";
+import { useStoreSettings } from "@/lib/queries";
 
 /** The address form shape, shared by the page and its panels. */
 export type CheckoutForm = {
@@ -33,8 +34,17 @@ export function AddressFields({
   onChange: (next: CheckoutForm) => void;
 }) {
   const { t, locale } = useI18n();
+  const { data: settings } = useStoreSettings();
   const set = <K extends keyof CheckoutForm>(key: K, value: CheckoutForm[K]) =>
     onChange({ ...form, [key]: value });
+
+  // Restrict the picker to wilayas the owner actually serves. An empty list
+  // means everywhere. The database enforces the same rule, so this is courtesy
+  // rather than control — but offering 58 options when 6 are served is how a
+  // buyer picks one that gets rejected at the last step.
+  const allowed = settings?.delivery_wilayas ?? [];
+  const deliverable =
+    allowed.length === 0 ? WILAYAS : WILAYAS.filter((w) => allowed.includes(w.fr));
 
   return (
     <div className="flex flex-col gap-4 rounded-[16px] border border-outline bg-surface p-6">
@@ -69,8 +79,8 @@ export function AddressFields({
         <Field label={t("checkout.wilaya")} required>
           <Select value={form.wilaya} onChange={(e) => set("wilaya", e.target.value)} required>
             <option value="">{t("checkout.selectWilaya")}</option>
-            {WILAYAS.map((w) => (
-              <option key={w.code} value={locale === "ar" ? w.ar : w.fr}>
+            {deliverable.map((w) => (
+              <option key={w.code} value={w.fr}>
                 {String(w.code).padStart(2, "0")} — {locale === "ar" ? w.ar : w.fr}
               </option>
             ))}

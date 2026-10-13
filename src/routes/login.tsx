@@ -12,6 +12,49 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
+type SignInOutcome = { ok: true } | { ok: false; error: string };
+
+/**
+ * Sign in, then settle what the account actually is.
+ *
+ * Three outcomes, in order of likelihood: an administrator, the first person
+ * ever (who claims the store), or a signed-in customer who is not staff and is
+ * signed straight back out. Leaving a customer session open on the admin screen
+ * would be worse than a failed login — the next request would look authenticated
+ * and only fail deep inside a policy.
+ */
+async function signInAndResolveRole(email: string, password: string): Promise<SignInOutcome> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email.trim(),
+    password,
+  });
+
+  if (error || !data.user) {
+    return { ok: false, error: error?.message ?? "Could not sign in." };
+  }
+
+  const { data: roleRow } = await supabase
+    .from("admin_users")
+    .select("role")
+    .eq("user_id", data.user.id)
+    .maybeSingle();
+
+  if (roleRow) return { ok: true };
+
+  // First administrator ever. This is how an owner arrives after confirming
+  // their email on the setup screen: the account exists, but the session only
+  // appears now, so the claim has to happen at this point.
+  const { data: exists } = await supabase.rpc("admin_exists");
+  if (exists === false) {
+    const { error: claimError } = await supabase.rpc("claim_store");
+    return claimError ? { ok: false, error: claimError.message } : { ok: true };
+  }
+
+  await supabase.auth.signOut();
+  return { ok: false, error: "This account is not a shop administrator." };
+}
+
 /**
  * Admin sign-in.
  *
@@ -30,44 +73,36 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [needsSetup, setNeedsSetup] = useState(false);
 
   // Already signed in as an admin: nothing to do here.
   useEffect(() => {
     if (!loading && isAdmin) void navigate({ to: "/admin" });
   }, [loading, isAdmin, navigate]);
 
+  // A brand-new install has no owner, so point at setup rather than leaving the
+  // owner staring at a sign-in form for an account that cannot exist yet.
+  useEffect(() => {
+    // Postgrest builders are PromiseLike, not Promise, so there is no .catch.
+    void getSupabase()
+      .rpc("admin_exists")
+      .then(
+        ({ data }) => setNeedsSetup(data === false),
+        () => undefined,
+      );
+  }, []);
+
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     setBusy(true);
     setError(null);
-
-    const supabase = getSupabase();
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
-
-    if (signInError || !data.user) {
-      setBusy(false);
-      setError(signInError?.message ?? t("common.somethingWrong"));
-      return;
-    }
-
-    const { data: roleRow } = await supabase
-      .from("admin_users")
-      .select("role")
-      .eq("user_id", data.user.id)
-      .maybeSingle();
-
-    if (!roleRow) {
-      await supabase.auth.signOut();
-      setBusy(false);
-      setError(t("admin.login.notAdmin"));
-      return;
-    }
-
+    const outcome = await signInAndResolveRole(email, password);
     setBusy(false);
-    void navigate({ to: "/admin" });
+    if (outcome.ok) {
+      void navigate({ to: "/admin" });
+      return;
+    }
+    setError(outcome.error);
   };
 
   return (
@@ -126,6 +161,17 @@ function LoginPage() {
         <Button type="submit" size="lg" disabled={busy}>
           {busy ? t("common.loading") : t("admin.login.submit")}
         </Button>
+
+        {/* Only offered while the shop has no owner, so it cannot be used to
+            take over a running store. */}
+        {needsSetup && (
+          <Link
+            to="/setup"
+            className="rounded-[10px] border border-primary/40 bg-primary/5 px-3 py-2.5 text-center text-sm text-primary hover:bg-primary/10"
+          >
+            {t("setup.title")}
+          </Link>
+        )}
       </form>
     </main>
   );
