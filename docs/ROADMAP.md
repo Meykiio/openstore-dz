@@ -157,3 +157,31 @@ dev` means anything. Budgets already asserted informally: 1.5 MB initial
   API credentials are the owner's and no agent can generate them.
 - **The demo imagery is external placeholder URLs** and must be replaced before
   the shop is public.
+
+---
+
+## Phase D0 - Dashboard overhaul (raised by the owner, before the rest of D)
+
+The dashboard is three numbers, four filter tabs and a list. It works and it is
+not good, and it is the screen the owner looks at every day, so it matters more
+than any storefront page.
+
+In the order an owner actually uses it:
+
+1. **Revenue over time.** Orders and confirmed value per day and week, so this
+   week can be compared to last. A number with no trend is not information.
+2. **Refusal rate by wilaya.** The most valuable number in Algerian COD
+   commerce. A wilaya at 40% refusal loses money on every parcel, and nothing in
+   the app surfaces it today. It tells the owner which wilayas to drop or to
+   require a deposit for.
+3. **Top products.** What sells, and what sits.
+4. **The call queue as the primary object, not a tab.** Confirming orders is the
+   daily job. It should be the first thing on the screen, with a count, and
+   workable without opening anything.
+5. **Low stock alerts.** Stock is enforced now, but nothing warns before a
+   variant runs out.
+6. **Bulk actions.** Confirm or ship many at once. Twenty at a time is the real
+   daily cost of a busy shop.
+
+Design note: this is a working tool, not a marketing page. Dense, fast, keyboard
+friendly, readable at a glance. The storefront's airy spacing is wrong here.
