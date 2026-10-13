@@ -18,16 +18,16 @@ browser post them separately. That was wrong twice over:
 - Three round trips leave half-written orders behind whenever the connection drops, and
   those orphans still consume a confirmation slot in the phone queue.
 - An INSERT policy on `order_items` guarded by `exists (select 1 from orders where id =
-  order_id)` is satisfied by *any* order whose id the caller can name. Guessing an order
+order_id)` is satisfied by _any_ order whose id the caller can name. Guessing an order
   id is enough to append lines to someone else's order.
 
 So `anon` gets no table privileges on `orders` or `order_items` at all. They are reached
 only through two `SECURITY DEFINER` functions:
 
-| Function | Caller | Returns |
-|---|---|---|
-| `place_order(p_customer jsonb, p_items jsonb)` | `anon`, `authenticated` | the tracking token |
-| `track_order(p_token uuid)` | `anon`, `authenticated` | order plus lines, or `null` |
+| Function                                       | Caller                  | Returns                     |
+| ---------------------------------------------- | ----------------------- | --------------------------- |
+| `place_order(p_customer jsonb, p_items jsonb)` | `anon`, `authenticated` | the tracking token          |
+| `track_order(p_token uuid)`                    | `anon`, `authenticated` | order plus lines, or `null` |
 
 `place_order` writes the order and its lines in one transaction and never reads a price
 from the caller. `track_order` is the only way anyone learns about an order without a
@@ -36,7 +36,7 @@ session, and it returns nothing for a token that does not exist.
 ## The three rules that prevent the most common bugs
 
 **1. Every table needs a policy AND a grant.**
-Row Level Security is evaluated *after* PostgREST checks whether the requesting role has a
+Row Level Security is evaluated _after_ PostgREST checks whether the requesting role has a
 table-level privilege. Without `GRANT SELECT ON public.products TO anon`, a perfectly
 correct policy still returns `401 Unauthorized`. This is the single most common cause of
 "my RLS policy is not working".
@@ -80,7 +80,7 @@ grant update on public.orders to authenticated;      -- every column
 revoke update (total) on public.orders to authenticated;   -- NO-OP
 ```
 
-Column privileges are a *separate* grant set. The table-level `UPDATE` still covers
+Column privileges are a _separate_ grant set. The table-level `UPDATE` still covers
 `total`, so the revoke does nothing and the dashboard can type its own order totals. The
 only correct shape is to never issue the table-level grant at all and enumerate columns:
 
@@ -94,17 +94,17 @@ grant update (customer_name, phone, wilaya, commune, address, note, status,
 
 ## Tables as built
 
-| Table | Holds | Public read | Admin write |
-|---|---|---|---|
-| `store_settings` | name, legal disclosures, contact, Guepex origin wilaya | yes | yes |
-| `admin_users` | shop owner and staff | no | yes |
-| `products` | single items and packs | published only | yes |
-| `product_variants` | size, colour, price, stock | yes | yes |
-| `variant_images` | gallery per variant | yes | yes |
-| `pack_items` | child variants inside a pack | yes | yes |
-| `orders` | customer, delivery, status, computed totals | no | yes |
-| `order_items` | snapshot of what was bought, at the price it was bought for | no | yes |
-| `reviews` | rating, comment, image | approved only | yes |
+| Table              | Holds                                                       | Public read    | Admin write |
+| ------------------ | ----------------------------------------------------------- | -------------- | ----------- |
+| `store_settings`   | name, legal disclosures, contact, Guepex origin wilaya      | yes            | yes         |
+| `admin_users`      | shop owner and staff                                        | no             | yes         |
+| `products`         | single items and packs                                      | published only | yes         |
+| `product_variants` | size, colour, price, stock                                  | yes            | yes         |
+| `variant_images`   | gallery per variant                                         | yes            | yes         |
+| `pack_items`       | child variants inside a pack                                | yes            | yes         |
+| `orders`           | customer, delivery, status, computed totals                 | no             | yes         |
+| `order_items`      | snapshot of what was bought, at the price it was bought for | no             | yes         |
+| `reviews`          | rating, comment, image                                      | approved only  | yes         |
 
 Money is stored as `integer` in Algerian dinar. Never floating point: dinar amounts with
 two decimal places are not a thing here, and a float will eventually produce a total that
@@ -183,7 +183,7 @@ have, including the three that are easy to get wrong and hard to notice:
 - `authenticated` holds no UPDATE privilege on `subtotal`, `delivery_fee` or `total`
 - a caller's price is overwritten by the catalogue price
 
-It also runs five statements that are *supposed* to fail, so each one prints its error.
+It also runs five statements that are _supposed_ to fail, so each one prints its error.
 Run it after every schema change:
 
 ```bash
@@ -210,12 +210,12 @@ applied. What was actually run and observed:
 
 Four defects were found and fixed along the way, none of which the compiler could catch:
 
-| Defect | Why it was invisible |
-|---|---|
-| `create order_items_order_idx` missing the word `index` | Syntax error, caught by the first run |
-| `coalesce(new.order_id, old.order_id)` in a DECLARE default | Compiles; raises `record "old" is not assigned yet` on the first INSERT |
-| `coalesce(new, old)` on composite records | Compiles; raises `could not identify a record type` |
-| seed reviews silently arrived unapproved | `validate_review` forces `is_approved := false` on every INSERT, including the seed's; the demo shop shipped with zero visible reviews until the seed approved them by UPDATE |
+| Defect                                                      | Why it was invisible                                                                                                                                                          |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create order_items_order_idx` missing the word `index`     | Syntax error, caught by the first run                                                                                                                                         |
+| `coalesce(new.order_id, old.order_id)` in a DECLARE default | Compiles; raises `record "old" is not assigned yet` on the first INSERT                                                                                                       |
+| `coalesce(new, old)` on composite records                   | Compiles; raises `could not identify a record type`                                                                                                                           |
+| seed reviews silently arrived unapproved                    | `validate_review` forces `is_approved := false` on every INSERT, including the seed's; the demo shop shipped with zero visible reviews until the seed approved them by UPDATE |
 
 `supabase/verify.sql` asserts these properties and is the regression net for the next
 change. It includes five statements that are expected to fail, so their error output is

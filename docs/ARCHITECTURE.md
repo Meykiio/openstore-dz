@@ -73,10 +73,10 @@ docs/
 
 ## Trust boundaries
 
-| Client | Key | RLS | Used by |
-|---|---|---|---|
-| `getSupabase()` | publishable / anon | Enforced | Every browser code path |
-| Edge Function | service role, server-side | Bypassed | Guepex webhook only |
+| Client          | Key                       | RLS      | Used by                 |
+| --------------- | ------------------------- | -------- | ----------------------- |
+| `getSupabase()` | publishable / anon        | Enforced | Every browser code path |
+| Edge Function   | service role, server-side | Bypassed | Guepex webhook only     |
 
 There is no service-role key in the application bundle. `GUEPEX_API_TOKEN` is server-side
 only and is never prefixed with `VITE_`.

@@ -3,6 +3,7 @@
 Base URL: `https://api.guepex.app/v1/`
 
 Every request needs two headers:
+
 ```
 X-API-ID: <YALIDINE_API_ID>
 X-API-TOKEN: <YALIDINE_API_TOKEN>
@@ -13,14 +14,17 @@ Dashboard (see `human-only-steps.md`). Never hardcode real values — use env
 vars, and use placeholders like `YOUR_API_ID` in any example code you write.
 
 Sanity check while wiring things up:
+
 ```bash
 curl "https://api.guepex.app/v1/wilayas/" \
   -H "X-API-ID: $YALIDINE_API_ID" \
   -H "X-API-TOKEN: $YALIDINE_API_TOKEN"
 ```
+
 A working call returns the wilayas list as JSON.
 
 ## Table of contents
+
 - [Pagination & list responses](#pagination--list-responses)
 - [Filtering, fields, ordering (shared conventions)](#filtering-fields-ordering-shared-conventions)
 - [Rate limits](#rate-limits)
@@ -36,17 +40,19 @@ A working call returns the wilayas list as JSON.
 ## Pagination & list responses
 
 Every list endpoint accepts:
-| Param | Type | Description |
-|---|---|---|
-| `page` | int | page number (optional) |
-| `page_size` | int | 1–1000, default 100 |
+
+| Param       | Type | Description            |
+| ----------- | ---- | ---------------------- |
+| `page`      | int  | page number (optional) |
+| `page_size` | int  | 1–1000, default 100    |
 
 Response shape:
+
 ```json
 {
   "has_more": true,
   "total_data": 58,
-  "data": [ /* array of objects */ ],
+  "data": [/* array of objects */],
   "links": {
     "self": "https://api.guepex.app/v1/wilayas/?page_size=3&page=2",
     "before": "https://api.guepex.app/v1/wilayas/?page_size=3&page=1",
@@ -54,6 +60,7 @@ Response shape:
   }
 }
 ```
+
 Follow `links.next` until it's absent (or `has_more` is `false`) to page
 through a full dataset.
 
@@ -78,12 +85,12 @@ histories:
 
 Default quotas — per API account:
 
-| Window | Default limit | Resets |
-|---|---|---|
-| second | 5 | 1s after your first request in the window |
-| minute | 50 | 60s after your first request |
-| hour | 1000 | 1h after your first request |
-| day | 10000 | 24h after your first request |
+| Window | Default limit | Resets                                    |
+| ------ | ------------- | ----------------------------------------- |
+| second | 5             | 1s after your first request in the window |
+| minute | 50            | 60s after your first request              |
+| hour   | 1000          | 1h after your first request               |
+| day    | 10000         | 24h after your first request              |
 
 Every response includes headers showing what's left:
 `x-second-quota-left`, `x-minute-quota-left`, `x-hour-quota-left`,
@@ -123,9 +130,14 @@ Sub-divisions of a wilaya — the actual delivery destination granularity.
 
 ```json
 {
-  "id": 1630, "name": "Bordj El Kiffan", "wilaya_id": 16, "wilaya_name": "Alger",
-  "has_stop_desk": 1, "is_deliverable": 1,
-  "delivery_time_parcel": 2, "delivery_time_payment": 5
+  "id": 1630,
+  "name": "Bordj El Kiffan",
+  "wilaya_id": 16,
+  "wilaya_name": "Alger",
+  "has_stop_desk": 1,
+  "is_deliverable": 1,
+  "delivery_time_parcel": 2,
+  "delivery_time_payment": 5
 }
 ```
 
@@ -146,10 +158,14 @@ stop-desk deliveries — never let a user free-type one.
 
 ```json
 {
-  "center_id": 163001, "name": "Centre de Bordj El Kiffan",
-  "address": "...", "gps": "36.72,3.19",
-  "commune_id": 1630, "commune_name": "Bordj El Kiffan",
-  "wilaya_id": 16, "wilaya_name": "Alger"
+  "center_id": 163001,
+  "name": "Centre de Bordj El Kiffan",
+  "address": "...",
+  "gps": "36.72,3.19",
+  "commune_id": 1630,
+  "commune_name": "Bordj El Kiffan",
+  "wilaya_id": 16,
+  "wilaya_name": "Alger"
 }
 ```
 
@@ -170,24 +186,28 @@ Delivery pricing between two wilayas, broken down per destination commune.
   "oversize_fee": 100,
   "per_commune": {
     "101": {
-      "commune_id": 101, "commune_name": "Adrar",
-      "express_home": 1400, "express_desk": 1100,
-      "economic_home": null, "economic_desk": null
+      "commune_id": 101,
+      "commune_name": "Adrar",
+      "express_home": 1400,
+      "express_desk": 1100,
+      "economic_home": null,
+      "economic_desk": null
     }
   }
 }
 ```
 
-| Field | Description |
-|---|---|
-| `retour_fee` | Return fee for the zone |
-| `cod_percentage` | % fee on cash-on-delivery, applied to `max(price, declared_value)` |
-| `insurance_percentage` | % fee for insurance, applied to `max(price, declared_value)` |
-| `oversize_fee` | DA charged per KG over the 5KG threshold |
-| `express_home` / `express_desk` | delivery fee (DA), taxes included, **excludes** weight/oversize fee |
+| Field                             | Description                                                                    |
+| --------------------------------- | ------------------------------------------------------------------------------ |
+| `retour_fee`                      | Return fee for the zone                                                        |
+| `cod_percentage`                  | % fee on cash-on-delivery, applied to `max(price, declared_value)`             |
+| `insurance_percentage`            | % fee for insurance, applied to `max(price, declared_value)`                   |
+| `oversize_fee`                    | DA charged per KG over the 5KG threshold                                       |
+| `express_home` / `express_desk`   | delivery fee (DA), taxes included, **excludes** weight/oversize fee            |
 | `economic_home` / `economic_desk` | same, for economic delivery type if the account has it enabled (`null` if not) |
 
 **Weight/oversize calculation** (needed to get a real total price):
+
 ```
 volumetric_weight = width_cm * height_cm * length_cm * 0.0002
 billable_weight = max(volumetric_weight, actual_weight_kg)
@@ -221,39 +241,39 @@ total_delivery_fee = base_fee (express_home/desk or economic_home/desk) + overwe
 
 Full field list on a parcel object:
 
-| Field | Type | Notes |
-|---|---|---|
-| `tracking` | string | unique ID, e.g. `yal-123456` |
-| `order_id` | string | your own order reference |
-| `firstname`, `familyname`, `contact_phone`, `address` | string | masked on GET/PATCH |
-| `is_stopdesk` | bool | true = stop-desk, false = home delivery |
-| `stopdesk_id`, `stopdesk_name` | | when `is_stopdesk` |
-| `from_wilaya_id`, `from_wilaya_name` | | sender's wilaya |
-| `to_commune_id`, `to_commune_name`, `to_wilaya_id`, `to_wilaya_name` | | destination |
-| `product_list` | string | content description |
-| `price` | int 0–150000 | amount to collect from receiver |
-| `do_insurance` | bool | |
-| `declared_value` | int 0–150000 | |
-| `delivery_fee` | int | |
-| `freeshipping` | bool | true = sender pays delivery fee |
-| `import_id` | int | batch-creation id |
-| `date_creation`, `date_expedition`, `date_last_status` | datetime string | |
-| `last_status` | string | see status list below |
-| `taxe_percentage`, `taxe_from`, `taxe_retour` | | COD fee math: `cod_fee = taxe_percentage * price / 100`, applies when `price >= taxe_from` |
-| `parcel_type` | `classic`\|`ecommerce`\|`multiseller` | |
-| `parcel_sub_type` | `accuse`\|`exchange`\|`rcc`\|`rccback`\|`sm`\|null | |
-| `length`, `width`, `height`, `weight` | int | cm / kg |
-| `has_recouvrement` | bool | has cash-on-delivery |
-| `return_center_code` | string | |
-| `current_center_id`, `current_center_name`, `current_wilaya_id`, `current_wilaya_name`, `current_commune_id`, `current_commune_name` | | where the parcel physically is right now |
-| `payment_status` | `not-ready`\|`ready`\|`receivable`\|`payed` | |
-| `payment_id` | string\|null | |
-| `has_exchange` | bool | |
-| `product_to_collect` | string\|null | required content when `has_exchange` is true |
-| `label` | string | URL to the printable label (bordereau) |
-| `labels` | string | URL to all labels from the same creation batch |
-| `qr_text` | string | phone segment masked |
-| `pin` | string | pin printed on the label |
+| Field                                                                                                                                | Type                                               | Notes                                                                                      |
+| ------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `tracking`                                                                                                                           | string                                             | unique ID, e.g. `yal-123456`                                                               |
+| `order_id`                                                                                                                           | string                                             | your own order reference                                                                   |
+| `firstname`, `familyname`, `contact_phone`, `address`                                                                                | string                                             | masked on GET/PATCH                                                                        |
+| `is_stopdesk`                                                                                                                        | bool                                               | true = stop-desk, false = home delivery                                                    |
+| `stopdesk_id`, `stopdesk_name`                                                                                                       |                                                    | when `is_stopdesk`                                                                         |
+| `from_wilaya_id`, `from_wilaya_name`                                                                                                 |                                                    | sender's wilaya                                                                            |
+| `to_commune_id`, `to_commune_name`, `to_wilaya_id`, `to_wilaya_name`                                                                 |                                                    | destination                                                                                |
+| `product_list`                                                                                                                       | string                                             | content description                                                                        |
+| `price`                                                                                                                              | int 0–150000                                       | amount to collect from receiver                                                            |
+| `do_insurance`                                                                                                                       | bool                                               |                                                                                            |
+| `declared_value`                                                                                                                     | int 0–150000                                       |                                                                                            |
+| `delivery_fee`                                                                                                                       | int                                                |                                                                                            |
+| `freeshipping`                                                                                                                       | bool                                               | true = sender pays delivery fee                                                            |
+| `import_id`                                                                                                                          | int                                                | batch-creation id                                                                          |
+| `date_creation`, `date_expedition`, `date_last_status`                                                                               | datetime string                                    |                                                                                            |
+| `last_status`                                                                                                                        | string                                             | see status list below                                                                      |
+| `taxe_percentage`, `taxe_from`, `taxe_retour`                                                                                        |                                                    | COD fee math: `cod_fee = taxe_percentage * price / 100`, applies when `price >= taxe_from` |
+| `parcel_type`                                                                                                                        | `classic`\|`ecommerce`\|`multiseller`              |                                                                                            |
+| `parcel_sub_type`                                                                                                                    | `accuse`\|`exchange`\|`rcc`\|`rccback`\|`sm`\|null |                                                                                            |
+| `length`, `width`, `height`, `weight`                                                                                                | int                                                | cm / kg                                                                                    |
+| `has_recouvrement`                                                                                                                   | bool                                               | has cash-on-delivery                                                                       |
+| `return_center_code`                                                                                                                 | string                                             |                                                                                            |
+| `current_center_id`, `current_center_name`, `current_wilaya_id`, `current_wilaya_name`, `current_commune_id`, `current_commune_name` |                                                    | where the parcel physically is right now                                                   |
+| `payment_status`                                                                                                                     | `not-ready`\|`ready`\|`receivable`\|`payed`        |                                                                                            |
+| `payment_id`                                                                                                                         | string\|null                                       |                                                                                            |
+| `has_exchange`                                                                                                                       | bool                                               |                                                                                            |
+| `product_to_collect`                                                                                                                 | string\|null                                       | required content when `has_exchange` is true                                               |
+| `label`                                                                                                                              | string                                             | URL to the printable label (bordereau)                                                     |
+| `labels`                                                                                                                             | string                                             | URL to all labels from the same creation batch                                             |
+| `qr_text`                                                                                                                            | string                                             | phone segment masked                                                                       |
+| `pin`                                                                                                                                | string                                             | pin printed on the label                                                                   |
 
 **Status values (`last_status` / histories `status`)**: Pas encore expédié,
 A vérifier, En préparation, Pas encore ramassé, Prêt à expédier, En
@@ -294,7 +314,10 @@ Conditional: `stopdesk_id` (required if `is_stopdesk` true),
     "price": 3000,
     "do_insurance": true,
     "declared_value": 3500,
-    "height": 10, "width": 20, "length": 30, "weight": 6,
+    "height": 10,
+    "width": 20,
+    "length": 30,
+    "weight": 6,
     "freeshipping": true,
     "is_stopdesk": true,
     "stopdesk_id": 163001,
@@ -306,6 +329,7 @@ Conditional: `stopdesk_id` (required if `is_stopdesk` true),
 
 Response is keyed by `order_id`, and **partial failure is normal** — check
 `success` on each entry individually:
+
 ```json
 {
   "MyFirstOrder": {
@@ -319,6 +343,7 @@ Response is keyed by `order_id`, and **partial failure is normal** — check
   }
 }
 ```
+
 A failed entry has `success: false`, `tracking: null`, and a `message`
 explaining what was invalid.
 
@@ -340,6 +365,7 @@ same "En préparation only" constraint.
   { "tracking": "yal-99999Z", "deleted": false }
 ]
 ```
+
 `deleted: false` means it can't be deleted, was misspelled, doesn't exist,
 or was already deleted — no separate error code, check this field.
 
@@ -360,12 +386,12 @@ Every status change for every parcel — the underlying data behind
 `center_name`, `wilaya_id`, `wilaya_name`, `commune_id`, `commune_name`
 
 `reason` is populated for failed-delivery or hold statuses, e.g.:
-*Téléphone injoignable, Client ne répond pas, Faux numéro, Client absent
+_Téléphone injoignable, Client ne répond pas, Faux numéro, Client absent
 (reporté/échoué), Annulé par le client, Commande double, Le client n'a pas
 commandé, Produit erroné/manquant/cassé ou défectueux, Client incapable de
-payer, Wilaya/Commune erronée, Client no-show, Adresse non livrable* (failed
-delivery) or *Document manquant, Produit interdit/dangereux, Fausse
-déclaration* (parcel hold).
+payer, Wilaya/Commune erronée, Client no-show, Adresse non livrable_ (failed
+delivery) or _Document manquant, Produit interdit/dangereux, Fausse
+déclaration_ (parcel hold).
 
 Use this endpoint to build a tracking timeline UI, or to backfill history
 if you missed webhook events (e.g. after downtime).

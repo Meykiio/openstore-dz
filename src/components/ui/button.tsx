@@ -3,34 +3,37 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 /**
- * Pill-shaped primary action, matching the commerce reference system.
- * Every interactive control on the storefront uses the full radius.
+ * Pill action, using the `.btn` classes ported from the reference system.
+ *
+ * The shape, weight and hover lift come from the design system rather than from
+ * ad-hoc utilities, so every button on the storefront — storefront, cart,
+ * checkout, dashboard — moves identically. `secondary` is the 2px-outline style,
+ * not a filled grey, because the reference reserves a filled second colour for
+ * the berry "sale" action.
  */
-const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-full font-medium " +
-    "transition-[background,color,box-shadow,transform] duration-150 ease-out-soft " +
-    "active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45 " +
-    "[&_svg]:size-[1.1em] [&_svg]:shrink-0",
-  {
-    variants: {
-      variant: {
-        primary: "bg-primary text-on-primary hover:bg-primary/90 shadow-sm",
-        outline: "border border-outline-hi bg-transparent text-on-surface hover:bg-surface-mid",
-        soft: "bg-surface-high text-on-surface hover:bg-surface-highest",
-        ghost: "bg-transparent text-on-surface hover:bg-surface-mid",
-        danger: "bg-error text-white hover:bg-error/90",
-        link: "bg-transparent text-primary underline-offset-4 hover:underline",
-      },
-      size: {
-        sm: "h-9 px-4 text-sm",
-        md: "h-11 px-6 text-[0.95rem]",
-        lg: "h-14 px-9 text-base",
-        icon: "size-11 p-0",
-      },
+const buttonVariants = cva("btn", {
+  variants: {
+    variant: {
+      primary: "btn-primary",
+      secondary: "btn-secondary",
+      // `outline` is an alias for `secondary`, kept because the storefront and
+      // dashboard call sites read better as "outline" for a neutral bordered
+      // action. It is the same 2px-outline style, not a second visual.
+      outline: "btn-secondary",
+      ghost: "btn-ghost",
+      berry: "btn-berry",
+      danger: "btn-danger",
+      link: "!p-0 !h-auto bg-transparent text-primary underline-offset-4 hover:underline",
     },
-    defaultVariants: { variant: "primary", size: "md" },
+    size: {
+      sm: "btn-sm",
+      md: "",
+      lg: "btn-lg",
+      icon: "btn-icon",
+    },
   },
-);
+  defaultVariants: { variant: "primary", size: "md" },
+});
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {

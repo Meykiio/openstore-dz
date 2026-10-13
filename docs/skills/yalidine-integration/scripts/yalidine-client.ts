@@ -41,7 +41,7 @@ export class YalidineApiError extends Error {
   constructor(
     message: string,
     public status: number,
-    public body: unknown
+    public body: unknown,
   ) {
     super(message);
     this.name = "YalidineApiError";
@@ -58,10 +58,7 @@ export function createYalidineClient(config: YalidineClientConfig) {
     dayLeft: null,
   };
 
-  async function request<T>(
-    path: string,
-    init: RequestInit = {}
-  ): Promise<T> {
+  async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     const url = path.startsWith("http") ? path : `${baseUrl}${path}`;
     const res = await fetch(url, {
       ...init,
@@ -85,7 +82,7 @@ export function createYalidineClient(config: YalidineClientConfig) {
       throw new YalidineApiError(
         `Rate limited. Retry after ${retryAfter ?? "unknown"}s.`,
         429,
-        await safeJson(res)
+        await safeJson(res),
       );
     }
 
@@ -93,7 +90,7 @@ export function createYalidineClient(config: YalidineClientConfig) {
       throw new YalidineApiError(
         `Yalidine API error: ${res.status}`,
         res.status,
-        await safeJson(res)
+        await safeJson(res),
       );
     }
 
@@ -101,9 +98,7 @@ export function createYalidineClient(config: YalidineClientConfig) {
   }
 
   function qs(params: Record<string, unknown>): string {
-    const entries = Object.entries(params).filter(
-      ([, v]) => v !== undefined && v !== null
-    );
+    const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== null);
     if (entries.length === 0) return "";
     const search = new URLSearchParams();
     for (const [key, value] of entries) {
@@ -131,21 +126,20 @@ export function createYalidineClient(config: YalidineClientConfig) {
     // ---- Fees ----
     getFees: (fromWilayaId: number, toWilayaId: number) =>
       request<Record<string, unknown>>(
-        `fees/?from_wilaya_id=${fromWilayaId}&to_wilaya_id=${toWilayaId}`
+        `fees/?from_wilaya_id=${fromWilayaId}&to_wilaya_id=${toWilayaId}`,
       ),
 
     // ---- Parcels ----
     listParcels: (params: Record<string, unknown> = {}) =>
       request<ListResponse<Record<string, unknown>>>(`parcels/${qs(params)}`),
 
-    getParcel: (tracking: string) =>
-      request<Record<string, unknown>>(`parcels/${tracking}`),
+    getParcel: (tracking: string) => request<Record<string, unknown>>(`parcels/${tracking}`),
 
     /** Always send an array, even for a single parcel. Partial failure is normal. */
     createParcels: (parcels: Record<string, unknown>[]) =>
       request<Record<string, { success: boolean; tracking: string | null; message: string }>>(
         "parcels/",
-        { method: "POST", body: JSON.stringify(parcels) }
+        { method: "POST", body: JSON.stringify(parcels) },
       ),
 
     /** Only works while the parcel's last_status is "En préparation". */
@@ -159,7 +153,7 @@ export function createYalidineClient(config: YalidineClientConfig) {
     deleteParcels: (trackings: string[]) =>
       request<{ tracking: string; deleted: boolean }[]>(
         `parcels/?tracking=${trackings.join(",")}`,
-        { method: "DELETE" }
+        { method: "DELETE" },
       ),
 
     // ---- Histories ----

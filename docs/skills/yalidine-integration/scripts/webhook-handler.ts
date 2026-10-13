@@ -86,20 +86,16 @@ interface YalidineWebhookPayload {
 async function verifySignature(
   rawBody: string,
   signatureHeader: string,
-  secret: string
+  secret: string,
 ): Promise<boolean> {
   const key = await crypto.subtle.importKey(
     "raw",
     new TextEncoder().encode(secret),
     { name: "HMAC", hash: "SHA-256" },
     false,
-    ["sign"]
+    ["sign"],
   );
-  const signatureBuffer = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    new TextEncoder().encode(rawBody)
-  );
+  const signatureBuffer = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(rawBody));
   const computedHex = bufferToHex(signatureBuffer);
   return timingSafeEqual(computedHex, signatureHeader);
 }

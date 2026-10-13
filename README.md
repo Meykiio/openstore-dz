@@ -19,19 +19,19 @@ verified: the app runs, the quality gate is green, and the design system is in p
 catalogue, checkout and dashboard are being built in order, and this file will say so the
 moment each one is verified.
 
-| Sprint | What it delivers | State |
-|---|---|---|
-| 0 | Project foundation, quality gate, design system | **Done** |
-| 1 | Skill library, design reference, governance docs | **Done** |
-| 2 | `supabase/schema.sql`: tables, RLS, grants, seed demo shop | **Done, verified on live DB** |
-| 3 | Admin sign-in and store profile | Next |
-| 4 | Products, packs, size guide builder | Planned |
-| 5 | Orders and the confirmation call queue | Planned |
-| 6 | Storefront, product pages, installable PWA | Planned |
-| 7 | Cart and cash-on-delivery checkout | Planned |
-| 8 | Guepex delivery, tracking, webhook | Planned |
-| 9 | Full accessibility and performance gates | Planned |
-| 10 | Launch readiness | Planned |
+| Sprint | What it delivers                                           | State                         |
+| ------ | ---------------------------------------------------------- | ----------------------------- |
+| 0      | Project foundation, quality gate, design system            | **Done**                      |
+| 1      | Skill library, design reference, governance docs           | **Done**                      |
+| 2      | `supabase/schema.sql`: tables, RLS, grants, seed demo shop | **Done, verified on live DB** |
+| 3      | Admin sign-in and store profile                            | Next                          |
+| 4      | Products, packs, size guide builder                        | Planned                       |
+| 5      | Orders and the confirmation call queue                     | Planned                       |
+| 6      | Storefront, product pages, installable PWA                 | Planned                       |
+| 7      | Cart and cash-on-delivery checkout                         | Planned                       |
+| 8      | Guepex delivery, tracking, webhook                         | Planned                       |
+| 9      | Full accessibility and performance gates                   | Planned                       |
+| 10     | Launch readiness                                           | Planned                       |
 
 > **Sprint 2 is live.** The schema is applied to the project database and was exercised
 > end to end: an order was placed through `place_order`, priced server-side, tracked through
@@ -68,7 +68,7 @@ That is not a design decision anyone made. It is the gap.
 - **Products and packs**, with colour and size variants and multi-image galleries
 - **Size guide builder** — the single highest-return feature for clothing, which cuts
   returns from 35–50% to 8–15%
-- **Cash-on-delivery checkout**, with the delivery fee shown *before* the buyer commits
+- **Cash-on-delivery checkout**, with the delivery fee shown _before_ the buyer commits
 - **Confirmation call queue** — the feature Algerian merchants ask for by name, because a
   pre-dispatch phone call cuts refused deliveries by 25–35%
 - **Guepex (Yalidine) delivery** with parcel creation, fee preview and live tracking
@@ -79,14 +79,14 @@ That is not a design decision anyone made. It is the gap.
 
 ## Tech stack
 
-| Layer | Choice |
-|---|---|
-| Framework | React 19, TanStack Start v1 (SSR), Vite 7, Nitro (Vercel preset) |
-| Styling | Tailwind CSS v4, CSS-first tokens, shadcn-style primitives |
-| Data | Supabase: Postgres + Auth + Storage + Edge Functions |
-| Server state | TanStack Query |
-| Delivery | Guepex (formerly Yalidine) |
-| Licence | AGPL-3.0-only |
+| Layer        | Choice                                                           |
+| ------------ | ---------------------------------------------------------------- |
+| Framework    | React 19, TanStack Start v1 (SSR), Vite 7, Nitro (Vercel preset) |
+| Styling      | Tailwind CSS v4, CSS-first tokens, shadcn-style primitives       |
+| Data         | Supabase: Postgres + Auth + Storage + Edge Functions             |
+| Server state | TanStack Query                                                   |
+| Delivery     | Guepex (formerly Yalidine)                                       |
+| Licence      | AGPL-3.0-only                                                    |
 
 ---
 
@@ -94,13 +94,13 @@ That is not a design decision anyone made. It is the gap.
 
 ### Prerequisites
 
-| Tool | Why |
-|---|---|
-| **Git** | to clone the repository |
-| **Node.js 20+** | to build and run the app |
-| **npm** | comes with Node.js |
-| **Docker** | to run Supabase locally, or use a free cloud project instead |
-| **Supabase CLI** | run `npx supabase --version` to check |
+| Tool             | Why                                                          |
+| ---------------- | ------------------------------------------------------------ |
+| **Git**          | to clone the repository                                      |
+| **Node.js 20+**  | to build and run the app                                     |
+| **npm**          | comes with Node.js                                           |
+| **Docker**       | to run Supabase locally, or use a free cloud project instead |
+| **Supabase CLI** | run `npx supabase --version` to check                        |
 
 ### Quick start
 
@@ -262,18 +262,18 @@ GUEPEX_WEBHOOK_SECRET=
 
 ## Documentation
 
-| File | What it covers |
-|---|---|
-| `docs/PROJECT.md` | Current state, scope, and the adaptations this project makes to the owner's master rules |
-| `docs/ARCHITECTURE.md` | How the system fits together and how requests flow |
-| `docs/DATABASE.md` | Schema, RLS, grants, triggers, and Algerian legal requirements |
-| `docs/FEATURES.md` | Verified feature set. Nothing here is aspirational |
-| `docs/PROJECT_STRUCTURE.md` | How the code is organised |
-| `docs/DEPLOY.md` | Putting a shop online |
-| `docs/DECISIONS.md` | Decisions already made, and why |
-| `docs/CHANGELOG.md` | What actually changed, per sprint |
-| `docs/skills/yalidine-integration/` | Guepex delivery integration for AI agents |
-| `AGENTS.md` | Rules for any AI agent working in this repo |
+| File                                | What it covers                                                                           |
+| ----------------------------------- | ---------------------------------------------------------------------------------------- |
+| `docs/PROJECT.md`                   | Current state, scope, and the adaptations this project makes to the owner's master rules |
+| `docs/ARCHITECTURE.md`              | How the system fits together and how requests flow                                       |
+| `docs/DATABASE.md`                  | Schema, RLS, grants, triggers, and Algerian legal requirements                           |
+| `docs/FEATURES.md`                  | Verified feature set. Nothing here is aspirational                                       |
+| `docs/PROJECT_STRUCTURE.md`         | How the code is organised                                                                |
+| `docs/DEPLOY.md`                    | Putting a shop online                                                                    |
+| `docs/DECISIONS.md`                 | Decisions already made, and why                                                          |
+| `docs/CHANGELOG.md`                 | What actually changed, per sprint                                                        |
+| `docs/skills/yalidine-integration/` | Guepex delivery integration for AI agents                                                |
+| `AGENTS.md`                         | Rules for any AI agent working in this repo                                              |
 
 ## Verification
 

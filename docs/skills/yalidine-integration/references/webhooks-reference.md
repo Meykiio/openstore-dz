@@ -23,13 +23,13 @@ repeatedly (which also burns your rate-limit quota).
 
 ## Event types
 
-| Event | Fires when |
-|---|---|
-| `parcel_created` | one or more parcels created (via dashboard import or API) |
-| `parcel_edited` | a parcel is edited |
-| `parcel_deleted` | a parcel is deleted |
-| `parcel_status_updated` | delivery status changes (the useful one for tracking UIs) |
-| `parcel_payment_updated` | COD payment status changes |
+| Event                    | Fires when                                                |
+| ------------------------ | --------------------------------------------------------- |
+| `parcel_created`         | one or more parcels created (via dashboard import or API) |
+| `parcel_edited`          | a parcel is edited                                        |
+| `parcel_deleted`         | a parcel is deleted                                       |
+| `parcel_status_updated`  | delivery status changes (the useful one for tracking UIs) |
+| `parcel_payment_updated` | COD payment status changes                                |
 
 ## Payload shape
 
@@ -48,7 +48,11 @@ but can bundle **multiple events of that type** in one delivery:
     {
       "event_id": "D5eoH7hmy8NWapJCAs6xER2vMfd0TQti",
       "occurred_at": "2022-04-28 12:01:26",
-      "data": { "tracking": "yal-222BBB", "status": "Tentative échouée", "reason": "Client ne répond pas" }
+      "data": {
+        "tracking": "yal-222BBB",
+        "status": "Tentative échouée",
+        "reason": "Client ne répond pas"
+      }
     }
   ]
 }
@@ -60,12 +64,12 @@ but can bundle **multiple events of that type** in one delivery:
   not guaranteed to arrive in order.**
 - **`data`** — shape depends on `type`:
 
-| type | `data` fields |
-|---|---|
-| `parcel_created` | `order_id`, `tracking`, `label`, `import_id` |
-| `parcel_edited` | `tracking`, `label` |
-| `parcel_deleted` | `tracking` |
-| `parcel_status_updated` | `tracking`, `status`, `reason` (nullable) |
+| type                     | `data` fields                                                                               |
+| ------------------------ | ------------------------------------------------------------------------------------------- |
+| `parcel_created`         | `order_id`, `tracking`, `label`, `import_id`                                                |
+| `parcel_edited`          | `tracking`, `label`                                                                         |
+| `parcel_deleted`         | `tracking`                                                                                  |
+| `parcel_status_updated`  | `tracking`, `status`, `reason` (nullable)                                                   |
 | `parcel_payment_updated` | `tracking`, `status` (`not-ready`\|`ready`\|`receivable`\|`payed`), `payment_id` (nullable) |
 
 New fields may be added to `data` without notice — parse defensively
@@ -75,9 +79,11 @@ break if a field you don't use is missing.
 ## Signature verification
 
 Every delivery includes an `X-YALIDINE-SIGNATURE` header:
+
 ```
 signature = HMAC_SHA256(raw_request_body, webhook_secret_key)
 ```
+
 Compute the same HMAC over the **raw** (unparsed) request body using the
 webhook's secret key (from the Webhooks Dashboard — see
 `human-only-steps.md`), and compare. If they don't match, or the header is
@@ -92,14 +98,14 @@ If your endpoint doesn't return `200` in 10 seconds, Yalidine retries with
 exponential backoff, 7 attempts total, over ~40 hours:
 
 | Attempt | Delay after previous attempt |
-|---|---|
-| 1 | immediately |
-| 2 | 5 minutes |
-| 3 | 15 minutes |
-| 4 | 1 hour |
-| 5 | 3 hours |
-| 6 | 12 hours |
-| 7 | 1 day |
+| ------- | ---------------------------- |
+| 1       | immediately                  |
+| 2       | 5 minutes                    |
+| 3       | 15 minutes                   |
+| 4       | 1 hour                       |
+| 5       | 3 hours                      |
+| 6       | 12 hours                     |
+| 7       | 1 day                        |
 
 After attempt 7 fails, the event is dropped. After several consecutive
 failed days, Yalidine emails the account's alert address and **auto-disables

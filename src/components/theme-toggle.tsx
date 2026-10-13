@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
-import { applyTheme, persistTheme, readStoredTheme, systemTheme, type Theme } from "@/lib/theme";
+import { applyTheme, persistTheme, resolveTheme, type Theme } from "@/lib/theme";
 
 export function ThemeToggle({ className = "" }: { className?: string }) {
   const [theme, setTheme] = useState<Theme>("light");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const current = readStoredTheme() ?? systemTheme();
+    const current = resolveTheme();
     applyTheme(current);
     setTheme(current);
     setMounted(true);

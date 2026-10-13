@@ -47,9 +47,9 @@ or a workaround when it hits something it can't do itself.
 2. In Claude, go to skill/capability settings and add a skill from a local
    folder or a packaged `.skill` file — pick this repo's root folder (the
    one containing `SKILL.md`).
-3. Ask Claude to integrate Yalidine into your project — e.g. *"add Yalidine
-   parcel creation to my checkout flow"* or *"set up a webhook to track
-   delivery status."* Claude will read the skill automatically.
+3. Ask Claude to integrate Yalidine into your project — e.g. _"add Yalidine
+   parcel creation to my checkout flow"_ or _"set up a webhook to track
+   delivery status."_ Claude will read the skill automatically.
 
 To package it as a single `.skill` file instead of pointing at the folder,
 use Anthropic's [skill-creator packaging
@@ -62,8 +62,8 @@ Most agentic coding CLIs support pointing at a folder of instructions.
 Point the tool at this repo (or copy `SKILL.md` + `references/` +
 `scripts/` + `assets/` into your project, e.g. under `.agent-skills/` or
 wherever your tool looks for custom instructions), then reference it in
-your prompt, e.g.: *"Read SKILL.md in the yalidine-integration folder and
-use it to add parcel tracking to this app."*
+your prompt, e.g.: _"Read SKILL.md in the yalidine-integration folder and
+use it to add parcel tracking to this app."_
 
 ### Any other LLM / agent
 

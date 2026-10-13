@@ -76,7 +76,7 @@ build emits `.vercel/output`.
 
 - `create order_items_order_idx` was missing the word `index`.
 - `coalesce(new.order_id, old.order_id)` in a DECLARE default raised `record "old" is not
-  assigned yet` on the first INSERT. Compiles cleanly; fails at runtime.
+assigned yet` on the first INSERT. Compiles cleanly; fails at runtime.
 - `coalesce(new, old)` on composite records raised `could not identify a record type`.
 - The seed's demo reviews arrived unapproved, because `validate_review` forces
   `is_approved := false` on every INSERT. The seed now approves them by UPDATE, the same

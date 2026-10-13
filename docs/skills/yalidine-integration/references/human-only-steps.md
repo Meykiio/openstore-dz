@@ -9,6 +9,7 @@ once up front — it lands better as "you need X now" than a wall of setup.
 ## 1. Generate API credentials (needed before any API call works)
 
 In the **Développement** page of the dashboard:
+
 - Generate the **API ID** and **API TOKEN**.
 - The token is shown **only once**, at generation/regeneration time — the
   user must copy it immediately into their password manager or directly
@@ -38,6 +39,7 @@ it locally (e.g. curl the CRC check yourself if the endpoint is reachable).
 ## 4. Create the webhook (dashboard-only, after step 3)
 
 In the **Webhooks** page:
+
 - Click **Ajouter** (Add).
 - Fill in: a recognizable name, the HTTPS URL of the deployed endpoint, an
   alert email (for delivery-failure notices), and which event types to

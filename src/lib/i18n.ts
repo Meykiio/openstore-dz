@@ -1,0 +1,106 @@
+/**
+ * Locale handling.
+ *
+ * Arabic is the default and the reference dictionary. `TranslationKey` is
+ * derived from it, so every other locale is forced by the compiler to cover the
+ * same keys — a missing translation becomes a build failure, not a blank label.
+ *
+ * Locale lives in `localStorage`, which the server cannot read. The server
+ * therefore always renders Arabic, and a client effect switches to the stored
+ * choice after hydration. That ordering avoids a hydration mismatch; the cost is
+ * one paint in Arabic for a returning French visitor, which is acceptable for an
+ * Arabic-first platform.
+ */
+
+import { ar } from "./locales/ar";
+import { fr } from "./locales/fr";
+import { en } from "./locales/en";
+
+export type Locale = "ar" | "fr" | "en";
+
+export const LOCALES: readonly Locale[] = ["ar", "fr", "en"];
+export const DEFAULT_LOCALE: Locale = "ar";
+
+export type TranslationKey = keyof typeof ar;
+
+const LOCALE_DIR: Record<Locale, "rtl" | "ltr"> = {
+  ar: "rtl",
+  fr: "ltr",
+  en: "ltr",
+};
+
+const HTML_LANG: Record<Locale, string> = { ar: "ar", fr: "fr", en: "en" };
+
+/** Endonym, so the switcher reads correctly whichever locale you are in. */
+export const LOCALE_LABEL: Record<Locale, string> = {
+  ar: "العربية",
+  fr: "Français",
+  en: "English",
+};
+
+const DICTS: Record<Locale, Record<TranslationKey, string>> = { ar, fr, en };
+
+const STORAGE_KEY = "openstore-locale";
+
+function isLocale(value: unknown): value is Locale {
+  return typeof value === "string" && (LOCALES as readonly string[]).includes(value);
+}
+
+/** Replace `{name}` placeholders. Unknown placeholders are left untouched. */
+function interpolate(template: string, vars?: Record<string, string | number>): string {
+  if (!vars) return template;
+  return template.replace(/\{(\w+)\}/g, (match, key: string) => {
+    const value = vars[key];
+    return value === undefined ? match : String(value);
+  });
+}
+
+export function translate(
+  locale: Locale,
+  key: TranslationKey,
+  vars?: Record<string, string | number>,
+): string {
+  const dict = DICTS[locale] ?? DICTS[DEFAULT_LOCALE];
+  const template = dict[key] ?? DICTS[DEFAULT_LOCALE][key] ?? key;
+  return interpolate(template, vars);
+}
+
+export function readStoredLocale(): Locale | null {
+  if (typeof window === "undefined") return null;
+  const raw = window.localStorage.getItem(STORAGE_KEY);
+  return isLocale(raw) ? raw : null;
+}
+
+export function persistLocale(locale: Locale): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(STORAGE_KEY, locale);
+}
+
+/**
+ * Best guess from the browser, used only when the visitor has never chosen.
+ * Arabic is returned for `ar-*`; anything else falls back to Arabic rather than
+ * guessing, because the platform is Arabic-first.
+ */
+export function detectLocale(): Locale {
+  if (typeof navigator === "undefined") return DEFAULT_LOCALE;
+  const languages = navigator.languages ?? [navigator.language];
+  for (const tag of languages) {
+    if (!tag) continue;
+    const base = tag.toLowerCase().split("-")[0];
+    if (base === "ar") return "ar";
+    if (base === "fr") return "fr";
+    if (base === "en") return "en";
+  }
+  return DEFAULT_LOCALE;
+}
+
+/** Apply `lang` and `dir` to `<html>`. Called on every locale change. */
+export function applyLocaleToDocument(locale: Locale): void {
+  if (typeof document === "undefined") return;
+  const html = document.documentElement;
+  html.setAttribute("lang", HTML_LANG[locale]);
+  html.setAttribute("dir", LOCALE_DIR[locale]);
+}
+
+/** Inline script so the first paint is already in the right direction. */
+export const localeBootstrapScript = `(function(){try{var s=localStorage.getItem("${STORAGE_KEY}");var l=(s==="ar"||s==="fr"||s==="en")?s:"ar";var d=l==="ar"?"rtl":"ltr";document.documentElement.setAttribute("lang",l);document.documentElement.setAttribute("dir",d);}catch(e){}})();`;

@@ -36,6 +36,7 @@ up front if the task only needs one — this keeps context lean.
 the required environment variables.
 
 Two ready-to-adapt implementations are in `scripts/`:
+
 - `scripts/yalidine-client.ts` — typed API client (fetch-based, no
   dependencies) covering all endpoints, pagination, and rate-limit headers.
 - `scripts/webhook-handler.ts` — a Supabase Edge Function (Deno) implementing
@@ -54,12 +55,14 @@ Two ready-to-adapt implementations are in `scripts/`:
    file instead (see Security below).
 
 2. **Set up configuration**, not hardcoded values:
+
    ```
    YALIDINE_API_ID=...
    YALIDINE_API_TOKEN=...
    YALIDINE_BASE_URL=https://api.guepex.app/v1/
    YALIDINE_WEBHOOK_SECRET=...   # only needed if implementing webhooks
    ```
+
    Add these to `.env.example` with empty values so the user knows what to
    fill in, and to the project's actual env file (gitignored) if the user
    gives you the real values directly (not via screenshot).
@@ -77,7 +80,7 @@ Two ready-to-adapt implementations are in `scripts/`:
 
 5. **Build the webhook endpoint last**, once parcel creation works, using
    `references/webhooks-reference.md`. The endpoint must exist and pass CRC
-   validation *before* the user can create the webhook in their dashboard —
+   validation _before_ the user can create the webhook in their dashboard —
    tell them the order of operations if they ask you to "just set up the
    webhook."
 
@@ -134,7 +137,7 @@ Two ready-to-adapt implementations are in `scripts/`:
   response includes `x-second-quota-left`, `x-minute-quota-left`,
   `x-hour-quota-left`, `x-day-quota-left` headers — read them, and back off
   before hitting 429. Repeated 429s extend the ban period.
-- **Bulk creation**: `POST /v1/parcels` takes an *array* of parcels, even
+- **Bulk creation**: `POST /v1/parcels` takes an _array_ of parcels, even
   for one. The response is keyed by `order_id`, and partial failure is
   normal — some parcels in a batch can fail while others succeed. Always
   check each entry's `success` field individually rather than assuming an

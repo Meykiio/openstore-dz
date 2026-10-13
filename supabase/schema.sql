@@ -220,6 +220,36 @@ create table if not exists public.reviews (
   created_at     timestamptz not null default now()
 );
 
+-- Size guides. `product_id` null means a store-wide guide that every product can
+-- show; a non-null value scopes it to one product. Clothes returns drop sharply
+-- when a buyer can measure, which is the whole reason this table exists.
+create table if not exists public.size_guides (
+  id          uuid primary key default gen_random_uuid(),
+  product_id  uuid references public.products(id) on delete cascade,
+  name        text not null,
+  -- Column headings, e.g. {المقاس, الصدر, الطول}
+  headers     text[] not null default '{}',
+  -- Array of string arrays, one per row, aligned to headers. jsonb rather than
+  -- a child table because a guide is always read and written whole.
+  rows        jsonb not null default '[]'::jsonb,
+  note        text,
+  sort_order  int not null default 0,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
+-- Per-wilaya delivery pricing. The flat fee in store_settings is the fallback;
+-- a row here overrides it for that wilaya. Keeps a store usable before Guepex
+-- is connected and after, when the carrier's own rate is authoritative.
+create table if not exists public.delivery_zones (
+  wilaya      text primary key,
+  fee         int not null default 0 check (fee >= 0),
+  eta_days    int not null default 3 check (eta_days >= 1),
+  is_active   boolean not null default true,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
 
 -- =============================================================================
 -- 3. Indexes
@@ -245,6 +275,7 @@ create index if not exists reviews_approved_idx     on public.reviews (created_a
 -- from products -> variants -> these rows gets slower as the catalogue grows.
 create index if not exists order_items_variant_idx  on public.order_items (variant_id);
 create index if not exists pack_items_variant_idx   on public.pack_items (variant_id);
+create index if not exists size_guides_product_idx  on public.size_guides (product_id);
 
 
 -- =============================================================================
@@ -623,6 +654,14 @@ drop trigger if exists validate_review_trigger on public.reviews;
 create trigger validate_review_trigger before insert on public.reviews
   for each row execute function public.validate_review();
 
+drop trigger if exists touch_size_guides on public.size_guides;
+create trigger touch_size_guides before update on public.size_guides
+  for each row execute function public.touch_updated_at();
+
+drop trigger if exists touch_delivery_zones on public.delivery_zones;
+create trigger touch_delivery_zones before update on public.delivery_zones
+  for each row execute function public.touch_updated_at();
+
 
 -- =============================================================================
 -- 6. Row Level Security
@@ -897,17 +936,19 @@ grant all on storage.objects to authenticated;
 insert into public.store_settings (
   id, name, tagline, description,
   legal_name, nif, rc_number, phone, whatsapp, address,
-  delivery_fee_flat, delivery_wilayas, delivery_eta_days, returns_days
+  delivery_fee_flat, delivery_wilayas, delivery_eta_days, returns_days,
+  free_shipping_threshold
 ) values (
   1,
-  'متجر تجريبي',
-  'Demo shop — replace this with your own',
+  'OpenStore DZ',
+  'متجرك الإلكتروني — الدفع عند الاستلام',
   'This is the demo shop created by supabase/schema.sql. Edit it in Settings, or delete the demo products and add your own.',
   'Demo SARL', '000000000000000', '00/00-0000000', '+213 555 00 00 00', '+21355500000000',
   'Alger, Algeria',
   600,
   array['الجزائر','وهران','قسنطينة','عنابة','سطيف','تلمسان','بجاية','ورقلة','أدرار','تيميمون'],
-  3, 14
+  3, 14,
+  10000
 )
 on conflict (id) do nothing;
 
@@ -915,8 +956,8 @@ on conflict (id) do nothing;
 -- storefront and the seed-verification query in the README expect.
 insert into public.products (id, slug, name, name_fr, description, kind, status, category, published_at)
 values
-  ('11111111-1111-4111-8111-111111111111', 'tshirt-demo',  'تيشيرت تجريبي',  'T-shirt démo',  'A demo single product. Replace with your own catalogue.', 'single', 'published', 'tshirt', now()),
-  ('22222222-2222-4222-8222-222222222222', 'pack-demo',    'باك تجريبي',     'Pack démo',    'A demo bundle of two items.', 'pack', 'published', 'other',   now())
+  ('11111111-1111-4111-8111-111111111111', 'shirt-demo',  'قميص قطني كلاسيكي',  'Chemise coton classique',  'قميص قطني 100% بقصة مريحة، مناسب للعمل والمناسبات اليومية.', 'single', 'published', 'قمصان', now()),
+  ('22222222-2222-4222-8222-222222222222', 'pack-demo',    'باك القميص + البنطال', 'Pack chemise + pantalon', 'باقة موفرة تجمع قميصاً وبنطالاً بسعر أقل من شرائهما منفصلين.', 'pack', 'published', 'other',   now())
 on conflict (id) do nothing;
 
 insert into public.product_variants (id, product_id, size, color_name, color_hex, sku, price, stock, weight_grams, sort_order)
@@ -926,6 +967,16 @@ values
   ('bbbbbbbb-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', 'M',  'أبيض',  '#ffffff', 'DEMO-PK-W-M',  4500,  6, 420, 0),
   ('bbbbbbbb-2222-4111-8222-222222222222', '22222222-2222-4222-8222-222222222222', 'L',  'أسود',  '#000000', 'DEMO-PK-B-L',  4500,  4, 420, 1)
 on conflict (id) do nothing;
+
+-- Demo imagery: external placeholders so a fresh install renders a shop that
+-- looks like a shop on first load. Replace with uploaded media.
+insert into public.variant_images (variant_id, url, alt, sort_order)
+values
+  ('aaaaaaaa-1111-4111-8111-111111111111', 'https://picsum.photos/seed/openstore-shirt-white/900/900', 'قميص أبيض', 0),
+  ('aaaaaaaa-2222-4111-8222-222222222222', 'https://picsum.photos/seed/openstore-shirt-black/900/900', 'قميص أسود', 0),
+  ('bbbbbbbb-1111-4111-8111-111111111111', 'https://picsum.photos/seed/openstore-pack-white/900/900', 'باقة بيضاء', 0),
+  ('bbbbbbbb-2222-4111-8222-222222222222', 'https://picsum.photos/seed/openstore-pack-black/900/900', 'باقة سوداء', 0)
+on conflict do nothing;
 
 insert into public.pack_items (product_id, variant_id, quantity, sort_order)
 values

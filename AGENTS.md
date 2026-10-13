@@ -56,7 +56,7 @@ verified result.
    Read the existing schema and RLS first. Never assume the database is empty. There are
    no migration files, by design.
 7. **Security.** RLS on every table with a base `GRANT` alongside the policy, because
-   PostgREST evaluates grants *before* RLS and returns 401 otherwise. Prices are computed
+   PostgREST evaluates grants _before_ RLS and returns 401 otherwise. Prices are computed
    server-side; a client-supplied price is a bug. Public storage buckets are read-only
    for non-admins.
 8. **Arabic is the primary language.** `dir="rtl"` is the default. Arabic needs larger

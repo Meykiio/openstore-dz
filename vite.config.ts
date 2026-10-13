@@ -18,6 +18,11 @@ export default defineConfig({
   ],
   server: {
     port: 8080,
+    // Bind to the LAN so the storefront can be opened on a phone over the same
+    // Wi-Fi — the only realistic way to judge an Arabic RTL storefront, since
+    // the whole design targets mobile. Dev only; the built output is unaffected.
+    host: true,
+    strictPort: true,
   },
   build: {
     // Product imagery dominates the page. Keep the initial payload small:

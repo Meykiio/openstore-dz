@@ -1,10 +1,15 @@
 /**
  * Theme handling.
  *
- * The reference design system switches themes with a `data-theme` attribute on
- * `<html>`, not `prefers-color-scheme`. That is deliberate: an explicit user
- * choice must win over the OS setting, and the platform must let a shop owner
- * pin a theme regardless of their buyer's device.
+ * Switches with a `data-theme` attribute on `<html>`, not `prefers-color-scheme`
+ * alone. That is deliberate: an explicit user choice must win, and a shop owner
+ * may eventually want to pin a theme regardless of the buyer's device.
+ *
+ * LIGHT IS THE DEFAULT, ALWAYS. The reference system marks light as canonical,
+ * and the storefront exists to show a seller's photography — opening it dark
+ * because the visitor's phone is in dark mode misrepresents the product and is
+ * not a decision the buyer made. Dark stays available behind the toggle and is
+ * remembered once chosen.
  */
 
 export type Theme = "light" | "dark";
@@ -27,9 +32,17 @@ export function persistTheme(theme: Theme) {
   window.localStorage.setItem(STORAGE_KEY, theme);
 }
 
-export function systemTheme(): Theme {
-  if (typeof window === "undefined") return "light";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+/**
+ * The theme to use when the visitor has never chosen one. Always light — the OS
+ * preference is intentionally not consulted here.
+ */
+export function defaultTheme(): Theme {
+  return "light";
+}
+
+/** Stored choice if there is one, otherwise the canonical light theme. */
+export function resolveTheme(): Theme {
+  return readStoredTheme() ?? defaultTheme();
 }
 
 /**
@@ -37,4 +50,4 @@ export function systemTheme(): Theme {
  * an inline script by `__root.tsx`; kept here so the logic is testable and the
  * rule stays in one place.
  */
-export const themeBootstrapScript = `(function(){try{var s=localStorage.getItem("${STORAGE_KEY}");var t=(s==="light"||s==="dark")?s:(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","light");}})();`;
+export const themeBootstrapScript = `(function(){try{var s=localStorage.getItem("${STORAGE_KEY}");document.documentElement.setAttribute("data-theme",(s==="light"||s==="dark")?s:"light");}catch(e){document.documentElement.setAttribute("data-theme","light");}})();`;

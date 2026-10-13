@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   applyTheme,
+  defaultTheme,
   persistTheme,
   readStoredTheme,
-  systemTheme,
+  resolveTheme,
   themeBootstrapScript,
 } from "./theme";
 
@@ -36,7 +37,8 @@ describe("theme storage", () => {
     expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
   });
 
-  it("reports dark when the system prefers dark", () => {
+  it("defaults to light, never consulting the OS preference", () => {
+    // The OS saying "dark" must not change the default: light is canonical.
     const spy = vi.spyOn(window, "matchMedia").mockReturnValue({
       matches: true,
       media: "",
@@ -47,23 +49,14 @@ describe("theme storage", () => {
       removeEventListener: vi.fn(),
       dispatchEvent: vi.fn(),
     });
-    expect(systemTheme()).toBe("dark");
+    expect(defaultTheme()).toBe("light");
+    expect(resolveTheme()).toBe("light");
     spy.mockRestore();
   });
 
-  it("reports light when the system prefers light", () => {
-    const spy = vi.spyOn(window, "matchMedia").mockReturnValue({
-      matches: false,
-      media: "",
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    });
-    expect(systemTheme()).toBe("light");
-    spy.mockRestore();
+  it("lets a stored choice override the default", () => {
+    persistTheme("dark");
+    expect(resolveTheme()).toBe("dark");
   });
 });
 
@@ -77,6 +70,12 @@ describe("theme bootstrap script", () => {
     window.localStorage.setItem("openstore-theme", "dark");
     eval(themeBootstrapScript);
     expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
+  });
+
+  it("falls back to light when nothing is stored", () => {
+    window.localStorage.clear();
+    eval(themeBootstrapScript);
+    expect(document.documentElement.getAttribute("data-theme")).toBe("light");
   });
 
   it("falls back to light when storage throws", () => {

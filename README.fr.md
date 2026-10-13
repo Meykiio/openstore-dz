@@ -28,19 +28,19 @@ OpenStore répond à ça : une vraie boutique, en arabe, qui s'installe en une �
 vérifié : le projet démarre, le contrôle qualité passe, le design system est en place. Le
 catalogue, le paiement et le tableau de bord suivent, dans l'ordre.
 
-| Sprint | Ce qu'il apporte | État |
-|---|---|---|
-| 0 | Socle du projet, contrôle qualité, design system | **Terminé** |
-| 1 | Bibliothèque de compétences, référence design, documentation | **Terminé** |
-| 2 | Base de données, RLS, jeu de données de démonstration | Terminé, vérifié en base réelle |
-| 3 | Connexion admin et profil de la boutique | Suivant |
-| 4 | Produits, packs, guide des tailles | Prévu |
-| 5 | Commandes et file d'appel de confirmation | Prévu |
-| 6 | Boutique en ligne et pages produit | Prévu |
-| 7 | Panier et paiement à la livraison | Prévu |
-| 8 | Livraison Guepex et suivi | Prévu |
-| 9 | Accessibilité et performance | Prévu |
-| 10 | Mise en production | Prévu |
+| Sprint | Ce qu'il apporte                                             | État                            |
+| ------ | ------------------------------------------------------------ | ------------------------------- |
+| 0      | Socle du projet, contrôle qualité, design system             | **Terminé**                     |
+| 1      | Bibliothèque de compétences, référence design, documentation | **Terminé**                     |
+| 2      | Base de données, RLS, jeu de données de démonstration        | Terminé, vérifié en base réelle |
+| 3      | Connexion admin et profil de la boutique                     | Suivant                         |
+| 4      | Produits, packs, guide des tailles                           | Prévu                           |
+| 5      | Commandes et file d'appel de confirmation                    | Prévu                           |
+| 6      | Boutique en ligne et pages produit                           | Prévu                           |
+| 7      | Panier et paiement à la livraison                            | Prévu                           |
+| 8      | Livraison Guepex et suivi                                    | Prévu                           |
+| 9      | Accessibilité et performance                                 | Prévu                           |
+| 10     | Mise en production                                           | Prévu                           |
 
 `docs/CHANGELOG.md` ne décrit que ce qui a été vérifié. Ce qui n'y figure pas n'existe
 pas encore.
@@ -78,13 +78,13 @@ ne détient **jamais** l'argent du commerçant.
 
 ## Installation
 
-| Outil | Pourquoi |
-|---|---|
-| **Git** | pour cloner le dépôt |
-| **Node.js 20+** | pour lancer le projet |
-| **npm** | fourni avec Node.js |
-| **Docker** | pour faire tourner Supabase en local, ou utilisez un projet cloud gratuit |
-| **Supabase CLI** | vérifiez avec `npx supabase --version` |
+| Outil            | Pourquoi                                                                  |
+| ---------------- | ------------------------------------------------------------------------- |
+| **Git**          | pour cloner le dépôt                                                      |
+| **Node.js 20+**  | pour lancer le projet                                                     |
+| **npm**          | fourni avec Node.js                                                       |
+| **Docker**       | pour faire tourner Supabase en local, ou utilisez un projet cloud gratuit |
+| **Supabase CLI** | vérifiez avec `npx supabase --version`                                    |
 
 ```bash
 git clone https://github.com/Meykiio/openstore-dz.git
@@ -226,16 +226,16 @@ Détail dans `docs/skills/yalidine-integration/references/human-only-steps.md`.
 
 ## Documentation
 
-| Fichier | Contenu |
-|---|---|
-| `docs/PROJECT.md` | État actuel et périmètre |
-| `docs/ARCHITECTURE.md` | Architecture du système |
-| `docs/DATABASE.md` | Schéma, RLS, obligations légales algériennes |
-| `docs/FEATURES.md` | Fonctionnalités vérifiées uniquement |
-| `docs/DEPLOY.md` | Mise en ligne |
-| `docs/DECISIONS.md` | Décisions prises et pourquoi |
-| `docs/CHANGELOG.md` | Ce qui a réellement changé |
-| `AGENTS.md` | Règles de travail dans le dépôt |
+| Fichier                | Contenu                                      |
+| ---------------------- | -------------------------------------------- |
+| `docs/PROJECT.md`      | État actuel et périmètre                     |
+| `docs/ARCHITECTURE.md` | Architecture du système                      |
+| `docs/DATABASE.md`     | Schéma, RLS, obligations légales algériennes |
+| `docs/FEATURES.md`     | Fonctionnalités vérifiées uniquement         |
+| `docs/DEPLOY.md`       | Mise en ligne                                |
+| `docs/DECISIONS.md`    | Décisions prises et pourquoi                 |
+| `docs/CHANGELOG.md`    | Ce qui a réellement changé                   |
+| `AGENTS.md`            | Règles de travail dans le dépôt              |
 
 ## Contrôle qualité
 

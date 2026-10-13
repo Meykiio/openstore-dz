@@ -36,15 +36,15 @@ That is a Node 20+ runtime. The same output works on Vercel, Netlify, or a VPS.
 Add these in **Project → Settings → Environment Variables**, for Production, Preview and
 Development:
 
-| Name | Scope | Value |
-|---|---|---|
-| `VITE_SUPABASE_URL` | client | your Supabase Project URL |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | client | publishable / anon key. Public, safe in the bundle |
-| `VITE_SUPABASE_PROJECT_ID` | client | your project ref |
-| `VITE_SITE_URL` | client | the public origin, for Open Graph URLs |
-| `GUEPEX_API_ID` | **server** | from your Guepex dashboard |
-| `GUEPEX_API_TOKEN` | **server** | from your Guepex dashboard. Never prefix with `VITE_` |
-| `GUEPEX_WEBHOOK_SECRET` | **server** | from your Guepex webhook dashboard |
+| Name                            | Scope      | Value                                                 |
+| ------------------------------- | ---------- | ----------------------------------------------------- |
+| `VITE_SUPABASE_URL`             | client     | your Supabase Project URL                             |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | client     | publishable / anon key. Public, safe in the bundle    |
+| `VITE_SUPABASE_PROJECT_ID`      | client     | your project ref                                      |
+| `VITE_SITE_URL`                 | client     | the public origin, for Open Graph URLs                |
+| `GUEPEX_API_ID`                 | **server** | from your Guepex dashboard                            |
+| `GUEPEX_API_TOKEN`              | **server** | from your Guepex dashboard. Never prefix with `VITE_` |
+| `GUEPEX_WEBHOOK_SECRET`         | **server** | from your Guepex webhook dashboard                    |
 
 A variable with no `VITE_` prefix never reaches the browser. If a secret ever appears in
 browser code, rotate it immediately. See `SECURITY.md`.
