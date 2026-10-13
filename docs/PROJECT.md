@@ -9,29 +9,33 @@ master files; they never weaken a `[HARD]` rule.
 
 | | |
 |---|---|
-| **Phase** | Sprint 2 written, not yet proven against a live database. |
-| **Works** | App builds, serves and renders. Algerian Emerald design tokens in both themes, Arabic-first typography via self-hosted Fraunces/Outfit/IBM Plex Mono with Cairo fallback, `data-theme` switching with a pre-paint bootstrap, RTL as the default. Setup health check reports connected / not configured / unreachable with the exact fix. README with a one-click agent setup prompt in English, Arabic and French. Governance and architecture documentation. |
-| **Gate status** | `typecheck` 0, `lint` 0, `test` 0 (19 tests), `build` 0. **`knip` exits 1** with `RangeError: Array buffer allocation failed` — machine memory pressure, not a code fault. It fails identically on a clean checkout of the previous commit, so treat it as environmental until memory is freed. |
+| **Phase** | Sprint 2 complete and verified against the live database. Sprint 3 next. |
+| **Works** | The database is applied and exercised. 9 tables, RLS plus grants on every one, 16 policies, 9 functions, 4 storage policies, one public bucket, and a demo shop that renders with two products and two approved reviews. `place_order` prices an order from the catalogue server-side and rolls back whole on a bad line; `track_order` answers only to a valid token. `anon` holds no privileges on `orders`. TypeScript types are generated from the live schema and committed. App side: builds, serves, renders; Algerian Emerald tokens, Arabic-first typography, `data-theme` switching, RTL default; setup health check; three-language READMEs. |
+| **Gate status** | `typecheck` 0, `lint` 0, `test` 0 (19 tests). **`knip` exits 1** with `RangeError: Array buffer allocation failed` from machine memory pressure — it fails identically on an untouched checkout of an earlier commit, so it is environmental, not a code fault. |
 | **In progress** | Nothing. |
-| **Next** | Run `npx supabase db reset --local` once, then `supabase/verify.sql`, then `npx supabase db advisors`. Then Sprint 3: admin sign-in and store profile. |
-| **Blocked on** | Nothing that stops writing code. The schema is unverified, so Sprint 3 UI work should not assume it is correct until the reset runs. |
+| **Next** | **Sprint 3** — admin sign-in and store profile. Add `admin_users` for the owner, Then the settings screen with the Algerian legal disclosure fields. |
+| **Blocked on** | Nothing. |
 
 ### Verified commands
 
 ```bash
 npm run check                       # the one gate, currently red on knip only
-npx supabase db reset --local       # applies schema.sql plus seed, from scratch
-npx supabase db advisors            # RLS, security and performance review
+npx supabase db advisors            # ran both classes; findings fixed
+npx supabase gen types typescript --project-id zupldepebwdasoziwjyt \
+  > src/lib/supabase/types.ts       # regenerate after any schema change
 ```
 
-### Schema honesty
+### Database
 
-`supabase/schema.sql` was written and reviewed, never run end to end. A partial run caught a
-real syntax error, and a later read caught two trigger defects that compile cleanly and fail
-only on the first real row (`coalesce(new.order_id, old.order_id)` in a DECLARE default, and
-`coalesce(new, old)` on composite records). All three are fixed. The rest of the file has not
-been executed. `supabase/verify.sql` asserts the 17 properties the schema claims and is the
-cheapest way to find whatever is still wrong.
+Project ref `zupldepebwdasoziwjyt`. Credentials live in `.env`, which is gitignored and
+never committed. The schema is one file, `supabase/schema.sql`, with no migrations by
+design — see `docs/DECISIONS.md` entry 4. It has been applied to the live project through
+the MCP `apply_migration` tool and verified by hand; `supabase/verify.sql` is the
+regression net.
+
+Four defects were found during verification, two of which compiled cleanly and would have
+surfaced as a mysterious checkout failure on the first real order. They are itemised in
+`docs/DATABASE.md`.
 
 ### Not yet built
 

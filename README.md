@@ -23,7 +23,7 @@ moment each one is verified.
 |---|---|---|
 | 0 | Project foundation, quality gate, design system | **Done** |
 | 1 | Skill library, design reference, governance docs | **Done** |
-| 2 | `supabase/schema.sql`: tables, RLS, grants, seed demo shop | **Written, unverified** |
+| 2 | `supabase/schema.sql`: tables, RLS, grants, seed demo shop | **Done, verified on live DB** |
 | 3 | Admin sign-in and store profile | Next |
 | 4 | Products, packs, size guide builder | Planned |
 | 5 | Orders and the confirmation call queue | Planned |
@@ -33,9 +33,11 @@ moment each one is verified.
 | 9 | Full accessibility and performance gates | Planned |
 | 10 | Launch readiness | Planned |
 
-> **Sprint 2 is written but not proven.** `supabase/schema.sql` has been authored and
-> reviewed, never executed against a running database. Run `npx supabase db reset --local`
-> before you rely on it, then `supabase/verify.sql`, then `npx supabase db advisors`.
+> **Sprint 2 is live.** The schema is applied to the project database and was exercised
+> end to end: an order was placed through `place_order`, priced server-side, tracked through
+> `track_order`, and confirmed to roll back whole when a line was invalid. `anon` holds no
+> table privileges on `orders`. Supabase's security and performance advisors were run and
+> both real findings were fixed.
 
 `docs/CHANGELOG.md` records verified state. If it is not in the changelog, it does not
 work yet.

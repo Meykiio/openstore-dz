@@ -240,6 +240,11 @@ create index if not exists orders_status_idx        on public.orders (status);
 create index if not exists order_items_order_idx on public.order_items (order_id);
 create index if not exists reviews_product_idx      on public.reviews (product_id);
 create index if not exists reviews_approved_idx     on public.reviews (created_at desc) where is_approved;
+-- Covering indexes for the two foreign keys that Supabase's performance advisor
+-- flagged. Without them, deleting a variant scans both tables, and the cascade
+-- from products -> variants -> these rows gets slower as the catalogue grows.
+create index if not exists order_items_variant_idx  on public.order_items (variant_id);
+create index if not exists pack_items_variant_idx   on public.pack_items (variant_id);
 
 
 -- =============================================================================
@@ -564,8 +569,20 @@ revoke all on function public.place_order(jsonb, jsonb) from public;
 grant execute on function public.place_order(jsonb, jsonb) to anon, authenticated;
 revoke all on function public.track_order(uuid) from public;
 grant execute on function public.track_order(uuid) to anon, authenticated;
-revoke all on function public.recalculate_for_order(uuid) from public;
-grant execute on function public.recalculate_for_order(uuid) to authenticated;
+-- place_order() calls recalculate_for_order internally as the owner, and the
+-- AFTER trigger on order_items already keeps totals right when the dashboard
+-- edits a line. No client needs to call it over RPC.
+revoke all on function public.recalculate_for_order(uuid) from public, anon, authenticated;
+
+-- Trigger functions are invoked by the trigger machinery, which does not check
+-- EXECUTE privileges, so revoking costs nothing and removes them from the
+-- exposed RPC surface. Supabase's advisor flags any SECURITY DEFINER function
+-- reachable without signing in; five of these were reachable purely by accident.
+revoke all on function public.touch_updated_at()         from public, anon, authenticated;
+revoke all on function public.validate_order()           from public, anon, authenticated;
+revoke all on function public.validate_order_item()      from public, anon, authenticated;
+revoke all on function public.validate_review()          from public, anon, authenticated;
+revoke all on function public.recalculate_order_totals() from public, anon, authenticated;
 
 
 -- =============================================================================
@@ -921,3 +938,17 @@ values
   ('cccccccc-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111', 'سعاد', 5, 'قماش ممتاز والتوصيل كان سريع.', true),
   ('cccccccc-2222-4222-8222-222222222222', '22222222-2222-4222-8222-222222222222', 'كريم', 4, 'الباك مناسب والسعر معقول.', true)
 on conflict (id) do nothing;
+
+-- The `true` above is a lie, and deliberately so. validate_review() forces
+-- is_approved := false on every INSERT, including this one, because that trigger
+-- is the control that stops a customer approving their own review. The demo
+-- reviews therefore arrive unapproved and are approved here with an UPDATE,
+-- which is exactly the path the moderation screen uses. Do not "fix" this by
+-- weakening the trigger.
+update public.reviews
+   set is_approved = true
+ where id in (
+   'cccccccc-1111-4111-8111-111111111111',
+   'cccccccc-2222-4222-8222-222222222222'
+ )
+   and is_approved = false;

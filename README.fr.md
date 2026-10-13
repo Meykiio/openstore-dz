@@ -32,7 +32,7 @@ catalogue, le paiement et le tableau de bord suivent, dans l'ordre.
 |---|---|---|
 | 0 | Socle du projet, contrôle qualité, design system | **Terminé** |
 | 1 | Bibliothèque de compétences, référence design, documentation | **Terminé** |
-| 2 | Base de données, RLS, jeu de données de démonstration | Écrit, non vérifié |
+| 2 | Base de données, RLS, jeu de données de démonstration | Terminé, vérifié en base réelle |
 | 3 | Connexion admin et profil de la boutique | Suivant |
 | 4 | Produits, packs, guide des tailles | Prévu |
 | 5 | Commandes et file d'appel de confirmation | Prévu |

@@ -193,16 +193,53 @@ docker exec -i supabase_db_<project>-<slug> psql -U postgres -d postgres -f - < 
 
 ### Current status: authored, not executed
 
-The schema has been written and read through, but has **not** been run end to end against a
-working database. Treat the first `db reset` as a real test that may surface errors. The
-`order_items` index had a typo caught by a partial run; a later pass found two trigger bugs
-that compile cleanly and only fail on the first real row:
+The schema is applied to the OpenStore project and was exercised end to end, not just
+applied. What was actually run and observed:
 
-- a DECLARE default of `coalesce(new.order_id, old.order_id)` raises `record "old" is not
-  assigned yet` on INSERT, because `old` does not exist there
-- `coalesce(new, old)` on composite records raises `COALESCE could not identify a record
-  type`
+- `place_order` inserted an order and its lines in one transaction; totals came back
+  7500 + 600 = 8100 and 9000 + 600 = 9600, both computed from the catalogue
+- the caller sent only `variant_id` and `quantity`; `product_name`, `variant_label`
+  (`"L / أسود"`) and `unit_price` were filled by `validate_order_item` from the catalogue
+- `track_order` returned the order for a valid token, `null` for an unknown token and
+  `null` for a null token
+- an order with a one-character name was rejected by `validate_order`
+- an order against an `is_active = false` variant was rejected with `Variant unavailable`,
+  and the transaction rolled back so no orphan order row survived
+- `anon` holds zero privileges on `orders`; `authenticated` cannot UPDATE `subtotal`,
+  `delivery_fee` or `total`, but can UPDATE `status`, `tracking_number` and `confirmed_at`
 
-Both are fixed, and both are why the remaining statements are worth running once by hand.
+Four defects were found and fixed along the way, none of which the compiler could catch:
+
+| Defect | Why it was invisible |
+|---|---|
+| `create order_items_order_idx` missing the word `index` | Syntax error, caught by the first run |
+| `coalesce(new.order_id, old.order_id)` in a DECLARE default | Compiles; raises `record "old" is not assigned yet` on the first INSERT |
+| `coalesce(new, old)` on composite records | Compiles; raises `could not identify a record type` |
+| seed reviews silently arrived unapproved | `validate_review` forces `is_approved := false` on every INSERT, including the seed's; the demo shop shipped with zero visible reviews until the seed approved them by UPDATE |
+
+`supabase/verify.sql` asserts these properties and is the regression net for the next
+change. It includes five statements that are expected to fail, so their error output is
+part of the result.
+
+### Advisors
+
+Both advisor classes were run against the live project.
+
+**Security** returned only `SECURITY DEFINER` exposure warnings. Four are intentional and
+must stay: `place_order` and `track_order` are the anonymous order path, and
+`has_admin_role` has to be executable for the RLS policies to call it. The rest were
+trigger functions reachable over RPC by accident — `touch_updated_at`, `validate_order`,
+`validate_order_item`, `validate_review` and `recalculate_order_totals` — and their
+`EXECUTE` is now revoked. Trigger functions are invoked by the trigger machinery, which
+does not check privileges, so revoking costs nothing. `recalculate_for_order` was revoked
+from clients too: `place_order` calls it internally, and the AFTER trigger already covers
+dashboard line edits.
+
+**Performance** returned two real findings and two noise findings. The real ones were
+`order_items.variant_id` and `pack_items.variant_id` without covering indexes; both now
+have one. The noise: `unused_index` on eight indexes (a fresh database has had no traffic —
+these serve storefront and dashboard queries that do not exist yet) and
+`multiple_permissive_policies` (Postgres ORs `Admins manage X` with `Public reads X`, which
+is correct; at single-shop scale the extra evaluation is not measurable).
 
 Run `db advisors` after every schema change and fix what it reports before committing.
