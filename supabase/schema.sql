@@ -1003,3 +1003,249 @@ update public.reviews
    'cccccccc-2222-4222-8222-222222222222'
  )
    and is_approved = false;
+
+-- =============================================================================
+-- 10. Later additions
+--
+-- Everything below was applied to the live database as a migration and then
+-- written back here. Leaving it out would mean a fresh install from this file
+-- produced an older, weaker database than the one in production: no stock
+-- decrement (so it would oversell), no way to become an administrator, and no
+-- phone validation. Appended in dependency order rather than interleaved above,
+-- because every statement here is idempotent and the order within the block is
+-- what matters.
+-- =============================================================================
+
+-- ── Sale pricing ────────────────────────────────────────────────────────────
+alter table public.product_variants
+  add column if not exists compare_at_price int
+  check (compare_at_price is null or compare_at_price >= 0);
+
+comment on column public.product_variants.compare_at_price is
+  'Original price when the variant is on sale, in dinar. Null means no sale.';
+
+-- ── Carrier webhook audit ───────────────────────────────────────────────────
+create table if not exists public.guepex_webhook_events (
+  id           uuid primary key default gen_random_uuid(),
+  event_id     text not null unique,
+  type         text not null,
+  occurred_at  timestamptz,
+  data         jsonb not null default '{}'::jsonb,
+  processed_at timestamptz,
+  note         text,
+  created_at   timestamptz not null default now()
+);
+
+create index if not exists guepex_events_created_idx on public.guepex_webhook_events (created_at desc);
+create index if not exists guepex_events_type_idx    on public.guepex_webhook_events (type);
+
+alter table public.guepex_webhook_events enable row level security;
+
+drop policy if exists "Admins read carrier events" on public.guepex_webhook_events;
+create policy "Admins read carrier events"
+  on public.guepex_webhook_events for select to authenticated
+  using ((select public.has_admin_role((select auth.uid()), array['owner','staff']::public.admin_role[])) is true);
+
+revoke all on public.guepex_webhook_events from anon, authenticated;
+grant select on public.guepex_webhook_events to authenticated;
+
+-- ── Algerian phone validation ───────────────────────────────────────────────
+-- The original rule was `^[0-9+\s\-]{8,20}$`, which accepts "12345678". On cash
+-- on delivery the phone is the only way to confirm an order.
+create or replace function public.normalise_dz_phone(raw text)
+returns text
+language sql
+immutable
+set search_path = ''
+as $$
+  select regexp_replace(coalesce(raw, ''), '[^0-9+]', '', 'g');
+$$;
+
+create or replace function public.is_valid_dz_phone(raw text)
+returns boolean
+language sql
+immutable
+set search_path = ''
+as $$
+  with cleaned as (select public.normalise_dz_phone(raw) as p)
+  select case
+    when p ~ '^0[5-7][0-9]{8}$' then true
+    when p ~ '^\+?213[5-7][0-9]{8}$' then true
+    when p ~ '^0[2-4][0-9]{7,8}$' then true
+    when p ~ '^\+?213[2-4][0-9]{7,8}$' then true
+    else false
+  end
+  from cleaned;
+$$;
+
+grant execute on function public.is_valid_dz_phone(text) to anon, authenticated;
+
+-- ── Order item: price from the catalogue, stock decremented atomically ──────
+create or replace function public.validate_order_item()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if new.quantity is null or new.quantity < 1 or new.quantity > 100 then
+    raise exception 'Invalid quantity' using errcode = 'check_violation';
+  end if;
+
+  select pv.price,
+         nullif(concat_ws(' / ', nullif(pv.size, ''), nullif(pv.color_name, '')), ''),
+         p.name
+    into new.unit_price, new.variant_label, new.product_name
+  from public.product_variants pv
+  join public.products p on p.id = pv.product_id
+  where pv.id = new.variant_id;
+
+  if not found then
+    raise exception 'Variant does not exist' using errcode = 'check_violation';
+  end if;
+
+  -- Atomic conditional decrement. Two simultaneous orders for the last item
+  -- cannot both match, which a read-then-write check would allow.
+  update public.product_variants
+     set stock = stock - new.quantity
+   where id = new.variant_id
+     and is_active
+     and stock >= new.quantity;
+
+  if not found then
+    if not exists (select 1 from public.product_variants where id = new.variant_id and is_active) then
+      raise exception 'Variant unavailable' using errcode = 'check_violation';
+    end if;
+    raise exception 'Insufficient stock for %', coalesce(new.variant_label, 'item')
+      using errcode = 'check_violation';
+  end if;
+
+  return new;
+end;
+$$;
+
+-- ── Order: field checks plus the owner's selling rules ─────────────────────
+create or replace function public.validate_order()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_open boolean;
+  v_allowed text[];
+begin
+  if length(trim(coalesce(new.customer_name, ''))) < 2 or length(new.customer_name) > 120 then
+    raise exception 'Invalid customer_name' using errcode = 'check_violation';
+  end if;
+
+  if not public.is_valid_dz_phone(new.phone) then
+    raise exception 'Invalid Algerian phone number' using errcode = 'check_violation';
+  end if;
+
+  if length(trim(coalesce(new.wilaya, ''))) < 2 or length(new.wilaya) > 80 then
+    raise exception 'Invalid wilaya' using errcode = 'check_violation';
+  end if;
+  if length(trim(coalesce(new.address, ''))) < 5 or length(new.address) > 500 then
+    raise exception 'Invalid address' using errcode = 'check_violation';
+  end if;
+  if new.note is not null and length(new.note) > 1000 then
+    raise exception 'Note too long' using errcode = 'check_violation';
+  end if;
+
+  select accepts_cod, delivery_wilayas into v_open, v_allowed
+  from public.store_settings where id = 1;
+
+  if v_open is false then
+    raise exception 'The shop is not accepting orders right now' using errcode = 'check_violation';
+  end if;
+
+  -- An empty list means everywhere. A populated list is a hard restriction.
+  if coalesce(array_length(v_allowed, 1), 0) > 0 and not (new.wilaya = any(v_allowed)) then
+    raise exception 'We do not deliver to % yet', new.wilaya using errcode = 'check_violation';
+  end if;
+
+  new.status := 'pending';
+  return new;
+end;
+$$;
+
+-- ── Restock when an order ends negatively ──────────────────────────────────
+create or replace function public.restock_on_negative_status()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if new.status = old.status then
+    return new;
+  end if;
+
+  if new.status in ('refused', 'cancelled', 'returned')
+     and old.status not in ('refused', 'cancelled', 'returned') then
+    update public.product_variants pv
+       set stock = pv.stock + oi.quantity
+      from public.order_items oi
+     where oi.order_id = new.id
+       and oi.variant_id = pv.id;
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists restock_on_negative_status_trigger on public.orders;
+create trigger restock_on_negative_status_trigger
+  after update of status on public.orders
+  for each row execute function public.restock_on_negative_status();
+
+revoke all on function public.restock_on_negative_status() from public, anon, authenticated;
+
+-- ── Admin bootstrap ────────────────────────────────────────────────────────
+-- `admin_users` deliberately has no INSERT policy, or any signed-in user could
+-- promote themselves to owner. That left no legitimate route in at all, so this
+-- adds exactly one: the first authenticated user may claim the store, and only
+-- while it has no administrator. The advisory lock is what stops two
+-- simultaneous claims both reading a count of zero and both inserting.
+create or replace function public.admin_exists()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (select 1 from public.admin_users);
+$$;
+
+create or replace function public.claim_store()
+returns public.admin_role
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_taken int;
+begin
+  if v_uid is null then
+    raise exception 'Sign in before claiming the store' using errcode = 'insufficient_privilege';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext('openstore_claim_store'));
+
+  select count(*) into v_taken from public.admin_users;
+  if v_taken > 0 then
+    raise exception 'This store already has an administrator' using errcode = 'check_violation';
+  end if;
+
+  insert into public.admin_users (user_id, role) values (v_uid, 'owner');
+  return 'owner';
+end;
+$$;
+
+revoke all on function public.admin_exists() from public;
+grant execute on function public.admin_exists() to anon, authenticated;
+
+revoke all on function public.claim_store() from public;
+grant execute on function public.claim_store() to authenticated;
