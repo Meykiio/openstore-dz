@@ -140,3 +140,40 @@ Next:
 
 - Phase B: stopdesk pickup, commune picker, WhatsApp order, sale prices, fee
   preview. Then Phase C storefront depth (search, categories, filtering).
+
+## Session report - Sprint B1, storefront depth
+
+Completed:
+
+- Categories promoted from free text to entities with canonical slugs, linked by
+  FK, text column dropped. Existing labels backfilled.
+- /category/$slug with SSR, real titles and a meta description.
+- /search with the query in the URL.
+- Shared filter and sort bar: size, colour, price range, in-stock-only, four
+  sort orders. Client-side by design at this scale, documented with the
+  threshold where it must move server-side.
+- Arabic-tolerant search normalisation (hamza, ya forms, taa marbuta,
+  diacritics).
+- Fixed: product cards rendered a category link inside the card's own anchor,
+  which is invalid HTML.
+- Fixed: a duplicate nav.products key broke the locale files. Caught by
+  typecheck, not shipped.
+
+Verified (what was actually run):
+
+- typecheck, lint, knip, build all exit 0.
+- Live routes: /category/shirts 200, /category/packs 200, unknown category 404,
+  /search 200, / 200.
+- Not verified: no e2e test covers filtering or search yet, and the filter bar
+  has not been used by a person.
+
+Known issues:
+
+- Performance still unmeasured.
+- Nothing deployed.
+- Demo imagery still placeholder URLs.
+
+Next:
+
+- Phase D0, the dashboard overhaul, which the owner asked for and which is the
+  screen they use daily.
