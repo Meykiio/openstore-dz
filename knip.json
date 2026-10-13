@@ -10,18 +10,14 @@
     "vitest.config.ts",
     "vite.config.ts"
   ],
-  "project": [
-    "src/**/*.{ts,tsx}",
-    "scripts/**/*.{ts,mjs}",
-    "eslint-rules/**/*.mjs",
-    "supabase/functions/**/*.ts"
-  ],
+  "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{ts,mjs}", "eslint-rules/**/*.mjs"],
   "ignore": [
     "src/routeTree.gen.ts",
     "src/lib/supabase/types.ts",
     "src/components/ui/**",
     "src/i18n/locales/**",
-    "docs/**"
+    "docs/**",
+    "supabase/functions/**"
   ],
   "ignoreBinaries": ["playwright", "supabase"],
   "ignoreDependencies": ["tailwindcss", "tw-animate-css", "@testing-library/jest-dom"]
