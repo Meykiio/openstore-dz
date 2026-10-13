@@ -33,12 +33,12 @@ catalogue, le paiement et le tableau de bord suivent, dans l'ordre.
 | 0      | Socle du projet, contrôle qualité, design system             | **Terminé**                     |
 | 1      | Bibliothèque de compétences, référence design, documentation | **Terminé**                     |
 | 2      | Base de données, RLS, jeu de données de démonstration        | Terminé, vérifié en base réelle |
-| 3      | Connexion admin et profil de la boutique                     | Suivant                         |
-| 4      | Produits, packs, guide des tailles                           | Prévu                           |
-| 5      | Commandes et file d'appel de confirmation                    | Prévu                           |
-| 6      | Boutique en ligne et pages produit                           | Prévu                           |
-| 7      | Panier et paiement à la livraison                            | Prévu                           |
-| 8      | Livraison Guepex et suivi                                    | Prévu                           |
+| 3      | Connexion admin et profil de la boutique                     | **Terminé**                     |
+| 4      | Produits, packs, guide des tailles                           | **Terminé**                     |
+| 5      | Commandes et file d'appel de confirmation                    | **Terminé**                     |
+| 6      | Boutique en ligne et pages produit                           | **Terminé**                     |
+| 7      | Panier et paiement à la livraison                            | **Terminé**                     |
+| 8      | Livraison Guepex et suivi                                    | **Terminé**                     |
 | 9      | Accessibilité et performance                                 | Prévu                           |
 | 10     | Mise en production                                           | Prévu                           |
 

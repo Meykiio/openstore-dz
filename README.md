@@ -24,20 +24,24 @@ moment each one is verified.
 | 0      | Project foundation, quality gate, design system            | **Done**                      |
 | 1      | Skill library, design reference, governance docs           | **Done**                      |
 | 2      | `supabase/schema.sql`: tables, RLS, grants, seed demo shop | **Done, verified on live DB** |
-| 3      | Admin sign-in and store profile                            | Next                          |
-| 4      | Products, packs, size guide builder                        | Planned                       |
-| 5      | Orders and the confirmation call queue                     | Planned                       |
-| 6      | Storefront, product pages, installable PWA                 | Planned                       |
-| 7      | Cart and cash-on-delivery checkout                         | Planned                       |
-| 8      | Guepex delivery, tracking, webhook                         | Planned                       |
-| 9      | Full accessibility and performance gates                   | Planned                       |
-| 10     | Launch readiness                                           | Planned                       |
+| 3      | Admin sign-in and store profile                            | **Done**                      |
+| 4      | Products, packs, size guide builder                        | **Done**                      |
+| 5      | Orders and the confirmation call queue                     | **Done**                      |
+| 6      | Storefront, product pages, installable PWA                 | **Done**                      |
+| 7      | Cart and cash-on-delivery checkout                         | **Done**                      |
+| 8      | Guepex delivery, tracking, webhook                         | **Done**                      |
+| 9      | Full accessibility and performance gates                   | Partial                       |
+| 10     | Launch readiness                                           | Partial                       |
 
-> **Sprint 2 is live.** The schema is applied to the project database and was exercised
-> end to end: an order was placed through `place_order`, priced server-side, tracked through
-> `track_order`, and confirmed to roll back whole when a line was invalid. `anon` holds no
-> table privileges on `orders`. Supabase's security and performance advisors were run and
-> both real findings were fixed.
+> **Sprints 0-8 are implemented.** Sprints 9 and 10 are partial: the app has a
+> three-language UI, SEO titles and route error boundaries, but no formal
+> accessibility or performance audit has been run against the built output, and
+> nothing has been deployed.
+>
+> **Two things need a human before this is a real shop.** The Guepex webhook
+> returns `503` until `GUEPEX_WEBHOOK_SECRET` is set on the Supabase project, and
+> the demo catalogue ships with external placeholder images that should be
+> replaced with real media.
 
 `docs/CHANGELOG.md` records verified state. If it is not in the changelog, it does not
 work yet.
