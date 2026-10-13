@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Save, Trash2, X } from "lucide-react";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
+import { Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Field, Input, Switch } from "@/components/ui/form";
+import { Switch } from "@/components/ui/form";
 import { useI18n } from "@/lib/i18n-context";
-import { addVariantImage, deleteVariantImage, type AdminVariant } from "@/lib/admin-products";
+import type { AdminVariant } from "@/lib/admin-products";
+import { VariantImages } from "./variant-images";
 import { DraftFields, type VariantDraft, toDraft } from "./variant-fields";
 
 /**
@@ -27,28 +25,8 @@ export function VariantRow({
   onDelete: () => void;
 }) {
   const { t } = useI18n();
-  const queryClient = useQueryClient();
   const [draft, setDraft] = useState<VariantDraft>(() => toDraft(variant));
   const [active, setActive] = useState(variant.is_active);
-  const [imageUrl, setImageUrl] = useState("");
-
-  const invalidate = () =>
-    void queryClient.invalidateQueries({ queryKey: ["admin_product", variant.product_id] });
-
-  const addImage = useMutation({
-    mutationFn: (url: string) => addVariantImage(variant.id, url),
-    onSuccess: () => {
-      invalidate();
-      setImageUrl("");
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-
-  const removeImage = useMutation({
-    mutationFn: (id: string) => deleteVariantImage(id),
-    onSuccess: invalidate,
-    onError: (error: Error) => toast.error(error.message),
-  });
 
   return (
     <li className="flex flex-col gap-3 rounded-[16px] border border-outline bg-surface p-4">
@@ -70,51 +48,7 @@ export function VariantRow({
         </Button>
       </div>
 
-      <div className="flex flex-col gap-2 border-t border-outline pt-3">
-        <p className="text-xs font-medium text-on-surface-muted">{t("admin.products.images")}</p>
-        <div className="flex flex-wrap items-center gap-2">
-          {variant.variant_images.map((image) => (
-            <span key={image.id} className="relative">
-              <img
-                src={image.url}
-                alt=""
-                className="size-14 rounded-[10px] border border-outline object-cover"
-              />
-              <button
-                type="button"
-                onClick={() => removeImage.mutate(image.id)}
-                aria-label={t("common.delete")}
-                className="absolute -top-1.5 -end-1.5 grid size-5 place-items-center rounded-full bg-error text-white"
-              >
-                <X size={11} aria-hidden="true" />
-              </button>
-            </span>
-          ))}
-          {variant.variant_images.length === 0 && <Badge tone="neutral">{t("common.none")}</Badge>}
-        </div>
-
-        <form
-          className="flex flex-wrap items-end gap-2"
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (imageUrl.trim()) addImage.mutate(imageUrl.trim());
-          }}
-        >
-          <Field label="رابط الصورة" className="min-w-56 flex-1">
-            <Input
-              value={imageUrl}
-              onChange={(event) => setImageUrl(event.target.value)}
-              dir="ltr"
-              type="url"
-              placeholder="https://…"
-            />
-          </Field>
-          <Button type="submit" variant="secondary" size="sm" disabled={addImage.isPending}>
-            <Plus size={15} aria-hidden="true" />
-            {t("common.add")}
-          </Button>
-        </form>
-      </div>
+      <VariantImages variant={variant} />
     </li>
   );
 }
