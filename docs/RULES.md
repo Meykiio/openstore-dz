@@ -227,7 +227,9 @@ Authentication, authorization, input validation, secrets, migrations, backups, d
    - Declaring work finished without verification
    - Finishing without launching or promoting
    - Context being lost between sessions or tools
+
 - Starting a sprint without its research brief
+
 5. End every build or decision response with one concrete next action.
 
 ---

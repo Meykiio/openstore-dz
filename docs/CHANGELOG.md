@@ -99,3 +99,44 @@ real finding fixed. `typecheck`, `lint` and `test` exit 0.
 
 - `knip` exits 1 with `RangeError: Array buffer allocation failed` under memory pressure. It
   fails identically on an untouched earlier commit, so it is environmental.
+
+## Session report
+
+Completed:
+
+- Phase A of docs/ROADMAP.md. Stock integrity (atomic decrement, oversell guard,
+  restock on refusal, no double-restock), image upload from a phone with
+  client-side resize to WebP, admin first-run claim flow, enforcement of
+  accepts_cod and delivery_wilayas, Algerian phone validation.
+- Fixed a latent carrier bug: the wilaya was stored in the buyer's reading
+  script, so an Arabic-locale order carried a name Guepex would never match.
+- Reconciled supabase/schema.sql with the live database. Seven objects existed
+  only in the database, so a fresh one-file install would have produced a weaker
+  database than production.
+- Adopted the master files: RULES.md copied to docs/, the two personal files
+  gitignored.
+
+Verified (what was actually run):
+
+- Stock: 8 to 5 on an order of 3; an order of 10 rejected with the variant named;
+  rejected attempt left no orphan row and did not move stock; refusal restored 8;
+  a repeat save did not restock twice.
+- claim_store() refuses an unauthenticated caller with 42501.
+- Phone: 0555123456, +213555123456 and spaced forms pass; 12345678 and a bad
+  prefix are rejected.
+- Gate green: typecheck, lint, knip, 20 unit tests, 20 e2e tests on desktop and
+  mobile, build. npm audit reports 0.
+- Not verified: schema.sql has not been re-applied end to end as a whole file,
+  only its parts individually. Parcel creation is untested against the real
+  Guepex API, whose credentials belong to the owner.
+
+Known issues:
+
+- Performance is unmeasured. No number from vite dev means anything.
+- Nothing is deployed.
+- Demo imagery is external placeholder URLs.
+
+Next:
+
+- Phase B: stopdesk pickup, commune picker, WhatsApp order, sale prices, fee
+  preview. Then Phase C storefront depth (search, categories, filtering).
