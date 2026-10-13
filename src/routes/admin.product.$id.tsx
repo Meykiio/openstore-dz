@@ -39,7 +39,7 @@ function ProductEditPage() {
         name_fr: product.name_fr ?? "",
         description: product.description ?? "",
         description_fr: product.description_fr ?? "",
-        category: product.category ?? "",
+        category_id: product.category_id ?? "",
       });
     }
   }, [product, draft]);
@@ -86,7 +86,7 @@ function ProductEditPage() {
       name_fr: draft.name_fr.trim() || null,
       description: draft.description.trim() || null,
       description_fr: draft.description_fr.trim() || null,
-      category: draft.category.trim() || null,
+      category_id: draft.category_id.trim() || null,
     });
 
   return (

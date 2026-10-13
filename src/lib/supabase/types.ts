@@ -49,6 +49,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      categories: {
+        Row: {
+          created_at: string;
+          description: string | null;
+          id: string;
+          image_url: string | null;
+          is_active: boolean;
+          name: string;
+          name_fr: string | null;
+          slug: string;
+          sort_order: number;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          image_url?: string | null;
+          is_active?: boolean;
+          name: string;
+          name_fr?: string | null;
+          slug: string;
+          sort_order?: number;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          image_url?: string | null;
+          is_active?: boolean;
+          name?: string;
+          name_fr?: string | null;
+          slug?: string;
+          sort_order?: number;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       delivery_zones: {
         Row: {
           created_at: string;
@@ -308,7 +347,7 @@ export type Database = {
       };
       products: {
         Row: {
-          category: string | null;
+          category_id: string | null;
           created_at: string;
           description: string | null;
           description_fr: string | null;
@@ -322,7 +361,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
-          category?: string | null;
+          category_id?: string | null;
           created_at?: string;
           description?: string | null;
           description_fr?: string | null;
@@ -336,7 +375,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
-          category?: string | null;
+          category_id?: string | null;
           created_at?: string;
           description?: string | null;
           description_fr?: string | null;
@@ -383,6 +422,13 @@ export type Database = {
           rating?: number;
         };
         Relationships: [
+          {
+            foreignKeyName: "products_category_id_fkey";
+            columns: ["category_id"];
+            isOneToOne: false;
+            referencedRelation: "categories";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "reviews_product_id_fkey";
             columns: ["product_id"];

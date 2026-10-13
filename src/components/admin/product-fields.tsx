@@ -1,6 +1,7 @@
 import { Field, Input, Select, Textarea } from "@/components/ui/form";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { useI18n } from "@/lib/i18n-context";
+import { useCategories } from "@/lib/queries";
 import type { AdminProduct } from "@/lib/admin-products";
 
 /** The editable text fields of a product. */
@@ -9,7 +10,7 @@ export type ProductDraft = {
   name_fr: string;
   description: string;
   description_fr: string;
-  category: string;
+  category_id: string;
 };
 
 export function ProductFieldsCard({
@@ -24,6 +25,7 @@ export function ProductFieldsCard({
   onStatusChange: (status: AdminProduct["status"]) => void;
 }) {
   const { t } = useI18n();
+  const { data: categories } = useCategories();
 
   return (
     <Card>
@@ -59,13 +61,26 @@ export function ProductFieldsCard({
             dir="ltr"
           />
         </Field>
-        <Field label={t("common.category")}>
-          <Input
-            value={draft.category}
-            onChange={(e) => set("category", e.target.value)}
-            maxLength={60}
-          />
+
+        {/* A select, not free text. A typed category used to silently create a
+            new one on every typo, which is why categories are entities now. */}
+        <Field
+          label={t("common.category")}
+          hint={categories && categories.length === 0 ? "أنشئ فئة أولاً" : undefined}
+        >
+          <Select
+            value={draft.category_id}
+            onChange={(event) => set("category_id", event.target.value)}
+          >
+            <option value="">{t("common.none")}</option>
+            {(categories ?? []).map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </Select>
         </Field>
+
         <Field label="الحالة">
           <Select
             value={status}

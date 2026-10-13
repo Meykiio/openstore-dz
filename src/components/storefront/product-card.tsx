@@ -28,7 +28,13 @@ function ProductCard({ product }: { product: CatalogueProduct }) {
   const stock = totalStock(product);
   const soldOut = stock <= 0;
   const rating = reviews ? averageRating(reviews) : null;
-  const category = product.category?.trim();
+  // Display only, not a link: the whole card is already an anchor, and a nested
+  // anchor is invalid HTML. Category navigation lives on the category pages and
+  // the category strip.
+  const category =
+    locale === "fr"
+      ? (product.categories?.name_fr ?? product.categories?.name)
+      : product.categories?.name;
 
   return (
     <Link to="/product/$slug" params={{ slug: product.slug }} className="product-card">

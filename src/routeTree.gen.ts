@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as TrackRouteImport } from './routes/track'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
@@ -20,6 +21,7 @@ import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as OrderTokenRouteImport } from './routes/order.$token'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as AdminProductIdRouteImport } from './routes/admin.product.$id'
@@ -42,6 +44,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SetupRoute = SetupRouteImport.update({
@@ -79,6 +86,11 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AdminRoute,
 } as any)
+const CategorySlugRoute = CategorySlugRouteImport.update({
+  id: '/category/$slug',
+  path: '/category/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrderTokenRoute = OrderTokenRouteImport.update({
   id: '/order/$token',
   path: '/order/$token',
@@ -100,12 +112,14 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
+  '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
   '/track': typeof TrackRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/category/$slug': typeof CategorySlugRoute
   '/order/$token': typeof OrderTokenRoute
   '/product/$slug': typeof ProductSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -115,12 +129,14 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
+  '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
   '/track': typeof TrackRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/category/$slug': typeof CategorySlugRoute
   '/order/$token': typeof OrderTokenRoute
   '/product/$slug': typeof ProductSlugRoute
   '/admin': typeof AdminIndexRoute
@@ -132,12 +148,14 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
+  '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
   '/track': typeof TrackRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/category/$slug': typeof CategorySlugRoute
   '/order/$token': typeof OrderTokenRoute
   '/product/$slug': typeof ProductSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -150,12 +168,14 @@ export interface FileRouteTypes {
     | '/admin'
     | '/checkout'
     | '/login'
+    | '/search'
     | '/setup'
     | '/track'
     | '/admin/delivery'
     | '/admin/products'
     | '/admin/reviews'
     | '/admin/settings'
+    | '/category/$slug'
     | '/order/$token'
     | '/product/$slug'
     | '/admin/'
@@ -165,12 +185,14 @@ export interface FileRouteTypes {
     | '/'
     | '/checkout'
     | '/login'
+    | '/search'
     | '/setup'
     | '/track'
     | '/admin/delivery'
     | '/admin/products'
     | '/admin/reviews'
     | '/admin/settings'
+    | '/category/$slug'
     | '/order/$token'
     | '/product/$slug'
     | '/admin'
@@ -181,12 +203,14 @@ export interface FileRouteTypes {
     | '/admin'
     | '/checkout'
     | '/login'
+    | '/search'
     | '/setup'
     | '/track'
     | '/admin/delivery'
     | '/admin/products'
     | '/admin/reviews'
     | '/admin/settings'
+    | '/category/$slug'
     | '/order/$token'
     | '/product/$slug'
     | '/admin/'
@@ -198,8 +222,10 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   CheckoutRoute: typeof CheckoutRoute
   LoginRoute: typeof LoginRoute
+  SearchRoute: typeof SearchRoute
   SetupRoute: typeof SetupRoute
   TrackRoute: typeof TrackRoute
+  CategorySlugRoute: typeof CategorySlugRoute
   OrderTokenRoute: typeof OrderTokenRoute
   ProductSlugRoute: typeof ProductSlugRoute
 }
@@ -232,6 +258,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/setup': {
@@ -283,6 +316,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/category/$slug': {
+      id: '/category/$slug'
+      path: '/category/$slug'
+      fullPath: '/category/$slug'
+      preLoaderRoute: typeof CategorySlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/order/$token': {
       id: '/order/$token'
       path: '/order/$token'
@@ -332,8 +372,10 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   CheckoutRoute: CheckoutRoute,
   LoginRoute: LoginRoute,
+  SearchRoute: SearchRoute,
   SetupRoute: SetupRoute,
   TrackRoute: TrackRoute,
+  CategorySlugRoute: CategorySlugRoute,
   OrderTokenRoute: OrderTokenRoute,
   ProductSlugRoute: ProductSlugRoute,
 }

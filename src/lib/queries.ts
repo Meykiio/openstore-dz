@@ -26,11 +26,18 @@ export type CatalogueVariant = {
   size: string | null;
   color_name: string | null;
   color_hex: string | null;
+  sku: string | null;
   price: number;
   stock: number;
   is_active: boolean;
   sort_order: number;
   variant_images: CatalogueImage[];
+};
+
+type CatalogueCategory = {
+  slug: string;
+  name: string;
+  name_fr: string | null;
 };
 
 export type CatalogueProduct = {
@@ -42,9 +49,23 @@ export type CatalogueProduct = {
   description_fr: string | null;
   kind: "single" | "pack";
   status: string;
-  category: string | null;
+  category_id: string | null;
+  /** The joined category, or null when the product is uncategorised. */
+  categories: CatalogueCategory | null;
   published_at: string | null;
   product_variants: CatalogueVariant[];
+};
+
+/** A category with the number of published products in it. */
+type CategoryWithCount = {
+  id: string;
+  slug: string;
+  name: string;
+  name_fr: string | null;
+  description: string | null;
+  image_url: string | null;
+  sort_order: number;
+  product_count: number;
 };
 
 export type StoreSettings = {
@@ -82,9 +103,10 @@ export type PublicReview = {
 };
 
 const PRODUCT_SELECT = `
-  id, slug, name, name_fr, description, description_fr, kind, status, category, published_at,
+  id, slug, name, name_fr, description, description_fr, kind, status, category_id, published_at,
+  categories ( slug, name, name_fr ),
   product_variants (
-    id, size, color_name, color_hex, price, stock, is_active, sort_order,
+    id, size, color_name, color_hex, sku, price, stock, is_active, sort_order,
     variant_images ( id, url, alt, sort_order )
   )
 `;
@@ -135,6 +157,49 @@ async function fetchReviews(productId?: string): Promise<PublicReview[]> {
 
 export const storeSettingsQuery = () =>
   queryOptions({ queryKey: ["store_settings"] as const, queryFn: fetchSettings });
+
+/**
+ * Active categories, each with how many published products it holds.
+ *
+ * The count comes from a separate read and is joined here rather than using a
+ * PostgREST aggregate, because counting only published products needs the same
+ * `status` filter the storefront uses, and keeping that rule in one place in
+ * TypeScript is less error prone than duplicating it in a query string.
+ */
+async function fetchCategories(): Promise<CategoryWithCount[]> {
+  const supabase = getSupabase();
+
+  const [{ data: rows, error }, { data: products, error: productError }] = await Promise.all([
+    supabase
+      .from("categories")
+      .select("id, slug, name, name_fr, description, image_url, sort_order")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
+      .order("name", { ascending: true }),
+    supabase.from("products").select("category_id").eq("status", "published"),
+  ]);
+
+  if (error) throw new Error(error.message);
+  if (productError) throw new Error(productError.message);
+
+  const counts = new Map<string, number>();
+  for (const row of products ?? []) {
+    const id = (row as { category_id: string | null }).category_id;
+    if (id) counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+
+  return (rows ?? []).map((row) => ({
+    ...(row as Omit<CategoryWithCount, "product_count">),
+    product_count: counts.get((row as { id: string }).id) ?? 0,
+  }));
+}
+
+export const categoriesQuery = () =>
+  queryOptions({ queryKey: ["categories"] as const, queryFn: fetchCategories });
+
+export function useCategories() {
+  return useQuery(categoriesQuery());
+}
 
 export const productsQuery = () =>
   queryOptions({ queryKey: ["products"] as const, queryFn: fetchProducts });

@@ -107,7 +107,7 @@ function Home() {
         )}
       </section>
 
-      <CategoryStrip products={list} />
+      <CategoryStrip />
       <PromoBand threshold={settings?.free_shipping_threshold ?? 0} />
       <ReviewWall />
       <ClosingCta storeName={settings?.name ?? "OpenStore DZ"} />

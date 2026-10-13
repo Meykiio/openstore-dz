@@ -2,49 +2,62 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, Quote } from "lucide-react";
 import { useI18n } from "@/lib/i18n-context";
 import { formatRelative } from "@/lib/format";
-import { useReviews, type CatalogueProduct } from "@/lib/queries";
+import { useCategories, useReviews } from "@/lib/queries";
 import { StarRating } from "./star-rating";
+import { cn } from "@/lib/utils";
 
 /**
  * Category strip.
  *
- * Derived from the catalogue rather than a fixed list, so a shop selling only
- * shirts shows one category and never an empty grid of placeholder categories.
+ * Real links to real category pages, built from the categories table rather than
+ * derived from whatever text happens to be on products. A category with no
+ * published products is not rendered, because an empty category page is a dead
+ * end and makes a small shop look broken.
  */
-export function CategoryStrip({ products }: { products: CatalogueProduct[] }) {
+export function CategoryStrip() {
   const { t } = useI18n();
-  const categories = Array.from(
-    new Set(products.map((p) => p.category?.trim()).filter((c): c is string => Boolean(c))),
-  ).slice(0, 8);
+  const { data: categories } = useCategories();
 
-  if (categories.length === 0) return null;
+  const visible = (categories ?? []).filter((category) => category.product_count > 0);
+  if (visible.length === 0) return null;
 
   return (
     <section className="container-page py-10">
       <h2 className="mb-5 font-display text-xl font-semibold sm:text-2xl">
         {t("home.categories")}
       </h2>
+
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {categories.map((category) => {
-          const count = products.filter((p) => p.category?.trim() === category).length;
-          return (
-            <a
-              key={category}
-              href="#catalogue"
-              className="group flex items-center justify-between gap-3 rounded-[16px] border border-outline bg-surface px-4 py-3.5 transition-[border-color,box-shadow] hover:border-outline-hi hover:shadow-sm"
-            >
-              <span className="min-w-0">
-                <span className="block truncate text-sm font-medium">{category}</span>
-                <span className="font-mono text-xs text-on-surface-muted">{count}</span>
+        {visible.map((category) => (
+          <Link
+            key={category.id}
+            to="/category/$slug"
+            params={{ slug: category.slug }}
+            className="group flex items-center justify-between gap-3 rounded-[16px] border border-outline bg-surface transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-outline-hi hover:shadow-sm"
+          >
+            {category.image_url && (
+              <span className="size-16 shrink-0 overflow-hidden rounded-s-[16px] bg-surface-high">
+                <img
+                  src={category.image_url}
+                  alt=""
+                  loading="lazy"
+                  className="size-full object-cover"
+                />
               </span>
-              <ArrowRight
-                size={16}
-                className="shrink-0 text-on-surface-muted transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
-                aria-hidden="true"
-              />
-            </a>
-          );
-        })}
+            )}
+            <span className="min-w-0 flex-1 px-4 py-3.5">
+              <span className="block truncate text-sm font-medium">{category.name}</span>
+              <span className="font-mono text-xs text-on-surface-muted">
+                {category.product_count} {t("nav.products")}
+              </span>
+            </span>
+            <ArrowRight
+              size={16}
+              className="me-4 shrink-0 text-on-surface-muted transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
+              aria-hidden="true"
+            />
+          </Link>
+        ))}
       </div>
     </section>
   );
@@ -64,7 +77,7 @@ export function PromoBand({ threshold }: { threshold: number }) {
     <section className="container-page py-6">
       <div className="promo-bar">
         <span className="p-text">
-          {t("home.promo.title")} —{" "}
+          {t("home.promo.title")} -{" "}
           <span dir="ltr" className="font-mono">
             {formatted}
           </span>{" "}
@@ -127,7 +140,11 @@ export function ClosingCta({ storeName }: { storeName: string }) {
   const { t } = useI18n();
   return (
     <section className="container-page py-14">
-      <div className="flex flex-col items-center gap-4 rounded-[24px] border border-outline bg-surface px-6 py-12 text-center">
+      <div
+        className={cn(
+          "flex flex-col items-center gap-4 rounded-[24px] border border-outline bg-surface px-6 py-12 text-center",
+        )}
+      >
         <h2 className="font-display text-xl font-semibold sm:text-2xl">{t("home.cta.title")}</h2>
         <p className="max-w-md text-sm text-on-surface-muted">{t("home.cta.body")}</p>
         <div className="flex flex-wrap justify-center gap-3">

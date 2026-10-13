@@ -35,15 +35,18 @@ export type AdminProduct = {
   description_fr: string | null;
   kind: "single" | "pack";
   status: string;
-  category: string | null;
+  category_id: string | null;
+  /** Joined for display; the admin form edits category_id. */
+  categories: { slug: string; name: string } | null;
   published_at: string | null;
   created_at: string;
   product_variants: AdminVariant[];
 };
 
 const ADMIN_SELECT = `
-  id, slug, name, name_fr, description, description_fr, kind, status, category,
+  id, slug, name, name_fr, description, description_fr, kind, status, category_id,
   published_at, created_at,
+  categories ( slug, name ),
   product_variants (
     id, product_id, size, color_name, color_hex, sku, price, stock,
     weight_grams, sort_order, is_active,
@@ -97,7 +100,7 @@ export async function createProduct(input: {
   name: string;
   slug: string;
   kind: "single" | "pack";
-  category?: string | null;
+  category_id?: string | null;
 }): Promise<string> {
   const { data, error } = await getSupabase()
     .from("products")
@@ -105,7 +108,7 @@ export async function createProduct(input: {
       name: input.name.trim(),
       slug: input.slug.trim(),
       kind: input.kind,
-      category: input.category?.trim() || null,
+      category_id: input.category_id ?? null,
       status: "draft",
     })
     .select("id")
@@ -119,7 +122,13 @@ export async function updateProduct(
   patch: Partial<
     Pick<
       AdminProduct,
-      "name" | "name_fr" | "description" | "description_fr" | "category" | "status" | "published_at"
+      | "name"
+      | "name_fr"
+      | "description"
+      | "description_fr"
+      | "category_id"
+      | "status"
+      | "published_at"
     >
   >,
 ): Promise<void> {
