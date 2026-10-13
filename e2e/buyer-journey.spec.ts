@@ -81,7 +81,9 @@ test.describe("buyer journey", () => {
     await page.getByRole("button", { name: /تأكيد الطلب/ }).click();
 
     // The database's own message must surface, not a generic failure.
-    await expect(page.getByRole("alert")).toContainText(/Invalid phone/i, { timeout: 20_000 });
+    await expect(page.getByRole("alert")).toContainText(/Invalid Algerian phone/i, {
+      timeout: 20_000,
+    });
   });
 
   test("tracking an unknown token says so instead of erroring", async ({ page }) => {
