@@ -24,7 +24,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#d9480f" },
+      { name: "theme-color", content: "#c2410c" },
+      // Default title, overridden by whichever route matches. Without this a
+      // route that forgets one — or the 404 page — ships an empty <title>, which
+      // axe flags and which browsers render as the raw URL.
+      { title: "OpenStore DZ" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
     ],

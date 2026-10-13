@@ -79,9 +79,9 @@ jobs:
         run: docker run -v "$PWD:/repo" zricethezav/gitleaks:latest git /repo --redact
 
   accessibility:
-    name: Accessibility (axe)
+    name: End-to-end and accessibility (Playwright + axe)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
 
@@ -95,11 +95,23 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Build
-        run: npm run build
+      # Real tests, not `--if-present`. The previous version of this job ran
+      # `npm run a11y --if-present`, which silently succeeded because no such
+      # script existed: a green check that verified nothing.
+      #
+      # These tests exercise live RLS and the place_order transaction, so they
+      # need read/insert access to a project. They create orders named
+      # `E2E-TEST`; delete them with the SQL in e2e/README.md.
+      - name: Run Playwright
+        run: npx playwright test
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
 
-      # Runs after `a11y` lands in Sprint 9. Kept as a commented step so the
-      # job structure is ready without failing the build on a missing script.
-      - name: Accessibility gate
-        if: hashFiles('package.json') != ''
-        run: npm run a11y --if-present
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

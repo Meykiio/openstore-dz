@@ -52,8 +52,12 @@ export function HomeHero({
           <Link
             to="/product/$slug"
             params={{ slug: featured.slug }}
-            className="group relative hidden overflow-hidden rounded-[24px] border border-outline bg-surface-high shadow-md lg:block"
+            className="group relative overflow-hidden rounded-[24px] border border-outline bg-surface-high shadow-md"
           >
+            {/* Shown on mobile too, not just desktop. The design thesis is that
+                product photography sells, and mobile is where most Algerian
+                buyers are — hiding the only product image above the fold on the
+                device most people use would invert the thesis. */}
             <img
               src={image}
               alt={featured.name}

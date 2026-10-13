@@ -35,15 +35,27 @@
   --surface-high: #f0ebe6;
   --surface-highest: #e6dfd7;
   --on-surface: #1c1917;
-  --on-surface-muted: #78716c;
+  /* Darkened from the reference #78716c, which measured 4.49:1 on the cream
+     background and 4.19:1 on the tinted section band — both under the 4.5:1 AA
+     floor for body text. This measures 5.13:1 and 4.78:1. Muted secondary text
+     is what a shop uses for delivery terms and return windows, so failing AA
+     there is failing on the copy a buyer most needs to read. */
+  --on-surface-muted: #6b6460;
   --outline: #e7e0d8;
   --outline-hi: #c9beb2;
 
-  --primary: #d9480f;
-  --primary-solid: #d9480f;
+  /* One deliberate deviation from the reference palette, measured rather than
+     guessed. The reference primary #d9480f scores 4.29:1 for white-on-orange and
+     4.02:1 for orange-on-cream, and WCAG AA requires 4.5:1 for text below 18.66px.
+     It therefore fails on every button label and every accented caption.
+     #c2410c is the same hue one step darker: 5.18:1 with white and 4.85:1 on the
+     cream background, passing both. The brand still reads as burnt orange; it
+     just stops failing axe. Verified by e2e/accessibility.spec.ts. */
+  --primary: #c2410c;
+  --primary-solid: #c2410c;
   --on-primary: #ffffff;
-  --primary-glow: rgba(217, 72, 15, 0.18);
-  --primary-glow-sm: rgba(217, 72, 15, 0.08);
+  --primary-glow: rgba(194, 65, 12, 0.18);
+  --primary-glow-sm: rgba(194, 65, 12, 0.08);
 
   --brand-orange: #ea580c;
   --secondary: #e11d48;
@@ -53,7 +65,10 @@
   --on-tertiary: #ffffff;
   --quaternary: #0d9488;
   --on-quaternary: #ffffff;
-  --positive: #15803d;
+  /* Darkened from #15803d for the same reason as --primary: on the 12% tint the
+     in-stock badge uses, the reference green measured 4.27:1. This is 6.07:1
+     there and 7.14:1 on plain white. */
+  --positive: #166534;
   --on-positive: #ffffff;
   --error: #dc2626;
 
