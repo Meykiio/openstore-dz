@@ -5,6 +5,7 @@
     "src/start.ts",
     "src/routes/**/*.tsx",
     "scripts/**/*.ts",
+    "scripts/**/*.mjs",
     "eslint-rules/**/*.mjs",
     "vitest.config.ts",
     "vite.config.ts"

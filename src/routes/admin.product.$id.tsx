@@ -4,25 +4,19 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Save } from "lucide-react";
 import { toast } from "sonner";
 import { VariantEditor } from "@/components/admin/variant-editor";
+import { ProductFieldsCard, type ProductDraft } from "@/components/admin/product-fields";
+import { PackBuilder } from "@/components/admin/pack-builder";
+import { SizeGuideEditor } from "@/components/admin/size-guide-editor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, Input, Select, Textarea } from "@/components/ui/form";
 import { EmptyState, LoadingState } from "@/components/ui/feedback";
 import { useI18n } from "@/lib/i18n-context";
-import { updateProduct, useAdminProduct, type AdminProduct } from "@/lib/admin-products";
+import { updateProduct, useAdminProduct, useAdminProducts } from "@/lib/admin-products";
 
 export const Route = createFileRoute("/admin/product/$id")({
   component: ProductEditPage,
 });
-
-type Draft = {
-  name: string;
-  name_fr: string;
-  description: string;
-  description_fr: string;
-  category: string;
-};
 
 type Patch = Parameters<typeof updateProduct>[1];
 
@@ -31,8 +25,11 @@ function ProductEditPage() {
   const { t } = useI18n();
   const queryClient = useQueryClient();
   const { data: product, isPending } = useAdminProduct(id);
+  // Every variant in the catalogue, for the pack contents picker.
+  const { data: allProducts } = useAdminProducts();
+  const allVariants = (allProducts ?? []).flatMap((p) => p.product_variants);
 
-  const [draft, setDraft] = useState<Draft | null>(null);
+  const [draft, setDraft] = useState<ProductDraft | null>(null);
 
   // Seed once the product arrives; never overwrite in-flight edits.
   useEffect(() => {
@@ -71,7 +68,7 @@ function ProductEditPage() {
   if (!product) return <EmptyState title={t("order.notFound")} />;
   if (!draft) return <LoadingState />;
 
-  const set = <K extends keyof Draft>(key: K, value: Draft[K]) =>
+  const set = <K extends keyof ProductDraft>(key: K, value: ProductDraft[K]) =>
     setDraft({ ...draft, [key]: value });
 
   const publishable = product.product_variants.length > 0;
@@ -94,41 +91,15 @@ function ProductEditPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <Link
-            to="/admin/products"
-            className="btn btn-ghost btn-icon !rounded-full !border !border-outline"
-            aria-label={t("common.back")}
-          >
-            <ArrowLeft size={16} className="rtl:rotate-180" aria-hidden="true" />
-          </Link>
-          <div>
-            <h1 className="font-display text-xl font-semibold">{product.name}</h1>
-            <p className="font-mono text-xs text-on-surface-muted" dir="ltr">
-              /product/{product.slug}
-            </p>
-          </div>
-          <Badge tone={published ? "positive" : "neutral"}>
-            {published ? t("common.published") : t("common.draft")}
-          </Badge>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            disabled={!publishable || save.isPending}
-            title={publishable ? undefined : t("admin.products.noVariants")}
-            onClick={togglePublish}
-          >
-            {published ? t("admin.products.unpublish") : t("admin.products.publish")}
-          </Button>
-          <Button disabled={save.isPending} onClick={saveFields}>
-            <Save size={16} aria-hidden="true" />
-            {save.isPending ? t("common.saving") : t("common.save")}
-          </Button>
-        </div>
-      </div>
+      <ProductHeader
+        name={product.name}
+        slug={product.slug}
+        published={published}
+        publishable={publishable}
+        busy={save.isPending}
+        onTogglePublish={togglePublish}
+        onSaveFields={saveFields}
+      />
 
       {!publishable && (
         <p className="rounded-[10px] border border-tertiary/40 bg-tertiary/5 px-4 py-3 text-sm">
@@ -151,74 +122,78 @@ function ProductEditPage() {
           <VariantEditor productId={id} variants={product.product_variants} />
         </CardBody>
       </Card>
+
+      {product.kind === "pack" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("admin.products.packContents")}</CardTitle>
+          </CardHeader>
+          <CardBody>
+            {/* A pack references variants from anywhere in the catalogue, so the
+                picker is given every variant, not just this product's. */}
+            <PackBuilder productId={id} variants={allVariants} />
+          </CardBody>
+        </Card>
+      )}
+
+      <SizeGuideEditor productId={id} />
     </div>
   );
 }
 
-function ProductFieldsCard({
-  draft,
-  set,
-  status,
-  onStatusChange,
+function ProductHeader({
+  name,
+  slug,
+  published,
+  publishable,
+  busy,
+  onTogglePublish,
+  onSaveFields,
 }: {
-  draft: Draft;
-  set: <K extends keyof Draft>(key: K, value: Draft[K]) => void;
-  status: string;
-  onStatusChange: (status: AdminProduct["status"]) => void;
+  name: string;
+  slug: string;
+  published: boolean;
+  publishable: boolean;
+  busy: boolean;
+  onTogglePublish: () => void;
+  onSaveFields: () => void;
 }) {
   const { t } = useI18n();
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("common.description")}</CardTitle>
-      </CardHeader>
-      <CardBody className="grid gap-4 sm:grid-cols-2">
-        <Field label={t("common.name")} required>
-          <Input value={draft.name} onChange={(e) => set("name", e.target.value)} maxLength={120} />
-        </Field>
-        <Field label="الاسم بالفرنسية">
-          <Input
-            value={draft.name_fr}
-            onChange={(e) => set("name_fr", e.target.value)}
-            maxLength={120}
-            dir="ltr"
-          />
-        </Field>
-        <Field label={t("common.description")}>
-          <Textarea
-            value={draft.description}
-            onChange={(e) => set("description", e.target.value)}
-            rows={4}
-            maxLength={4000}
-          />
-        </Field>
-        <Field label="الوصف بالفرنسية">
-          <Textarea
-            value={draft.description_fr}
-            onChange={(e) => set("description_fr", e.target.value)}
-            rows={4}
-            maxLength={4000}
-            dir="ltr"
-          />
-        </Field>
-        <Field label={t("common.category")}>
-          <Input
-            value={draft.category}
-            onChange={(e) => set("category", e.target.value)}
-            maxLength={60}
-          />
-        </Field>
-        <Field label="الحالة">
-          <Select
-            value={status}
-            onChange={(event) => onStatusChange(event.target.value as AdminProduct["status"])}
-          >
-            <option value="draft">{t("common.draft")}</option>
-            <option value="published">{t("common.published")}</option>
-            <option value="archived">{t("common.archived")}</option>
-          </Select>
-        </Field>
-      </CardBody>
-    </Card>
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex items-center gap-3">
+        <Link
+          to="/admin/products"
+          className="btn btn-ghost btn-icon !rounded-full !border !border-outline"
+          aria-label={t("common.back")}
+        >
+          <ArrowLeft size={16} className="rtl:rotate-180" aria-hidden="true" />
+        </Link>
+        <div>
+          <h1 className="font-display text-xl font-semibold">{name}</h1>
+          <p className="font-mono text-xs text-on-surface-muted" dir="ltr">
+            /product/{slug}
+          </p>
+        </div>
+        <Badge tone={published ? "positive" : "neutral"}>
+          {published ? t("common.published") : t("common.draft")}
+        </Badge>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Button
+          variant="secondary"
+          disabled={!publishable || busy}
+          title={publishable ? undefined : t("admin.products.noVariants")}
+          onClick={onTogglePublish}
+        >
+          {published ? t("admin.products.unpublish") : t("admin.products.publish")}
+        </Button>
+        <Button disabled={busy} onClick={onSaveFields}>
+          <Save size={16} aria-hidden="true" />
+          {busy ? t("common.saving") : t("common.save")}
+        </Button>
+      </div>
+    </div>
   );
 }

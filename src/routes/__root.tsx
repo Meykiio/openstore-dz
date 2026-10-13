@@ -16,6 +16,7 @@ import { localeBootstrapScript } from "@/lib/i18n";
 import { I18nProvider } from "@/lib/i18n-context";
 import { AuthProvider } from "@/lib/auth";
 import { CartProvider } from "@/lib/cart";
+import { ServiceWorkerRegistrar } from "@/components/service-worker";
 import { Button } from "@/components/ui/button";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
@@ -23,7 +24,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#047857" },
+      { name: "theme-color", content: "#d9480f" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
     ],
@@ -31,6 +32,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/icon-192.png" },
+      { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
     ],
     scripts: [{ children: themeBootstrapScript }, { children: localeBootstrapScript }],
   }),
@@ -65,6 +67,7 @@ function RootComponent() {
           <CartProvider>
             <Outlet />
             <Toaster position="top-center" richColors closeButton />
+            <ServiceWorkerRegistrar />
           </CartProvider>
         </AuthProvider>
       </I18nProvider>
