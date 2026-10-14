@@ -88,10 +88,21 @@ Additional gates once the relevant parts exist:
 
 ```bash
 npx supabase db advisors    # RLS and security review after any schema change
-npm run audit               # dependency audit before a release
+npm audit                   # dependency audit before a release
+E2E_BASE_URL=http://127.0.0.1:3000 npm run test:e2e   # layout, against the built output
 ```
+
+Run the browser suite against the built output when the assertion is about layout or
+performance. In `vite dev` the stylesheet is injected by JavaScript during hydration, so
+for a window the page is unstyled and any measurement taken there is a measurement of the
+loader.
 
 ## Scope discipline
 
-Sprints 2, 5 and 7 are load-bearing. If time or credits run short, cut from Phase 3.
-Never cut the confirmation queue or the size guide.
+The phases are ordered so each one removes a reason a real shop cannot use the platform.
+Phase B (the Algeria-specific gaps) comes before Phase E, because stopdesk and the commune
+picker are why a buyer abandons a cart, and a launch without them ships a shop that loses
+orders.
+
+Never cut the confirmation queue or the size guide to save time. They are where the margin
+is. See `docs/ROADMAP.md`.

@@ -27,10 +27,6 @@ Darija is actively harmful, because Darija has no written standard and is writte
 three different scripts depending on the person. Do not attempt it without a native
 speaker.
 
-**Search and filtering on the storefront.**
-Trigger: a shop passes roughly 40 products. Below that, a grid with categories is faster
-and better than a search box nobody needs.
-
 **Abandoned-cart WhatsApp follow-up.**
 Trigger: after the confirmation queue ships and there is real order volume. The research
 says the phone call is what works, not the message.

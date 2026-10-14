@@ -65,16 +65,24 @@ removes the main reason a COD cart is abandoned at the last step.
 
 ## Phase C — Buyer experience
 
-### C1. Search
+### C1. Search ✔ DONE (Sprint B1)
 
 With more than a page of products, browsing stops working. Name, category and
 SKU, Arabic and French, tolerant of the spelling variation Arabic names have.
 
-### C2. Category pages
+Shipped as `/search?q=` with the query in the URL, plus Arabic normalisation
+(alef, yeh, teh-marbuta, diacritics) so a query typed without hamza still
+matches.
 
-The home category strip currently links to `#catalogue`, which scrolls rather
-than filters. A shop with 40 products needs real `/category/$slug` pages, and
-they are free SEO surface.
+### C2. Category pages ✔ DONE (Sprint B1)
+
+The home category strip used to link to `#catalogue`, which scrolls rather than
+filters. A shop with 40 products needs real `/category/$slug` pages, and they
+are free SEO surface.
+
+Shipped as a server-rendered route that 404s on an unknown slug. Categories
+became entities (`categories` table, `products.category_id`) rather than a text
+column, which the filter toolbar needed.
 
 ### C3. Cart page
 
@@ -101,7 +109,7 @@ one-time WhatsApp or SMS when it returns turns dead traffic into orders.
 
 ## Phase D — Owner experience
 
-### D1. Analytics
+### D1. Analytics ✔ DONE (Phase D0)
 
 The dashboard shows today's counts. An owner needs revenue over time, best
 sellers, and above all the **refusal rate by wilaya** — that number tells them
@@ -118,7 +126,7 @@ using a notebook.
 Owners reconcile in Excel. Without an export they retype orders, and an app that
 creates retyping loses.
 
-### D4. Low-stock view
+### D4. Low-stock view ✔ DONE (Phase D0)
 
 Stock is enforced now, but nothing warns before a variant runs out. A list
 sorted by remaining stock, and a badge on the dashboard.
@@ -160,7 +168,7 @@ dev` means anything. Budgets already asserted informally: 1.5 MB initial
 
 ---
 
-## Phase D0 - Dashboard overhaul (raised by the owner, before the rest of D)
+## Phase D0 - Dashboard overhaul ✔ DONE
 
 The dashboard is three numbers, four filter tabs and a list. It works and it is
 not good, and it is the screen the owner looks at every day, so it matters more

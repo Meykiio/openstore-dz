@@ -216,3 +216,48 @@ Next:
 
 - Sign in as the owner and look at /admin. Everything is behind a login I cannot
   pass, and the owner's judgement on the layout is the missing input.
+
+## Session report - responsiveness measured, and the docs made true
+
+Completed:
+
+- Responsive audit that measures instead of guessing: page-level horizontal
+  overflow at seven widths across every visitor and admin route, a tap-target
+  floor, and a check that the mobile bottom bar stays pinned to the viewport. It
+  runs against the built output, which is the only place a layout measurement
+  means anything. Plus an authenticated pass that signs in and checks the admin
+  area fits a phone.
+- Tap targets raised: the language switcher (25px), the header brand link (30px)
+  and the footer telephone, WhatsApp and email links (17px).
+- Docs truth pass. Four documents described a project that no longer exists.
+  FEATURES.md named an "Algerian Emerald" palette that was never shipped and
+  listed the catalogue, checkout, reviews, Guepex and the PWA as not yet built.
+  PROJECT.md contradicted itself two lines apart and exempted a file that did not
+  exist. ROADMAP.md still showed search, category pages and analytics as
+  outstanding. AGENTS.md pointed at a script that does not exist.
+- docs/DESIGN_SYSTEM.html, which PROJECT.md and AGENTS.md both already exempted
+  from the file-size rule, now exists and documents the shipped tokens.
+- Removed a dead DashboardOrder type and a stale LATER.md entry for search.
+
+Verified (what was actually run):
+
+- Production build, then the responsive suite against it: 10 passed. No
+  horizontal overflow at 320, 360, 390, 414, 768, 1024 or 1280 on any route.
+- The authenticated audit passes, so the dashboard does render its range switcher
+  and analytics grid. That gap was open for two sessions.
+- npm run check green: typecheck, lint, unit tests, knip, build.
+
+Known issues:
+
+- The first responsive run failed five times and then passed. I nearly recorded
+  that as a layout bug. It was not: in vite dev the stylesheet is injected during
+  hydration, so the suite was measuring the loader. Recorded in PROJECT.md and
+  AGENTS.md so the next agent does not repeat it.
+- The earlier claim in my own notes that SECURITY.md and SUPPORT.md were missing
+  was wrong. Both exist; my first listing was truncated at 30 entries.
+- The dev-server overflow is still reachable in dev. It is not a production
+  defect, but it will look like one to anyone who measures there.
+
+Next:
+
+- Phase B. Stopdesk pickup first.
