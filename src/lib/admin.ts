@@ -134,3 +134,21 @@ export async function saveStoreSettings(patch: Partial<StoreSettings>): Promise<
   const { error } = await getSupabase().from("store_settings").update(patch).eq("id", 1);
   if (error) throw new Error(error.message);
 }
+
+/**
+ * Orders in the order the dashboard should show them: the ones needing a call
+ * first, then newest first.
+ *
+ * Confirming an order drops it out of the queue and down the list rather than
+ * making it disappear. An order that vanishes from the screen reads as deleted,
+ * which is a worse failure than a longer list.
+ *
+ * Pure and separate from the component so the ordering is unit-testable.
+ */
+export function sortOrdersForQueue(orders: AdminOrder[], queueOnly = false): AdminOrder[] {
+  const visible = queueOnly ? orders.filter(needsCall) : orders;
+  return [...visible].sort((a, b) => {
+    const queueDiff = Number(needsCall(b)) - Number(needsCall(a));
+    return queueDiff !== 0 ? queueDiff : b.created_at.localeCompare(a.created_at);
+  });
+}

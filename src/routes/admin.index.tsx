@@ -14,7 +14,7 @@ import { ErrorState, LoadingState } from "@/components/ui/feedback";
 import { useI18n } from "@/lib/i18n-context";
 import { formatDzd } from "@/lib/format";
 import { useAnalytics, refusalRate, wilayasToWatch } from "@/lib/analytics";
-import { needsCall, useAdminOrders } from "@/lib/admin";
+import { needsCall, sortOrdersForQueue, useAdminOrders } from "@/lib/admin";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/")({
@@ -26,12 +26,18 @@ type Range = 7 | 30 | 90;
 function DashboardPage() {
   const { t, locale } = useI18n();
   const [range, setRange] = useState<Range>(30);
-  const [showAll, setShowAll] = useState(false);
+  const [queueOnly, setQueueOnly] = useState(false);
 
   const analytics = useAnalytics(range);
   const orders = useAdminOrders();
 
   const queue = useMemo(() => (orders.data ?? []).filter(needsCall), [orders.data]);
+
+  // All orders by default, queue first. See `sortOrdersForQueue` for why.
+  const shown = useMemo(
+    () => sortOrdersForQueue(orders.data ?? [], queueOnly),
+    [orders.data, queueOnly],
+  );
 
   if (orders.isPending) return <LoadingState />;
   if (orders.isError) {
@@ -94,24 +100,30 @@ function DashboardPage() {
             />
           </div>
 
-          {/* The call queue first, because confirming orders is the daily job. */}
+          {/* Confirmations first, because that is the daily job, but every order
+              stays on the page so nothing appears to vanish. */}
           <section className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="flex items-center gap-2 font-display text-lg font-semibold">
                 <PhoneCall size={17} className="text-primary" aria-hidden="true" />
-                {t("admin.orders.queue")}
+                {t("admin.orders.title")}
                 {queue.length > 0 && (
                   <span className="grid size-6 place-items-center rounded-full bg-tertiary text-xs font-semibold text-on-tertiary">
                     {queue.length}
                   </span>
                 )}
               </h2>
-              <Button variant="ghost" size="sm" onClick={() => setShowAll((value) => !value)}>
-                {showAll ? t("admin.orders.queue") : t("admin.orders.all")}
+              <Button
+                variant={queueOnly ? "primary" : "ghost"}
+                size="sm"
+                aria-pressed={queueOnly}
+                onClick={() => setQueueOnly((value) => !value)}
+              >
+                {queueOnly ? t("admin.orders.all") : t("admin.orders.queue")}
               </Button>
             </div>
 
-            <AdminOrderList orders={showAll ? (orders.data ?? []) : queue} />
+            <AdminOrderList orders={shown} />
           </section>
 
           {data && (

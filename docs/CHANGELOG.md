@@ -463,3 +463,28 @@ Next:
 
 - The storefront cart drawer, which has the same "not responsive" report as the
   sidebar had.
+
+## Session report - the order queue no longer hides orders
+
+Completed:
+
+- The dashboard showed the call queue and hid the rest, so confirming an order made
+  it disappear. All orders are now listed, queue sorted first, and the toggle is a
+  filter rather than a swap.
+- Ordering extracted to `sortOrdersForQueue` with six unit tests, including the one
+  that pins the actual bug: a confirmed order is still in the list.
+
+Verified (what was actually run):
+
+- npm run check green, unit tests included.
+- Responsive and admin-shell suites against the built output: 13 passed.
+
+Known issues:
+
+- Still outstanding from the request: the storefront cart drawer, the size guide
+  redesign, the additional shop and delivery settings, and the Google Sheets
+  integration. The Guepex API sync is deprioritised by the owner, who has no key.
+
+Next:
+
+- The storefront cart drawer.
