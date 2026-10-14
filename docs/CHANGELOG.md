@@ -177,3 +177,42 @@ Next:
 
 - Phase D0, the dashboard overhaul, which the owner asked for and which is the
   screen they use daily.
+
+## Session report - Phase D0, the dashboard
+
+Completed:
+
+- admin_analytics() aggregate function: revenue per day, status funnel, totals,
+  refusal rate by wilaya, top products, low stock. One function, one round trip,
+  aggregated in the database rather than in the capped client fetch.
+- Dashboard rebuilt: four headline tiles, revenue chart drawn as inline SVG, the
+  call queue promoted to the first object on the page, refusal table by wilaya,
+  best sellers, low stock, and a wilayas-to-watch warning.
+- Locale files split into storefront and admin halves. They passed the 250-line
+  [HARD] limit; the seam is the audience, which is the real one. Done with a
+  state-machine parser because Prettier wraps long values and a line filter moves
+  the continuation into the wrong file, which is exactly what the first attempt
+  did.
+
+Verified (what was actually run):
+
+- Aggregation logic verified against known inputs: 6 orders gave confirmed value
+  16000, refused 1, and byWilaya returned Alger at 0.25 while correctly
+  excluding Oran below the three-order threshold.
+- The first attempt at that test was wrong, not the code: a sloppy UPDATE did
+  not filter by wilaya and flipped an order the previous statement had already
+  marked delivered. Redone deterministically with explicit ids.
+- typecheck, lint, knip, unit tests and build all exit 0.
+- Routes respond: /admin 200, /setup 200, /category/shirts 200, /search 200.
+
+Known issues:
+
+- The dashboard has NOT been visually verified with real data. It needs an
+  authenticated session and I have no credentials; the aggregation behind it is
+  verified, the rendering is not.
+- Performance still unmeasured. Nothing deployed. Demo imagery still placeholder.
+
+Next:
+
+- Sign in as the owner and look at /admin. Everything is behind a login I cannot
+  pass, and the owner's judgement on the layout is the missing input.

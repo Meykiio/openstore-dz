@@ -74,10 +74,6 @@ export function needsCall(order: AdminOrder): boolean {
   return order.status === "pending";
 }
 
-export function isOpenOrder(order: AdminOrder): boolean {
-  return ["pending", "confirmed", "shipped"].includes(order.status);
-}
-
 export async function setOrderStatus(
   id: string,
   status: OrderStatus,
