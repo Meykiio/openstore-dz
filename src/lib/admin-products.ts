@@ -1,4 +1,4 @@
-import { queryOptions, useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query";
 import { getSupabase } from "./supabase/client";
 import { slugify } from "./format";
 
@@ -54,13 +54,17 @@ const ADMIN_SELECT = `
   )
 `;
 
-const PRODUCTS_PAGE_SIZE = 20;
+/*
+ * Products per page. Fifteen, same reasoning as the order queue: a page that has to
+ * be scrolled to reach the bottom is a page whose last rows get skimmed past.
+ */
+const PRODUCTS_PAGE_SIZE = 15;
 
 /** One page of products, plus what is needed to ask for the next one. */
 type AdminProductsPage = {
   rows: AdminProduct[];
   total: number;
-  nextOffset: number | null;
+  pageCount: number;
 };
 
 /*
@@ -74,27 +78,30 @@ type AdminProductsPage = {
  * `created_at` is not unique, and without a stable second key rows repeat or
  * vanish between pages.
  */
-async function fetchAdminProductsPage(offset: number): Promise<AdminProductsPage> {
+async function fetchAdminProductsPage(page: number): Promise<AdminProductsPage> {
+  const from = (Math.max(page, 1) - 1) * PRODUCTS_PAGE_SIZE;
   const { data, error, count } = await getSupabase()
     .from("products")
     .select(ADMIN_SELECT, { count: "exact" })
     .order("created_at", { ascending: false })
     .order("id", { ascending: false })
-    .range(offset, offset + PRODUCTS_PAGE_SIZE - 1);
+    .range(from, from + PRODUCTS_PAGE_SIZE - 1);
   if (error) throw new Error(error.message);
 
-  const rows = (data ?? []) as unknown as AdminProduct[];
   const total = count ?? 0;
-  const consumed = offset + rows.length;
-  return { rows, total, nextOffset: consumed < total ? consumed : null };
+  return {
+    rows: (data ?? []) as unknown as AdminProduct[],
+    total,
+    pageCount: Math.max(1, Math.ceil(total / PRODUCTS_PAGE_SIZE)),
+  };
 }
 
-export function useAdminProductsPage() {
-  return useInfiniteQuery({
-    queryKey: ["admin_products"] as const,
-    queryFn: ({ pageParam }) => fetchAdminProductsPage(pageParam),
-    initialPageParam: 0,
-    getNextPageParam: (last) => last.nextOffset,
+export function useAdminProductsPage(page: number) {
+  return useQuery({
+    queryKey: ["admin_products", page] as const,
+    queryFn: () => fetchAdminProductsPage(page),
+    // Keeps the current page visible while the next loads.
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -222,55 +229,4 @@ export async function addVariantImage(variantId: string, url: string): Promise<v
 export async function deleteVariantImage(id: string): Promise<void> {
   const { error } = await getSupabase().from("variant_images").delete().eq("id", id);
   if (error) throw new Error(error.message);
-}
-
-/**
- * A variant as the pack picker needs it.
- *
- * Deliberately narrower than `AdminVariant`: no images, no price, no stock. The
- * picker only labels a variant and remembers its id, and declaring that is how the
- * query stays small. If the picker ever needs a price it should say so here.
- */
-export type PickerVariant = {
-  id: string;
-  size: string | null;
-  color_name: string | null;
-  sku: string | null;
-};
-
-type PickerProduct = {
-  id: string;
-  name: string;
-  slug: string;
-  kind: string;
-  product_variants: PickerVariant[];
-};
-
-const PICKER_SELECT = `
-  id, name, slug, kind,
-  product_variants ( id, size, color_name, sku )
-`;
-
-/**
- * Products and variants for the pack-contents picker.
- *
- * Not paginated, and deliberately far narrower than the admin list: no images, no
- * prices, no stock. It exists because the picker used to reuse the list query, so
- * opening one product pulled the whole admin payload with every image nested
- * inside it, purely to populate a dropdown.
- *
- * A shop with thousands of products wants a typeahead here rather than a full
- * list. At a few hundred this is a few kilobytes.
- */
-async function fetchProductPicker(): Promise<PickerProduct[]> {
-  const { data, error } = await getSupabase()
-    .from("products")
-    .select(PICKER_SELECT)
-    .order("name", { ascending: true });
-  if (error) throw new Error(error.message);
-  return (data ?? []) as unknown as PickerProduct[];
-}
-
-export function useProductPicker() {
-  return useQuery({ queryKey: ["product_picker"] as const, queryFn: fetchProductPicker });
 }

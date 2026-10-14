@@ -707,3 +707,33 @@ Known issues:
   piece. Paginating it means moving filter, sort, search and the facets to the
   server: filtering in the browser over a paged list would only ever see the loaded
   page, which is a wrong answer rather than a slow one. Planned in ROADMAP E2b.
+
+## Session report - real pagination in the admin
+
+Completed:
+
+- Replaced "load more" with numbered pages, previous and next, fifteen rows a page.
+  Load more is not pagination: the page grows without bound and page 30 needs
+  thirty clicks.
+- Previous and next are words, not arrows, because an arrow's correct direction
+  inverts between Arabic and French.
+- The window caps at five numbers with ellipses, and shows all pages when there are
+  seven or fewer.
+- `pageWindow` extracted and unit-tested, 8 tests. One caught a real bug in my first
+  version: it hid pages 3 and 4 of a five-page catalogue.
+- The pack picker moved to its own module when admin-products.ts passed 250 lines.
+- Fixed the pagination test counting `main ul > li`, which matched the sidebar and
+  analytics widgets too.
+
+Verified (what was actually run):
+
+- npm run check green, including the 8 new pagination unit tests.
+- Authenticated suite against the built output: 4 passed, including paging to page
+  two and asserting the rows stay bounded rather than appending.
+
+Known issues:
+
+- The storefront catalogue still loads every product and filters in the browser. It
+  is the remaining piece and the reason is in ROADMAP E2b: paging it means moving
+  filter, sort, search and facets to the server first, and half-doing it produces a
+  wrong result count rather than a slow one.

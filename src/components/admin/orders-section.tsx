@@ -1,6 +1,7 @@
 import { PhoneCall } from "lucide-react";
 import { AdminOrderList } from "./order-list";
 import { Button } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
 import { useI18n } from "@/lib/i18n-context";
 import type { AdminOrder } from "@/lib/admin";
 
@@ -18,21 +19,21 @@ import type { AdminOrder } from "@/lib/admin";
 export function OrdersSection({
   orders,
   total,
+  page,
+  pageCount,
   queueCount,
   queueOnly,
   onToggleQueue,
-  hasNextPage,
-  loadingMore,
-  onLoadMore,
+  onPageChange,
 }: {
   orders: AdminOrder[];
   total: number;
+  page: number;
+  pageCount: number;
   queueCount: number;
   queueOnly: boolean;
   onToggleQueue: () => void;
-  hasNextPage: boolean;
-  loadingMore: boolean;
-  onLoadMore: () => void;
+  onPageChange: (page: number) => void;
 }) {
   const { t } = useI18n();
 
@@ -49,10 +50,10 @@ export function OrdersSection({
           )}
         </h2>
         <span className="flex items-center gap-2">
-          {/* How much of the list is on screen. Without it, a paged list and a
-              complete one look identical. */}
-          <span className="font-mono text-xs text-on-surface-muted" data-testid="orders-count">
-            {orders.length} / {total}
+          {/* How many orders exist in total, not how many are on screen. Without
+              it, a page of fifteen and a shop with fifteen look identical. */}
+          <span className="font-mono text-xs text-on-surface-muted" data-testid="orders-total">
+            {total}
           </span>
           <Button
             variant={queueOnly ? "primary" : "ghost"}
@@ -67,17 +68,12 @@ export function OrdersSection({
 
       <AdminOrderList orders={orders} />
 
-      {hasNextPage && (
-        <Button
-          variant="outline"
-          className="self-center"
-          data-testid="orders-load-more"
-          disabled={loadingMore}
-          onClick={onLoadMore}
-        >
-          {loadingMore ? t("common.loading") : t("common.loadMore")}
-        </Button>
-      )}
+      <Pagination
+        page={page}
+        pageCount={pageCount}
+        onPageChange={onPageChange}
+        testId="orders-pagination"
+      />
     </section>
   );
 }

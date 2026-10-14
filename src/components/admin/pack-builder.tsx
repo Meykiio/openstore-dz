@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/lib/i18n-context";
-import type { PickerVariant } from "@/lib/admin-products";
+import type { PickerVariant } from "@/lib/product-picker";
 import { fetchPackItems, removePackItem, upsertPackItem, type PackItem } from "@/lib/admin-content";
 
 /** "M / أبيض", matching how the storefront labels a variant. */

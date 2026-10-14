@@ -12,7 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState, LoadingState } from "@/components/ui/feedback";
 import { useI18n } from "@/lib/i18n-context";
-import { updateProduct, useAdminProduct, useProductPicker } from "@/lib/admin-products";
+import { updateProduct, useAdminProduct } from "@/lib/admin-products";
+import { useProductPicker } from "@/lib/product-picker";
 
 export const Route = createFileRoute("/admin/product/$id")({
   component: ProductEditPage,

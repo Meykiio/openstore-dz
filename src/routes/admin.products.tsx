@@ -5,6 +5,7 @@ import { ImageOff, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
 import { Dialog } from "@/components/ui/dialog";
 import { Field, Input, Select } from "@/components/ui/form";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/feedback";
@@ -36,7 +37,8 @@ function useProductInvalidation() {
 
 function ProductsPage() {
   const { t } = useI18n();
-  const products = useAdminProductsPage();
+  const [page, setPage] = useState(1);
+  const products = useAdminProductsPage(page);
   const [open, setOpen] = useState(false);
 
   if (products.isPending) return <LoadingState />;
@@ -44,8 +46,9 @@ function ProductsPage() {
     return <ErrorState message={products.error.message} onRetry={() => void products.refetch()} />;
   }
 
-  const list = (products.data?.pages ?? []).flatMap((page) => page.rows);
-  const total = products.data?.pages[0]?.total ?? 0;
+  const list = products.data?.rows ?? [];
+  const total = products.data?.total ?? 0;
+  const pageCount = products.data?.pageCount ?? 1;
 
   return (
     <div className="flex flex-col gap-6">
@@ -53,8 +56,8 @@ function ProductsPage() {
         <h1 className="font-display text-2xl font-semibold">{t("admin.products.title")}</h1>
         <span className="flex items-center gap-3">
           {/* A paged list and a complete one look identical without this. */}
-          <span className="font-mono text-xs text-on-surface-muted" data-testid="products-count">
-            {list.length} / {total}
+          <span className="font-mono text-xs text-on-surface-muted" data-testid="products-total">
+            {total}
           </span>
           <Button onClick={() => setOpen(true)}>
             <Plus size={16} aria-hidden="true" />
@@ -76,17 +79,12 @@ function ProductsPage() {
             ))}
           </ul>
 
-          {products.hasNextPage && (
-            <Button
-              variant="outline"
-              className="self-center"
-              data-testid="products-load-more"
-              disabled={products.isFetchingNextPage}
-              onClick={() => void products.fetchNextPage()}
-            >
-              {products.isFetchingNextPage ? t("common.loading") : t("common.loadMore")}
-            </Button>
-          )}
+          <Pagination
+            page={page}
+            pageCount={pageCount}
+            onPageChange={setPage}
+            testId="products-pagination"
+          />
         </>
       )}
 

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { OrdersSection } from "@/components/admin/orders-section";
 import {
@@ -25,19 +25,18 @@ function DashboardPage() {
   const { t, locale } = useI18n();
   const [range, setRange] = useState<Range>(30);
   const [queueOnly, setQueueOnly] = useState(false);
+  const [page, setPage] = useState(1);
 
   const analytics = useAnalytics(range);
   // The queue is a server-side filter, not a re-sort of whatever happened to be
   // loaded. Loading the first page and filtering it in the browser would report a
   // queue size that depends on the page size.
-  const orders = useOrdersPage(queueOnly ? "pending" : null);
+  const orders = useOrdersPage(page, queueOnly ? "pending" : null);
   const pending = usePendingOrdersCount();
 
-  const shown = useMemo(
-    () => (orders.data?.pages ?? []).flatMap((page) => page.rows),
-    [orders.data],
-  );
-  const total = orders.data?.pages[0]?.total ?? 0;
+  const shown = orders.data?.rows ?? [];
+  const total = orders.data?.total ?? 0;
+  const pageCount = orders.data?.pageCount ?? 1;
   const queueCount = pending.data ?? 0;
 
   if (orders.isPending) return <LoadingState />;
@@ -110,9 +109,9 @@ function DashboardPage() {
             queueCount={queueCount}
             queueOnly={queueOnly}
             onToggleQueue={() => setQueueOnly((value) => !value)}
-            hasNextPage={Boolean(orders.hasNextPage)}
-            loadingMore={orders.isFetchingNextPage}
-            onLoadMore={() => void orders.fetchNextPage()}
+            page={page}
+            pageCount={pageCount}
+            onPageChange={setPage}
           />
 
           {data && (

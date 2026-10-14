@@ -22,7 +22,7 @@ export function AdminOrderList({ orders }: { orders: AdminOrder[] }) {
   const { t } = useI18n();
   if (orders.length === 0) return <EmptyState title={t("admin.orders.empty")} />;
   return (
-    <ul className="flex flex-col gap-3">
+    <ul className="flex flex-col gap-3" data-testid="order-list">
       {orders.map((order) => (
         <OrderRow key={order.id} order={order} />
       ))}

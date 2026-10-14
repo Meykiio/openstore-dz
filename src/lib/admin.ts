@@ -1,4 +1,4 @@
-import { queryOptions, useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query";
 import { getSupabase } from "./supabase/client";
 import type { Database } from "./supabase/types";
 import type { StoreSettings } from "./queries";
@@ -52,14 +52,21 @@ const ORDER_SELECT = `
   order_items ( id, product_name, variant_label, quantity, unit_price )
 `;
 
-/** One page of orders, plus what is needed to ask for the next one. */
+/** One page of orders, plus what the pager needs. */
 export type OrdersPage = {
   rows: AdminOrder[];
   total: number;
-  nextOffset: number | null;
+  pageCount: number;
 };
 
-const ORDERS_PAGE_SIZE = 20;
+/**
+ * Orders per page.
+ *
+ * Fifteen, deliberately small. This is a working queue an owner reads on a phone
+ * between calls, and a page that needs scrolling to reach the bottom is a page
+ * where the last few orders get skimmed past.
+ */
+const ORDERS_PAGE_SIZE = 15;
 
 /**
  * A page of orders, newest first.
@@ -72,8 +79,10 @@ const ORDERS_PAGE_SIZE = 20;
  * is not unique, and without a stable second key two orders created in the same
  * second can swap places between pages, so one is shown twice and another never.
  */
-async function fetchOrdersPage(offset: number, status: OrderStatus | null): Promise<OrdersPage> {
+async function fetchOrdersPage(page: number, status: OrderStatus | null): Promise<OrdersPage> {
   const supabase = getSupabase();
+  const from = (Math.max(page, 1) - 1) * ORDERS_PAGE_SIZE;
+
   let request = supabase
     .from("orders")
     .select(ORDER_SELECT, { count: "exact" })
@@ -82,13 +91,15 @@ async function fetchOrdersPage(offset: number, status: OrderStatus | null): Prom
 
   if (status) request = request.eq("status", status);
 
-  const { data, error, count } = await request.range(offset, offset + ORDERS_PAGE_SIZE - 1);
+  const { data, error, count } = await request.range(from, from + ORDERS_PAGE_SIZE - 1);
   if (error) throw new Error(error.message);
 
-  const rows = (data ?? []) as unknown as AdminOrder[];
   const total = count ?? 0;
-  const consumed = offset + rows.length;
-  return { rows, total, nextOffset: consumed < total ? consumed : null };
+  return {
+    rows: (data ?? []) as unknown as AdminOrder[],
+    total,
+    pageCount: Math.max(1, Math.ceil(total / ORDERS_PAGE_SIZE)),
+  };
 }
 
 /**
@@ -98,12 +109,13 @@ async function fetchOrdersPage(offset: number, status: OrderStatus | null): Prom
  * loaded. That distinction is the whole reason the badge and the list can disagree
  * with the truth if the filtering is done in the browser.
  */
-export function useOrdersPage(status: OrderStatus | null) {
-  return useInfiniteQuery({
-    queryKey: ["admin_orders", status ?? "all"] as const,
-    queryFn: ({ pageParam }) => fetchOrdersPage(pageParam, status),
-    initialPageParam: 0,
-    getNextPageParam: (last) => last.nextOffset,
+export function useOrdersPage(page: number, status: OrderStatus | null) {
+  return useQuery({
+    queryKey: ["admin_orders", page, status ?? "all"] as const,
+    queryFn: () => fetchOrdersPage(page, status),
+    // Keeps the current page on screen while the next loads, so paging does not
+    // flash a loading state over content the owner is already reading.
+    placeholderData: keepPreviousData,
   });
 }
 
