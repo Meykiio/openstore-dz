@@ -12,6 +12,7 @@ import {
   type SettingsDraft,
   type SettingsSetter,
 } from "@/components/admin/settings-cards";
+import { ExportSettings } from "@/components/admin/export-settings";
 import { useI18n } from "@/lib/i18n-context";
 import { useStoreSettings, type StoreSettings } from "@/lib/queries";
 import { saveStoreSettings } from "@/lib/admin";
@@ -91,6 +92,7 @@ function SettingsPage() {
       <IdentityCard form={form} set={set} />
       <LegalCard form={form} set={set} />
       <CommerceCard form={form} set={set} />
+      <ExportSettings />
     </form>
   );
 }

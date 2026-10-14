@@ -37,6 +37,15 @@ complains. Moving it is an architecture change, not a copy fix: it touches how t
 locale is bootstrapped, and the bootstrap script exists specifically to avoid a
 flash of the wrong language. Not worth doing for a browser tab.
 
+**Per-target export health.**
+Order exports are fire-and-forget: the trigger logs `queued` and `pg_net` keeps the
+real outcome for six hours in `net._http_response`, which the owner has to query by
+hand. A card per destination showing "last success" and "last error" would turn a
+silent failure into a visible one.
+Trigger: the first time an owner reports orders not arriving and has to be walked
+through the SQL. Until then the setup guide covers it, and adding it now would mean
+scheduled polling of an unlogged table.
+
 **Abandoned-cart WhatsApp follow-up.**
 Trigger: after the confirmation queue ships and there is real order volume. The research
 says the phone call is what works, not the message.

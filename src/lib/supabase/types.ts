@@ -23,6 +23,12 @@
  *    mapped type is `{}`, and TypeScript 5 refuses to index `{}` with a generic
  *    type parameter. If a composite type is ever added, restore the generated
  *    branch.
+ *
+ * One addition rather than a deviation: `order_export_log` and
+ * `order_export_targets` were written by hand in the generator's exact shape,
+ * because regenerating the whole file to add two tables is a large diff to review
+ * for no benefit. Regenerating will reproduce them; if it ever differs, the
+ * generator wins.
  */
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
@@ -116,6 +122,81 @@ export type Database = {
           is_active?: boolean;
           updated_at?: string;
           wilaya?: string;
+        };
+        Relationships: [];
+      };
+      order_export_log: {
+        Row: {
+          created_at: string;
+          event: string;
+          id: number;
+          order_id: string | null;
+          request_id: number | null;
+          status: string;
+          target_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          event: string;
+          id?: number;
+          order_id?: string | null;
+          request_id?: number | null;
+          status: string;
+          target_id: string;
+        };
+        Update: {
+          created_at?: string;
+          event?: string;
+          id?: number;
+          order_id?: string | null;
+          request_id?: number | null;
+          status?: string;
+          target_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "order_export_log_target_id_fkey";
+            columns: ["target_id"];
+            isOneToOne: false;
+            referencedRelation: "order_export_targets";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "order_export_log_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      order_export_targets: {
+        Row: {
+          created_at: string;
+          enabled: boolean;
+          id: string;
+          label: string;
+          secret: string;
+          updated_at: string;
+          url: string;
+        };
+        Insert: {
+          created_at?: string;
+          enabled?: boolean;
+          id?: string;
+          label: string;
+          secret?: string;
+          updated_at?: string;
+          url: string;
+        };
+        Update: {
+          created_at?: string;
+          enabled?: boolean;
+          id?: string;
+          label?: string;
+          secret?: string;
+          updated_at?: string;
+          url?: string;
         };
         Relationships: [];
       };

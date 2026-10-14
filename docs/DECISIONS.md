@@ -213,3 +213,62 @@ The paste path is kept, because an owner whose numbers are already in a spreadsh
 should not be made to retype them. The grid's operations are pure functions in
 `src/lib/size-guide-grid.ts`, unit-tested at the edges that matter: removing the last
 column, and pasting a ragged copy.
+
+---
+
+## 12. Order export runs in the database, and signs its payload
+
+**Context.** Owners wanted orders to land in a Google Sheet as well as in the app.
+Algerian shops reconcile in spreadsheets, and an app that makes them retype data
+loses to a notebook.
+
+**Decision.** Destinations live in `order_export_targets`, owner-readable only. A
+trigger on `orders` queues an asynchronous POST per enabled destination through
+`pg_net`, with an HMAC-SHA256 signature over the raw body, on creation and on every
+status change. Off by default, and any number of destinations.
+
+**Reason.** Three options were considered.
+
+An _Apps Script web app_ is the receiver. It needs no OAuth client, no Google Cloud
+project, and no service account for the owner to create, and the owner keeps control
+of their own sheet. The alternative, a service account with the Sheets API, needs a
+Google Cloud project per shop and a JSON key to store, which is a much larger thing
+to ask of someone setting up a shop from their phone.
+
+_pg_net over an Edge Function_ is about placement. `pg_net` queues the request and
+sends it after the transaction commits, so a slow or dead endpoint cannot delay or
+fail a checkout. An Edge Function in the middle would add a network hop and a second
+component to misconfigure, for nothing. It also keeps the URL and the secret out of
+the browser entirely: no client ever holds them, and there is nothing for the
+storefront bundle to leak.
+
+_Signing at all_ is because an Apps Script endpoint has to be public. Without a
+signature the URL alone is a bearer token, and anyone who obtains it can inject
+orders into the shop's spreadsheet. The signature is the only thing separating a
+real order from a forged one.
+
+**Consequences.**
+
+The signature travels as a query parameter _and_ a header, which is not redundancy.
+Google Apps Script cannot read request headers at all: the event object passed to
+`doPost()` has no `headers` field and never has had one (Google issue 67764685, open
+since 2017). Since Apps Script is the reason the feature exists, a header-only
+signature would have been unverifiable for the one integration it was built for.
+This was caught by the Sprint Research Gate before the UI was written, not after a
+shop owner reported it.
+
+The body sent by `pg_net` was verified byte-for-byte identical to `payload::text`,
+so a receiver recomputing the digest over what it received gets the same value. That
+is not obvious and would have failed silently.
+
+Supabase grants broad default privileges on new tables to `anon`, so `anon` started
+out holding `SELECT` and `TRUNCATE` on both new tables. RLS returns no rows to
+`anon` because the policies target `authenticated`, but a signing secret should not
+be one dropped policy away from being readable, and `TRUNCATE` ignores RLS entirely.
+Both are revoked explicitly, the same treatment `orders` already gets.
+
+Delivery outcomes are not surfaced in the app beyond a "queued" log row, because
+`pg_net` is asynchronous and the shop does not see the response. The raw outcome is
+in `net._http_response` for six hours, which `docs/GOOGLE_SHEETS.md` tells the owner
+how to read. A per-target health indicator would be better and is recorded in
+`docs/LATER.md`.

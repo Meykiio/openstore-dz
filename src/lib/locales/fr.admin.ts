@@ -124,4 +124,23 @@ export const frAdmin = {
   "admin.sizeGuide.methodHint": "L'information la plus souvent absente.",
   "admin.sizeGuide.methodPlaceholder":
     "Ex. : longueur de l'épaule au bas, poitrine mesurée sous les aisselles.",
+  "admin.export.title": "Export des commandes",
+  "admin.export.intro":
+    "Envoyez chaque nouvelle commande, et chaque changement de statut, vers votre Google Sheet. Chaque destination est signée par un secret, pour que votre script puisse vérifier que la commande vient bien de votre boutique. Désactivé par défaut.",
+  "admin.export.added": "Destination ajoutée",
+  "admin.export.add": "Ajouter une destination",
+  "admin.export.label": "Nom",
+  "admin.export.labelPlaceholder": "Ex. : Feuille des commandes",
+  "admin.export.url": "URL de réception",
+  "admin.export.urlHint": "L'URL de votre application Google Apps Script publiée.",
+  "admin.export.urlInvalid": "L'URL doit commencer par https://",
+  "admin.export.enabled": "Activée",
+  "admin.export.disabled": "Désactivée",
+  "admin.export.secret": "Secret",
+  "admin.export.secretHint": "Collez-le dans le script pour vérifier la signature.",
+  "admin.export.copy": "Copier le secret",
+  "admin.export.remove": "Supprimer la destination",
+  "admin.export.empty":
+    "Aucune destination. Ajoutez-en une pour envoyer les commandes vers un Google Sheet.",
+  "admin.export.recent": "Dernières tentatives",
 };

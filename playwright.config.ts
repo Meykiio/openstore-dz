@@ -45,19 +45,24 @@ export default defineConfig({
   },
 
   projects: [
-    // The responsive audit and the admin shell both set their own viewport per
-    // assertion, so running them in the device projects would test twice.
+    // Self-managing specs: these set their own viewport and sign in, so running
+    // them in both device projects would do the same work twice. The project is
+    // named for the largest of them; it is really "specs that manage their own
+    // context".
     {
       name: "desktop",
       use: { ...devices["Desktop Chrome"] },
-      testIgnore: /(responsive|admin-shell|cart-drawer)\.spec\.ts/,
+      testIgnore: /(responsive|admin-shell|cart-drawer|admin-export)\.spec\.ts/,
     },
     {
       name: "mobile",
       use: { ...devices["Pixel 7"] },
-      testIgnore: /(responsive|admin-shell|cart-drawer)\.spec\.ts/,
+      testIgnore: /(responsive|admin-shell|cart-drawer|admin-export)\.spec\.ts/,
     },
-    { name: "responsive", testMatch: /(responsive|admin-shell|cart-drawer)\.spec\.ts/ },
+    {
+      name: "responsive",
+      testMatch: /(responsive|admin-shell|cart-drawer|admin-export)\.spec\.ts/,
+    },
   ],
 
   // An externally supplied base URL means a server is already running; starting

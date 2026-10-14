@@ -553,3 +553,39 @@ Known issues:
 Next:
 
 - The remaining shop and delivery settings.
+
+## Session report - order export to Google Sheets
+
+Completed:
+
+- Destinations table (owner-only), export log, and a trigger that queues a signed
+  async POST per enabled destination on order creation and on every status change.
+- The receiver is a Google Apps Script the owner deploys against their own sheet. No
+  OAuth client, no Cloud project, no service key.
+- HMAC-SHA256 over the raw body. Sent as a query parameter and as a header.
+- Admin UI in Settings: add, name, enable, disable, read and copy the secret, remove,
+  and see recent attempts.
+- docs/GOOGLE_SHEETS.md: full setup guide, the complete receiving script, and a
+  troubleshooting list. DECISIONS.md entry 12.
+
+Verified (what was actually run):
+
+- End to end against a real public endpoint: HTTP 200, correct payload, and the
+  signature recomputed over the received body matching both the query parameter and
+  the header.
+- The trigger exports on a status change and correctly does not export on an
+  unrelated update.
+- anon holds no privileges on either new table; authenticated holds exactly the four
+  DML privileges.
+- npm run check green. Full Playwright suite 46 passed.
+
+Known issues:
+
+- Delivery outcome is not surfaced beyond a "queued" log row, because pg_net is
+  asynchronous and the app cannot see the response. The raw outcome is in
+  net._http_response for six hours. Logged in LATER.md with a trigger.
+- The live database now has the new tables and trigger; schema.sql matches.
+
+Next:
+
+- The remaining shop and delivery settings.

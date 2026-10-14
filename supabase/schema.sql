@@ -1249,3 +1249,259 @@ grant execute on function public.admin_exists() to anon, authenticated;
 
 revoke all on function public.claim_store() from public;
 grant execute on function public.claim_store() to authenticated;
+
+-- =============================================================================
+-- 11. Order export to Google Sheets, and to anything else taking a webhook
+-- =============================================================================
+--
+-- An owner can point orders at one or many endpoints, typically a Google Apps
+-- Script web app bound to their own Sheet. Off by default: a shop with no targets
+-- behaves exactly as it did before.
+--
+--  * pg_net, not an Edge Function. Its requests are queued and sent after the
+--    transaction commits, so a slow or dead endpoint can never delay or fail a
+--    checkout. A function in the middle would add a hop and a second thing to
+--    misconfigure for no benefit.
+--  * The URL and the signing secret live here, in a table only the owner can
+--    read, and the request is made by the database. No browser ever holds them,
+--    so there is nothing for the storefront bundle to leak.
+--  * Every payload is HMAC-SHA256 signed over the raw body, so the receiving
+--    script can prove the request came from this shop. Without that the URL alone
+--    is a bearer token, and an Apps Script endpoint has to be public.
+--
+-- pgcrypto lives in the `extensions` schema, so its functions are named in full
+-- rather than relying on search_path.
+
+create extension if not exists pg_net;
+
+create table if not exists public.order_export_targets (
+  id uuid primary key default gen_random_uuid(),
+  label text not null check (length(trim(label)) between 1 and 80),
+  -- https only. A plaintext webhook would put names, phone numbers and addresses
+  -- on the wire in the clear.
+  url text not null check (url ~ '^https://.'),
+  secret text not null default encode(extensions.gen_random_bytes(32), 'hex'),
+  enabled boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+comment on table public.order_export_targets is
+  'Outbound order webhooks, typically a Google Apps Script bound to a Sheet. Owner-only, because the secret signs payloads and must be pasted into the receiving script.';
+
+create table if not exists public.order_export_log (
+  id bigserial primary key,
+  target_id uuid not null references public.order_export_targets(id) on delete cascade,
+  order_id uuid references public.orders(id) on delete set null,
+  event text not null check (event in ('created', 'status_changed')),
+  status text not null,
+  request_id bigint,
+  created_at timestamptz not null default now()
+);
+
+comment on table public.order_export_log is
+  'One row per attempted export. request_id correlates to net._http_response, which pg_net retains for six hours.';
+
+create index if not exists order_export_log_target_idx
+  on public.order_export_log (target_id, created_at desc);
+create index if not exists order_export_log_order_idx
+  on public.order_export_log (order_id);
+
+drop trigger if exists order_export_targets_touch on public.order_export_targets;
+create trigger order_export_targets_touch
+  before update on public.order_export_targets
+  for each row execute function public.touch_updated_at();
+
+/*
+ * A flat, self-describing payload rather than the raw row.
+ *
+ * The person writing the receiving script is a shop owner looking at a
+ * spreadsheet, not at this schema, so every field is named in full and the line
+ * total is precomputed.
+ *
+ * SECURITY DEFINER because it reads customer personal data and must never be
+ * callable from a client. Execute is revoked from every API role below.
+ */
+create or replace function public.order_export_payload(p_order_id uuid, p_event text)
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select jsonb_build_object(
+    'event', p_event,
+    'sent_at', now(),
+    'shop', (
+      select jsonb_build_object('name', s.name, 'phone', s.phone, 'whatsapp', s.whatsapp)
+      from public.store_settings s where s.id = 1
+    ),
+    'order', jsonb_build_object(
+      'id', o.id,
+      'token', o.public_token,
+      'customer_name', o.customer_name,
+      'phone', o.phone,
+      'wilaya', o.wilaya,
+      'commune', o.commune,
+      'address', o.address,
+      'note', o.note,
+      'subtotal', o.subtotal,
+      'delivery_fee', o.delivery_fee,
+      'total', o.total,
+      'status', o.status,
+      'created_at', o.created_at,
+      'confirmed_at', o.confirmed_at,
+      'refused_at', o.refused_at,
+      'refused_reason', o.refused_reason,
+      'shipped_at', o.shipped_at,
+      'delivered_at', o.delivered_at,
+      'carrier', o.carrier,
+      'tracking_number', o.tracking_number,
+      'tracking_url', o.tracking_url
+    ),
+    'items', coalesce(
+      (
+        select jsonb_agg(
+          jsonb_build_object(
+            'product_name', i.product_name,
+            'variant_label', i.variant_label,
+            'quantity', i.quantity,
+            'unit_price', i.unit_price,
+            'line_total', i.unit_price * i.quantity
+          )
+          order by i.created_at
+        )
+        from public.order_items i where i.order_id = o.id
+      ),
+      '[]'::jsonb
+    )
+  )
+  from public.orders o
+  where o.id = p_order_id;
+$$;
+
+/*
+ * Queue an export for every enabled target.
+ *
+ * Fires on creation and on any status change, because a sheet that only ever
+ * shows new orders is a sheet the owner still reconciles by hand. The receiving
+ * script upserts on order.id.
+ *
+ * The signature travels in two places, and that is not redundancy. A Google Apps
+ * Script web app cannot read request headers at all: the event object passed to
+ * doPost() has no `headers` field and never has had one (Google issue 67764685,
+ * open since 2017). Apps Script is the main reason this feature exists, so a
+ * header-only signature would be unverifiable for the one integration it was
+ * built for. The query parameter is for Apps Script; the header is the usual
+ * convention for anything else that can read it. Both carry the same digest over
+ * the same body, which was verified byte-for-byte against a real endpoint.
+ *
+ * Wrapped so a misconfigured endpoint cannot fail a checkout. An export is a side
+ * effect, and losing an order to a broken webhook would be an absurd trade.
+ * Failures land in the log instead.
+ */
+create or replace function public.enqueue_order_export()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  target record;
+  payload jsonb;
+  event_name text;
+  digest text;
+  request_id bigint;
+begin
+  if tg_op = 'INSERT' then
+    event_name := 'created';
+  elsif new.status is distinct from old.status then
+    event_name := 'status_changed';
+  else
+    return new;
+  end if;
+
+  payload := public.order_export_payload(new.id, event_name);
+  if payload is null then
+    return new;
+  end if;
+
+  for target in select id, url, secret from public.order_export_targets where enabled loop
+    begin
+      digest := encode(extensions.hmac(payload::text, target.secret, 'sha256'), 'hex');
+
+      select net.http_post(
+        url := target.url,
+        body := payload,
+        -- Raw hex, no prefix, because the receiving script compares hex to hex.
+        params := jsonb_build_object('sig', digest),
+        headers := jsonb_build_object(
+          'Content-Type', 'application/json',
+          'X-OpenStore-Event', event_name,
+          -- Hex only, deliberately: pg_net refuses to send a request whose
+          -- headers contain a carriage return or line feed, and hex cannot.
+          'X-OpenStore-Signature', 'sha256=' || digest
+        ),
+        timeout_milliseconds := 10000
+      ) into request_id;
+
+      insert into public.order_export_log (target_id, order_id, event, status, request_id)
+      values (target.id, new.id, event_name, 'queued', request_id);
+    exception when others then
+      insert into public.order_export_log (target_id, order_id, event, status)
+      values (target.id, new.id, event_name, 'error: ' || sqlerrm);
+    end;
+  end loop;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists order_export_enqueue on public.orders;
+create trigger order_export_enqueue
+  after insert or update of status on public.orders
+  for each row execute function public.enqueue_order_export();
+
+alter table public.order_export_targets enable row level security;
+alter table public.order_export_log enable row level security;
+
+grant select, insert, update, delete on public.order_export_targets to authenticated;
+grant select on public.order_export_log to authenticated;
+grant usage, select on sequence public.order_export_log_id_seq to authenticated;
+
+-- Owner only, not owner-and-staff as elsewhere: this table holds a signing
+-- secret, and a leaked one lets someone forge orders into the shop's spreadsheet.
+drop policy if exists order_export_targets_admin on public.order_export_targets;
+create policy order_export_targets_admin on public.order_export_targets
+  for all to authenticated
+  using (
+    (select public.has_admin_role((select auth.uid()), array['owner'::public.admin_role])) is true
+  )
+  with check (
+    (select public.has_admin_role((select auth.uid()), array['owner'::public.admin_role])) is true
+  );
+
+drop policy if exists order_export_log_admin on public.order_export_log;
+create policy order_export_log_admin on public.order_export_log
+  for select to authenticated
+  using (
+    (select public.has_admin_role((select auth.uid()), array['owner'::public.admin_role])) is true
+  );
+
+-- Supabase grants broad default privileges on new tables in `public` to anon,
+-- authenticated and service_role. That is what makes the usual grant-plus-policy
+-- pairing work, and it also means `anon` starts out holding SELECT and TRUNCATE
+-- on these two. RLS returns no rows to anon here, because the only policies target
+-- `authenticated`, but a signing secret should not be one dropped policy away from
+-- being readable. TRUNCATE ignores RLS entirely, so leaving it granted would be a
+-- loaded gun for no benefit. Same treatment `public.orders` already gets.
+revoke all on public.order_export_targets from anon;
+revoke all on public.order_export_log from anon;
+revoke truncate, references, trigger on public.order_export_targets from authenticated, service_role;
+revoke truncate, references, trigger on public.order_export_log from authenticated, service_role;
+revoke all on sequence public.order_export_log_id_seq from anon;
+
+-- These two expose customer personal data and are only ever called by the trigger,
+-- which runs as the definer.
+revoke all on function public.order_export_payload(uuid, text) from public, anon, authenticated;
+revoke all on function public.enqueue_order_export() from public, anon, authenticated;

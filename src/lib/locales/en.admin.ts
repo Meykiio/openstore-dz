@@ -122,4 +122,22 @@ export const enAdmin = {
   "admin.sizeGuide.methodHint": "The most commonly missing piece of information.",
   "admin.sizeGuide.methodPlaceholder":
     "e.g. length from shoulder to hem, chest measured under the arms.",
+  "admin.export.title": "Order export",
+  "admin.export.intro":
+    "Send every new order, and every status change, to your own Google Sheet. Each destination is signed with a secret so your script can prove the order really came from your shop. Off by default.",
+  "admin.export.added": "Destination added",
+  "admin.export.add": "Add destination",
+  "admin.export.label": "Name",
+  "admin.export.labelPlaceholder": "e.g. Orders sheet",
+  "admin.export.url": "Receiving URL",
+  "admin.export.urlHint": "The URL of your published Google Apps Script app.",
+  "admin.export.urlInvalid": "The URL must start with https://",
+  "admin.export.enabled": "Enabled",
+  "admin.export.disabled": "Disabled",
+  "admin.export.secret": "Secret",
+  "admin.export.secretHint": "Paste it into the script to verify the signature.",
+  "admin.export.copy": "Copy secret",
+  "admin.export.remove": "Remove destination",
+  "admin.export.empty": "No destinations yet. Add one to send orders to a Google Sheet.",
+  "admin.export.recent": "Recent attempts",
 };
