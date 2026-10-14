@@ -140,4 +140,11 @@ export const enAdmin = {
   "admin.export.remove": "Remove destination",
   "admin.export.empty": "No destinations yet. Add one to send orders to a Google Sheet.",
   "admin.export.recent": "Recent attempts",
+  "admin.settings.marketing": "Announcement and social links",
+  "admin.settings.announcement": "Announcement",
+  "admin.settings.announcementHint": "Shown in a bar at the top of every page.",
+  "admin.settings.announcementEnabled": "Show the announcement",
+  "admin.settings.returnsNote": "Returns policy",
+  "admin.settings.returnsNoteHint":
+    "What a buyer should know before ordering. Shown in the footer.",
 };

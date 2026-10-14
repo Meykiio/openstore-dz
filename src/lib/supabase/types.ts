@@ -592,6 +592,12 @@ export type Database = {
           tagline: string | null;
           updated_at: string;
           whatsapp: string | null;
+          announcement: string | null;
+          announcement_enabled: boolean;
+          facebook_url: string | null;
+          instagram_url: string | null;
+          returns_note: string | null;
+          tiktok_url: string | null;
         };
         Insert: {
           accepts_cod?: boolean;
@@ -617,6 +623,12 @@ export type Database = {
           tagline?: string | null;
           updated_at?: string;
           whatsapp?: string | null;
+          announcement?: string | null;
+          announcement_enabled?: boolean;
+          facebook_url?: string | null;
+          instagram_url?: string | null;
+          returns_note?: string | null;
+          tiktok_url?: string | null;
         };
         Update: {
           accepts_cod?: boolean;
@@ -642,6 +654,12 @@ export type Database = {
           tagline?: string | null;
           updated_at?: string;
           whatsapp?: string | null;
+          announcement?: string | null;
+          announcement_enabled?: boolean;
+          facebook_url?: string | null;
+          instagram_url?: string | null;
+          returns_note?: string | null;
+          tiktok_url?: string | null;
         };
         Relationships: [];
       };

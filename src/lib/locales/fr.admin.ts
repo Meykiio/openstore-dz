@@ -143,4 +143,11 @@ export const frAdmin = {
   "admin.export.empty":
     "Aucune destination. Ajoutez-en une pour envoyer les commandes vers un Google Sheet.",
   "admin.export.recent": "Dernières tentatives",
+  "admin.settings.marketing": "Annonce et réseaux sociaux",
+  "admin.settings.announcement": "Annonce",
+  "admin.settings.announcementHint": "Affichée dans une barre en haut de chaque page.",
+  "admin.settings.announcementEnabled": "Afficher l'annonce",
+  "admin.settings.returnsNote": "Politique de retour",
+  "admin.settings.returnsNoteHint":
+    "Ce que l'acheteur doit savoir avant de commander. Affiché en pied de page.",
 };

@@ -87,9 +87,24 @@ create table if not exists public.store_settings (
   returns_days        int  not null default 14 check (returns_days >= 0),
   accepts_cod         boolean not null default true,
 
-  -- Guepex origin. The carrier matches wilaya by exact name string, so this
-  -- must match the carrier's spelling character for character.
-  guepex_from_wilaya  text,
+    -- Guepex origin. The carrier matches wilaya by exact name string, so this
+    -- must match the carrier's spelling character for character.
+    guepex_from_wilaya  text,
+
+    -- What the shop says to buyers before they buy.
+    --
+    -- The announcement is off by default, so a shop that has never opened the
+    -- settings page renders nothing rather than an empty bar.
+    announcement            text,
+    announcement_enabled    boolean not null default false,
+    -- Full URLs, not handles. A handle cannot be turned into a correct link for
+    -- every platform, and guessing wrong sends a buyer to a stranger's profile.
+    instagram_url           text,
+    facebook_url            text,
+    tiktok_url              text,
+    -- `returns_days` says how long; this says what is covered, which is the part
+    -- buyers actually ask about.
+    returns_note            text,
 
   created_at          timestamptz not null default now(),
   updated_at          timestamptz not null default now()

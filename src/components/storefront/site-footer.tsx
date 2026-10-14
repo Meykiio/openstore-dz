@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Mail, MapPin, Phone, ShieldCheck } from "lucide-react";
 import { useI18n } from "@/lib/i18n-context";
 import { useStoreSettings } from "@/lib/queries";
+import { SocialLinks } from "./social-links";
 import { formatDzd } from "@/lib/format";
 import { waLink } from "@/lib/whatsapp";
 
@@ -102,6 +103,7 @@ export function SiteFooter() {
               {settings.address}
             </span>
           )}
+          <SocialLinks settings={settings} />
         </div>
       </div>
 
@@ -115,6 +117,12 @@ export function SiteFooter() {
           {t("nav.login")}
         </Link>
       </div>
+
+      {settings?.returns_note && (
+        <div className="container-page pb-6">
+          <p className="text-xs text-on-surface-muted">{settings.returns_note}</p>
+        </div>
+      )}
     </footer>
   );
 }

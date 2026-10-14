@@ -589,3 +589,32 @@ Known issues:
 Next:
 
 - The remaining shop and delivery settings.
+
+## Session report - more shop settings
+
+Completed:
+
+- Announcement bar with its own switch, rendered above the header on every page.
+- Instagram, Facebook and TikTok links in the footer, stored as full URLs.
+- Returns policy text, the one legally-relevant footer field that was missing.
+- Split settings-cards.tsx and site-footer.tsx past the 250-line limit, both by
+  audience rather than by size.
+- Declined to add a minimum order value: displaying one without enforcing it would
+  be a field that lies. Logged in LATER.md with the reason.
+
+Verified (what was actually run):
+
+- npm run check green.
+- Full Playwright suite against the built output: 45 passed, 1 skipped.
+
+Known issues:
+
+- `src/lib/queries.ts` is now at the 250-line ceiling and is a domain grab-bag
+  (catalogue, categories, reviews, settings). It needs splitting by domain rather
+  than trimmed again the next time something is added.
+- Still outstanding: performance measurement against the built output, and the
+  Guepex API sync, which the owner cannot test without a key.
+
+Next:
+
+- Performance measurement, which is the last unmeasured claim in the project.

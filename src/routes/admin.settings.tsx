@@ -12,6 +12,7 @@ import {
   type SettingsDraft,
   type SettingsSetter,
 } from "@/components/admin/settings-cards";
+import { MarketingCard } from "@/components/admin/marketing-card";
 import { ExportSettings } from "@/components/admin/export-settings";
 import { useI18n } from "@/lib/i18n-context";
 import { useStoreSettings, type StoreSettings } from "@/lib/queries";
@@ -43,6 +44,12 @@ const DEFAULTS: StoreSettings = {
   returns_days: 14,
   accepts_cod: true,
   guepex_from_wilaya: null,
+  announcement: null,
+  announcement_enabled: false,
+  instagram_url: null,
+  facebook_url: null,
+  tiktok_url: null,
+  returns_note: null,
 };
 
 function SettingsPage() {
@@ -91,6 +98,7 @@ function SettingsPage() {
 
       <IdentityCard form={form} set={set} />
       <LegalCard form={form} set={set} />
+      <MarketingCard form={form} set={set} />
       <CommerceCard form={form} set={set} />
       <ExportSettings />
     </form>

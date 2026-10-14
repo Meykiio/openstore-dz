@@ -137,4 +137,10 @@ export const arAdmin = {
   "admin.export.remove": "حذف الوجهة",
   "admin.export.empty": "لا توجد وجهات بعد. أضف واحدة لترسل الطلبات إلى جدول Google.",
   "admin.export.recent": "آخر المحاولات",
+  "admin.settings.marketing": "الإعلان وروابط التواصل",
+  "admin.settings.announcement": "الإعلان",
+  "admin.settings.announcementHint": "يظهر في شريط أعلى كل صفحة.",
+  "admin.settings.announcementEnabled": "إظهار الإعلان",
+  "admin.settings.returnsNote": "سياسة الإرجاع",
+  "admin.settings.returnsNoteHint": "ما يجب أن يعرفه المشتري قبل الطلب. يظهر في أسفل الصفحة.",
 };

@@ -90,6 +90,12 @@ export type StoreSettings = {
   returns_days: number;
   accepts_cod: boolean;
   guepex_from_wilaya: string | null;
+  announcement: string | null;
+  announcement_enabled: boolean;
+  instagram_url: string | null;
+  facebook_url: string | null;
+  tiktok_url: string | null;
+  returns_note: string | null;
 };
 
 export type PublicReview = {
@@ -159,12 +165,10 @@ export const storeSettingsQuery = () =>
   queryOptions({ queryKey: ["store_settings"] as const, queryFn: fetchSettings });
 
 /**
- * Active categories, each with how many published products it holds.
+ * Active categories with their published-product count.
  *
- * The count comes from a separate read and is joined here rather than using a
- * PostgREST aggregate, because counting only published products needs the same
- * `status` filter the storefront uses, and keeping that rule in one place in
- * TypeScript is less error prone than duplicating it in a query string.
+ * Counted in a separate read rather than a PostgREST aggregate, so the
+ * `status` rule lives in one place instead of being repeated in a query string.
  */
 async function fetchCategories(): Promise<CategoryWithCount[]> {
   const supabase = getSupabase();
