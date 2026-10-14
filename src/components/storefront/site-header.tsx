@@ -30,7 +30,10 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-outline bg-nav-bg/95 backdrop-blur supports-[backdrop-filter]:bg-nav-bg/80">
       <div className="container-page flex h-16 items-center gap-3">
-        <Link to="/" className="flex min-w-0 items-center gap-2 font-display text-lg font-semibold">
+        <Link
+          to="/"
+          className="flex min-h-11 min-w-0 items-center gap-2 font-display text-lg font-semibold"
+        >
           <Store size={20} className="shrink-0 text-primary" aria-hidden="true" />
           <span className="truncate">{storeName}</span>
         </Link>

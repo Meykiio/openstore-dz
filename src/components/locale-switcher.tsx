@@ -30,7 +30,10 @@ export function LocaleSwitcher({ className }: { className?: string }) {
           onClick={() => setLocale(code as Locale)}
           aria-current={locale === code ? "true" : undefined}
           className={cn(
-            "rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-150",
+            // min-h-9 keeps each segment a real tap target. At py-1 the buttons
+            // measured 25px tall, which is under the 32px floor and awkward for
+            // a thumb.
+            "inline-flex min-h-9 items-center rounded-full px-3 text-xs font-medium transition-colors duration-150",
             locale === code
               ? "bg-primary text-on-primary"
               : "text-on-surface-muted hover:bg-surface-mid",

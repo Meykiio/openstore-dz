@@ -14,7 +14,7 @@ import { ErrorState, LoadingState } from "@/components/ui/feedback";
 import { useI18n } from "@/lib/i18n-context";
 import { formatDzd } from "@/lib/format";
 import { useAnalytics, refusalRate, wilayasToWatch } from "@/lib/analytics";
-import { needsCall, useAdminOrders, type AdminOrder } from "@/lib/admin";
+import { needsCall, useAdminOrders } from "@/lib/admin";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/")({
@@ -50,14 +50,14 @@ function DashboardPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-2xl font-semibold">{t("admin.nav.overview")}</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" data-testid="dashboard-range">
           {([7, 30, 90] as const).map((value) => (
             <button
               key={value}
               type="button"
               onClick={() => setRange(value)}
               className={cn(
-                "rounded-full px-3.5 py-1.5 text-xs transition-colors",
+                "inline-flex min-h-9 items-center rounded-full px-3.5 text-xs transition-colors",
                 range === value
                   ? "bg-primary text-on-primary"
                   : "border border-outline text-on-surface-muted hover:bg-surface-mid",
@@ -115,7 +115,7 @@ function DashboardPage() {
           </section>
 
           {data && (
-            <div className="grid gap-4 xl:grid-cols-2">
+            <div className="grid gap-4 xl:grid-cols-2" data-testid="dashboard-analytics">
               <RevenueChart days={data.revenue} locale={locale} />
               <WilayaTable analytics={data} />
               <TopProducts analytics={data} />
@@ -143,6 +143,3 @@ function DashboardPage() {
     </div>
   );
 }
-
-/** Kept for the type the order list expects when filtering. */
-export type DashboardOrder = AdminOrder;

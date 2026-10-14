@@ -60,7 +60,7 @@ export function SiteFooter() {
           {settings?.phone && (
             <a
               href={`tel:${settings.phone.replace(/\s/g, "")}`}
-              className="flex items-center gap-2 text-sm text-on-surface-muted hover:text-on-surface"
+              className="flex min-h-11 items-center gap-2 text-sm text-on-surface-muted hover:text-on-surface"
             >
               <Phone size={15} aria-hidden="true" />
               <span dir="ltr" className="font-mono text-xs">
@@ -71,7 +71,7 @@ export function SiteFooter() {
           {settings?.whatsapp && (
             <a
               href={`https://wa.me/${settings.whatsapp.replace(/\D/g, "")}`}
-              className="flex items-center gap-2 text-sm text-on-surface-muted hover:text-on-surface"
+              className="flex min-h-11 items-center gap-2 text-sm text-on-surface-muted hover:text-on-surface"
               rel="noopener noreferrer"
               target="_blank"
             >
@@ -84,7 +84,7 @@ export function SiteFooter() {
           {settings?.email && (
             <a
               href={`mailto:${settings.email}`}
-              className="flex items-center gap-2 text-sm text-on-surface-muted hover:text-on-surface"
+              className="flex min-h-11 items-center gap-2 text-sm text-on-surface-muted hover:text-on-surface"
             >
               <Mail size={15} aria-hidden="true" />
               <span>{settings.email}</span>
@@ -105,7 +105,7 @@ export function SiteFooter() {
           {settings ? formatDzd(settings.delivery_fee_flat, locale) : "—"} ·{" "}
           {t("admin.settings.returnsDays")} {settings?.returns_days ?? 0}
         </p>
-        <Link to="/login" className="hover:text-on-surface">
+        <Link to="/login" className="inline-flex min-h-11 items-center hover:text-on-surface">
           {t("nav.login")}
         </Link>
       </div>
