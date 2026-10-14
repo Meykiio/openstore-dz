@@ -38,7 +38,11 @@ export function CartDrawer() {
         if (event.target === ref.current) closeCart();
       }}
       aria-labelledby="cart-title"
-      className="ms-auto me-0 my-0 h-dvh max-h-dvh w-[min(400px,94vw)] rounded-none border-0 border-s border-outline bg-nav-bg p-0 text-on-surface shadow-lg backdrop:bg-black/45"
+      // Full width on a phone, a side sheet from 640px. A 94vw panel on a 320px
+      // screen leaves a strip of backdrop that reads as a misaligned element
+      // rather than as somewhere to tap, and the cart is where the most
+      // information has to fit.
+      className="ms-auto me-0 my-0 h-dvh max-h-dvh w-full rounded-none border-0 border-s border-outline bg-nav-bg p-0 text-on-surface shadow-lg backdrop:bg-black/45 sm:w-[400px]"
     >
       <div className="flex h-full flex-col">
         <div className="cart-head">

@@ -488,3 +488,34 @@ Known issues:
 Next:
 
 - The storefront cart drawer.
+
+## Session report - the cart drawer, measured
+
+Completed:
+
+- Six tests that open the cart and assert its geometry. Nothing had ever verified
+  the drawer: the responsive audit never opens it, and a dialog is in the top layer
+  where a document-level overflow check cannot see it.
+- Full width on a phone, side sheet from 640px. At 94vw on a 320px screen it left a
+  19px strip of backdrop that reads as misalignment, not as a tap target.
+- A stable hook on the header cart button.
+
+Verified (what was actually run):
+
+- npm run check green.
+- Cart suite against the built output: 6 passed. Responsive run: 15 passed.
+- The drawer fits at 320, 360, 414, 768, does not scroll sideways, and its actions
+  stay in view.
+
+Known issues:
+
+- The drawer was reported as not responsive and measures as responsive. The owner
+  may be describing something these tests cannot see, which is taste: spacing,
+  density, or expecting a bottom sheet on a phone. Needs a screenshot to act on.
+- Still outstanding: the size guide redesign, the additional shop and delivery
+  settings, and the Google Sheets integration.
+
+Next:
+
+- The size guide, which the owner described as confusing, so the fix is copy and
+  structure rather than layout.

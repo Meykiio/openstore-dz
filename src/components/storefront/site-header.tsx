@@ -58,6 +58,7 @@ export function SiteHeader() {
           <button
             type="button"
             onClick={openCart}
+            data-testid="cart-open"
             className="relative inline-flex size-10 items-center justify-center rounded-full border border-outline text-on-surface transition-colors hover:bg-surface-mid"
             aria-label={t("cart.title")}
           >

@@ -50,14 +50,14 @@ export default defineConfig({
     {
       name: "desktop",
       use: { ...devices["Desktop Chrome"] },
-      testIgnore: /(responsive|admin-shell)\.spec\.ts/,
+      testIgnore: /(responsive|admin-shell|cart-drawer)\.spec\.ts/,
     },
     {
       name: "mobile",
       use: { ...devices["Pixel 7"] },
-      testIgnore: /(responsive|admin-shell)\.spec\.ts/,
+      testIgnore: /(responsive|admin-shell|cart-drawer)\.spec\.ts/,
     },
-    { name: "responsive", testMatch: /(responsive|admin-shell)\.spec\.ts/ },
+    { name: "responsive", testMatch: /(responsive|admin-shell|cart-drawer)\.spec\.ts/ },
   ],
 
   // An externally supplied base URL means a server is already running; starting
