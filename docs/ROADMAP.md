@@ -177,6 +177,33 @@ dev` means anything. Budgets: 1.5 MB initial payload, LCP under 2.5s on a
   typography, and guessing at them without measuring the fix would be worse than
   the honest number.
 
+- **E2b. Paginate the storefront catalogue, which means moving filtering server-side.**
+
+  The admin lists are paged. The storefront catalogue is not, and it is a
+  different size of job for one reason: `src/lib/catalogue.ts` filters, sorts and
+  searches **in the browser** over the whole catalogue, and computes the filter
+  facets (sizes, colours, price range) from it too.
+
+  That design was deliberate and documented as the swap point. It stops working the
+  moment the list is paged, and it fails in the worst way: filtering a paged list in
+  the browser only ever sees the loaded page, so "12 results" becomes a wrong
+  answer rather than a slow one.
+
+  So this is not "add a limit". It is:
+
+  1. A `catalogue_page()` RPC taking category, query, sizes, colours, price range,
+     in-stock, sort, limit and offset, returning the rows and the total.
+  2. `normalize_arabic()` in SQL, matching `normalizeArabic` in the client exactly,
+     or the same search stops finding the same things. Hamza forms, both ya forms,
+     taa marbuta and diacritics.
+  3. Facets from the server too, for the same reason as the rows.
+  4. The toolbar and the view switched to a paged query with "load more".
+  5. Tests asserting that a filtered page reports the filtered total, because that
+     is the assertion that catches the failure above.
+
+  Worth doing before the catalogue passes a few hundred products, which is exactly
+  when the current design is documented to stop being viable.
+
 - **E3.** Deploy to Vercel, set `GUEPEX_WEBHOOK_SECRET`, replace the placeholder
   demo imagery, and connect error monitoring.
 
