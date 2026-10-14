@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { PackageSearch } from "lucide-react";
 import { ProductGrid } from "./product-card";
 import { CatalogueToolbar } from "./catalogue-toolbar";
@@ -6,6 +6,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { EmptyState, ErrorState, ProductSkeleton } from "@/components/ui/feedback";
 import { useI18n } from "@/lib/i18n-context";
 import { EMPTY_FILTERS, useCataloguePage, type CatalogueFilters } from "@/lib/catalogue";
+import { useDebouncedValue } from "@/lib/use-debounced";
 
 /**
  * A browsable catalogue: heading, filters, grid, pages.
@@ -39,7 +40,17 @@ export function CatalogueView({
   });
   const [page, setPage] = useState(1);
 
-  const catalogue = useCataloguePage(filters, page);
+  // Only the price fields are debounced. They are text inputs, so every keystroke
+  // would otherwise be a query. Chips and sort change once per interaction and
+  // stay immediate.
+  const debouncedMin = useDebouncedValue(filters.minPrice);
+  const debouncedMax = useDebouncedValue(filters.maxPrice);
+  const effectiveFilters = useMemo(
+    () => ({ ...filters, minPrice: debouncedMin, maxPrice: debouncedMax }),
+    [filters, debouncedMin, debouncedMax],
+  );
+
+  const catalogue = useCataloguePage(effectiveFilters, page);
   const products = catalogue.data?.products ?? [];
   const facets = catalogue.data?.facets ?? { sizes: [], colors: [], priceMin: 0, priceMax: 0 };
 

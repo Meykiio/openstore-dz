@@ -52,3 +52,5 @@ Desktop.ini
 # Personal master files: local copies only, never commit (see RULES 11.8)
 docs/Sifeddine_SSOT.md
 docs/Sifeddine_System_Instructions.md
+
+.vercel
