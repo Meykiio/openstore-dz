@@ -154,9 +154,29 @@ busy shop.
 - **E1.** `sitemap.xml`, `robots.txt` per store, and `Product`/`Offer` JSON-LD so
   products can appear in search results with a price.
 - **E2.** Performance pass against the **built** output. No number from `vite
-dev` means anything. Budgets already asserted informally: 1.5 MB initial
-  payload, LCP under 2.5s on a throttled 3G profile — which is the realistic
-  profile for the target market, not a fibre connection.
+dev` means anything. Budgets: 1.5 MB initial payload, LCP under 2.5s on a
+  throttled profile (700 kbps, 300 ms RTT, 4x CPU), which is the realistic
+  profile for the target market rather than a fibre connection.
+
+  **Measured 2026-10-14, on the built output.** Payload **372 KB** across 29
+  files: budget met, with room. LCP **4.4s and 8.9s** on two runs: budget missed,
+  and variable. `e2e/performance.spec.ts` asserts both. The LCP assertion is marked
+  expected-to-fail rather than deleted, so the number cannot regress quietly and
+  the marker self-cleans when someone fixes it.
+
+  What is actually costing the time, from the same run:
+
+  - A single **188 KB compressed** entry chunk (`index-*.js`, 737 KB
+    uncompressed) is the largest resource by a wide margin. Worth checking whether
+    admin-only code is leaking into the shared chunk.
+  - **130 KB of fonts**: Fraunces 67 KB, Outfit 32 KB, Cairo 31 KB. Fraunces is a
+    variable font carrying an optical-size axis that a shop with two display sizes
+    does not need. Subsetting it is the single cheapest win here.
+
+  Neither is attempted yet. Both are real work with a real chance of breaking
+  typography, and guessing at them without measuring the fix would be worse than
+  the honest number.
+
 - **E3.** Deploy to Vercel, set `GUEPEX_WEBHOOK_SECRET`, replace the placeholder
   demo imagery, and connect error monitoring.
 

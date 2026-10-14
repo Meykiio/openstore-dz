@@ -618,3 +618,35 @@ Known issues:
 Next:
 
 - Performance measurement, which is the last unmeasured claim in the project.
+
+## Session report - performance, measured at last
+
+Completed:
+
+- e2e/performance.spec.ts: payload and LCP against the built output, with the
+  connection throttled to 700 kbps, 300 ms RTT and 4x CPU.
+- Fixed a bug in my own measurement that reported a 0 KB payload, because
+  initiatorType is "link" for a stylesheet rather than "stylesheet".
+- The LCP budget is asserted and marked expected-to-fail rather than deleted, so it
+  cannot regress quietly and self-cleans when fixed.
+
+Verified (what was actually run):
+
+- Payload 372 KB across 29 files. Budget 1.5 MB. Met.
+- LCP 4.4s and 8.9s across two runs. Budget 2.5s. MISSED.
+- npm run check green.
+
+Known issues:
+
+- LCP on a throttled connection is roughly double the budget. The two dominant
+  costs are a 188 KB compressed entry chunk and 130 KB of fonts, of which Fraunces
+  is 67 KB and carries an unused optical-size axis. Both recorded in ROADMAP E2
+  with the specifics; neither attempted, because guessing at a typography change
+  without measuring the result is worse than the honest number.
+- Guepex API sync is still not built. The owner has no API key, so it cannot be
+  verified even if written, and the skill is in docs/skills/yalidine-integration/.
+
+Next:
+
+- Split the entry chunk and subset Fraunces, then re-measure. That is the work E2
+  describes, and it is now measurable rather than theoretical.
