@@ -711,6 +711,13 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
       };
+      category_product_counts: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          category_id: string;
+          product_count: number;
+        }[];
+      };
       claim_store: {
         Args: Record<PropertyKey, never>;
         Returns: Database["public"]["Enums"]["admin_role"];

@@ -1,6 +1,10 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { getSupabase } from "./supabase/client";
 
+// Re-exported so existing imports from "@/lib/queries" keep working. The
+// implementation lives in ./store-settings, split out at the 250-line limit.
+export { storeSettingsQuery, useStoreSettings, type StoreSettings } from "./store-settings";
+
 /**
  * Public catalogue reads.
  *
@@ -68,36 +72,6 @@ type CategoryWithCount = {
   product_count: number;
 };
 
-export type StoreSettings = {
-  id: number;
-  name: string;
-  tagline: string | null;
-  description: string | null;
-  logo_url: string | null;
-  banner_url: string | null;
-  legal_name: string | null;
-  nif: string | null;
-  rc_number: string | null;
-  phone: string | null;
-  whatsapp: string | null;
-  email: string | null;
-  address: string | null;
-  free_shipping_threshold: number;
-  currency: string;
-  delivery_fee_flat: number;
-  delivery_wilayas: string[];
-  delivery_eta_days: number;
-  returns_days: number;
-  accepts_cod: boolean;
-  guepex_from_wilaya: string | null;
-  announcement: string | null;
-  announcement_enabled: boolean;
-  instagram_url: string | null;
-  facebook_url: string | null;
-  tiktok_url: string | null;
-  returns_note: string | null;
-};
-
 export type PublicReview = {
   id: string;
   product_id: string | null;
@@ -116,16 +90,6 @@ const PRODUCT_SELECT = `
     variant_images ( id, url, alt, sort_order )
   )
 `;
-
-async function fetchSettings(): Promise<StoreSettings | null> {
-  const { data, error } = await getSupabase()
-    .from("store_settings")
-    .select("*")
-    .eq("id", 1)
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  return (data as StoreSettings | null) ?? null;
-}
 
 async function fetchProducts(): Promise<CatalogueProduct[]> {
   const { data, error } = await getSupabase()
@@ -161,40 +125,43 @@ async function fetchReviews(productId?: string): Promise<PublicReview[]> {
   return (data ?? []) as PublicReview[];
 }
 
-export const storeSettingsQuery = () =>
-  queryOptions({ queryKey: ["store_settings"] as const, queryFn: fetchSettings });
-
 /**
  * Active categories with their published-product count.
  *
  * Counted in a separate read rather than a PostgREST aggregate, so the
  * `status` rule lives in one place instead of being repeated in a query string.
  */
+/**
+ * Active categories with their published-product count.
+ *
+ * The count comes from a database aggregate, not from fetching every product to
+ * count in the browser. The earlier version did that, so the home page pulled the
+ * whole catalogue on every load to produce eight numbers.
+ */
 async function fetchCategories(): Promise<CategoryWithCount[]> {
   const supabase = getSupabase();
 
-  const [{ data: rows, error }, { data: products, error: productError }] = await Promise.all([
+  const [{ data: rows, error }, { data: counts, error: countError }] = await Promise.all([
     supabase
       .from("categories")
       .select("id, slug, name, name_fr, description, image_url, sort_order")
       .eq("is_active", true)
       .order("sort_order", { ascending: true })
       .order("name", { ascending: true }),
-    supabase.from("products").select("category_id").eq("status", "published"),
+    supabase.rpc("category_product_counts"),
   ]);
 
   if (error) throw new Error(error.message);
-  if (productError) throw new Error(productError.message);
+  if (countError) throw new Error(countError.message);
 
-  const counts = new Map<string, number>();
-  for (const row of products ?? []) {
-    const id = (row as { category_id: string | null }).category_id;
-    if (id) counts.set(id, (counts.get(id) ?? 0) + 1);
+  const byCategory = new Map<string, number>();
+  for (const row of counts ?? []) {
+    byCategory.set(row.category_id, Number(row.product_count ?? 0));
   }
 
   return (rows ?? []).map((row) => ({
     ...(row as Omit<CategoryWithCount, "product_count">),
-    product_count: counts.get((row as { id: string }).id) ?? 0,
+    product_count: byCategory.get((row as { id: string }).id) ?? 0,
   }));
 }
 
@@ -220,10 +187,6 @@ export const reviewsQuery = (productId?: string) =>
     queryKey: ["reviews", productId ?? "all"] as const,
     queryFn: () => fetchReviews(productId),
   });
-
-export function useStoreSettings() {
-  return useQuery(storeSettingsQuery());
-}
 
 export function useProducts() {
   return useQuery(productsQuery());

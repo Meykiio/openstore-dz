@@ -1520,3 +1520,41 @@ revoke all on sequence public.order_export_log_id_seq from anon;
 -- which runs as the definer.
 revoke all on function public.order_export_payload(uuid, text) from public, anon, authenticated;
 revoke all on function public.enqueue_order_export() from public, anon, authenticated;
+
+-- =============================================================================
+-- 12. Storefront read helpers
+-- =============================================================================
+--
+-- Both exist for the same reason: the storefront was doing work in the browser
+-- that the database does in one row instead.
+
+/*
+ * Published product count per category.
+ *
+ * The home page used to select every published product's `category_id` and count
+ * them in JavaScript, so producing eight numbers cost a full catalogue read on
+ * every load. This returns eight rows.
+ */
+create or replace function public.category_product_counts()
+returns table (category_id uuid, product_count bigint)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select p.category_id, count(*)::bigint as product_count
+  from public.products p
+  where p.status = 'published'
+    and p.category_id is not null
+  group by p.category_id;
+$$;
+
+comment on function public.category_product_counts() is
+  'Published product count per category, so the storefront counts in SQL instead of fetching every product.';
+
+revoke all on function public.category_product_counts() from public;
+grant execute on function public.category_product_counts() to anon, authenticated;
+
+-- Supports the group-by above, and the catalogue's category filter.
+create index if not exists products_status_category_idx
+  on public.products (status, category_id);
