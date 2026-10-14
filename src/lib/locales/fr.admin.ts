@@ -94,4 +94,9 @@ export const frAdmin = {
   "admin.products.slug": "URL (slug)",
   "admin.products.created": "Produit créé",
   "admin.delivery.etaDays": "Délai (jours)",
+  "admin.nav.manage": "Gestion",
+  "admin.nav.collapse": "Réduire le menu",
+  "admin.nav.expand": "Développer le menu",
+  "admin.nav.menu": "Ouvrir le menu",
+  "admin.shopLink": "Voir la boutique",
 };

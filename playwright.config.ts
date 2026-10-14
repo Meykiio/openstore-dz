@@ -45,19 +45,19 @@ export default defineConfig({
   },
 
   projects: [
-    // The responsive audit sets its own viewport per assertion, so running it in
-    // both device projects would test the same widths twice.
+    // The responsive audit and the admin shell both set their own viewport per
+    // assertion, so running them in the device projects would test twice.
     {
       name: "desktop",
       use: { ...devices["Desktop Chrome"] },
-      testIgnore: /responsive\.spec\.ts/,
+      testIgnore: /(responsive|admin-shell)\.spec\.ts/,
     },
     {
       name: "mobile",
       use: { ...devices["Pixel 7"] },
-      testIgnore: /responsive\.spec\.ts/,
+      testIgnore: /(responsive|admin-shell)\.spec\.ts/,
     },
-    { name: "responsive", testMatch: /responsive\.spec\.ts/ },
+    { name: "responsive", testMatch: /(responsive|admin-shell)\.spec\.ts/ },
   ],
 
   // An externally supplied base URL means a server is already running; starting

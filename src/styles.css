@@ -1046,3 +1046,249 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ==========================================================================
+   Admin shell
+   --------------------------------------------------------------------------
+   The sidebar is ported from the Commerce Storefront reference system, the
+   same system the rest of these tokens come from, and which never had a
+   sidebar in this project until now.
+
+   Two adaptations, both because the reference is written for Latin and LTR
+   while this app is Arabic-first:
+
+   1. Every offset is logical (inset-inline-start, border-inline-end,
+      margin-inline-start), so the rail sits on the right in Arabic and the left
+      in French or English from one set of rules. The reference hardcodes
+      `left`, which would mirror wrongly here.
+
+   2. The off-canvas offset and the hover nudge are direction variables rather
+      than literals. `translateX(-105%)` hides a left-hand rail, and this rail is
+      on the right in the default locale, so the same value would slide it into
+      the viewport instead of out of it.
+   ========================================================================== */
+
+:root {
+  --sidebar-w: 264px;
+  --sidebar-hide: -105%;
+  --nav-nudge: 2px;
+}
+
+html[dir="rtl"] {
+  --sidebar-hide: 105%;
+  --nav-nudge: -2px;
+}
+
+.admin-shell {
+  min-height: 100dvh;
+}
+
+.admin-sidebar {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: 0;
+  z-index: 220;
+  width: var(--sidebar-w);
+  display: flex;
+  flex-direction: column;
+  background: var(--nav-bg);
+  border-inline-end: 1px solid var(--outline);
+  transition:
+    width var(--dur-med) var(--ease-out-soft),
+    transform var(--dur-med) var(--ease-out-soft),
+    background 0.3s,
+    border-color 0.3s;
+}
+
+.admin-sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 20px 14px;
+}
+
+.admin-sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 12px 18px;
+  overscroll-behavior: contain;
+}
+
+.admin-nav-group-label {
+  font: 600 10px/1 var(--font-body);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--outline-hi);
+  padding: 14px 10px 7px;
+}
+
+.admin-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  margin-bottom: 2px;
+  border-radius: var(--r-sm);
+  font: 500 13.5px/1.2 var(--font-body);
+  color: var(--on-surface-muted);
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color var(--dur-fast) var(--ease-out-soft),
+    transform var(--dur-fast) var(--ease-out-soft);
+}
+
+.admin-nav-item svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.6;
+  transition: opacity var(--dur-fast) var(--ease-out-soft);
+}
+
+.admin-nav-item:hover {
+  color: var(--on-surface);
+  transform: translateX(var(--nav-nudge));
+}
+
+.admin-nav-item:hover svg {
+  opacity: 1;
+}
+
+.admin-nav-item.active {
+  color: var(--primary);
+  transform: translateX(var(--nav-nudge));
+}
+
+.admin-nav-item.active svg {
+  opacity: 1;
+  color: var(--primary);
+}
+
+.admin-sidebar-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--outline);
+}
+
+/* Desktop-only collapse control. On mobile the rail is a drawer instead. */
+.admin-collapse-toggle {
+  display: none;
+}
+
+.admin-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--nav-bg);
+  border-bottom: 1px solid var(--outline);
+}
+
+.admin-page {
+  margin-inline-start: var(--sidebar-w);
+  min-width: 0;
+  transition: margin-inline-start var(--dur-med) var(--ease-out-soft);
+}
+
+.admin-backdrop {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .admin-collapse-toggle {
+    display: inline-flex;
+  }
+
+  .admin-topbar {
+    display: none;
+  }
+
+  /* The collapsed rail: icons only, labels dropped, groups separated by a rule
+     rather than by a heading. */
+  html.nav-collapsed {
+    --sidebar-w: 70px;
+  }
+
+  html.nav-collapsed .admin-sidebar-header {
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 8px 10px;
+  }
+
+  html.nav-collapsed .admin-sidebar-nav {
+    padding: 6px 9px 18px;
+  }
+
+  html.nav-collapsed .admin-nav-group-label {
+    display: none;
+  }
+
+  html.nav-collapsed .admin-nav-item {
+    justify-content: center;
+    padding: 8px 0;
+    gap: 0;
+  }
+
+  html.nav-collapsed .admin-nav-item:hover,
+  html.nav-collapsed .admin-nav-item.active {
+    transform: none;
+  }
+
+  html.nav-collapsed .admin-nav-label,
+  html.nav-collapsed .admin-sidebar-brand {
+    display: none;
+  }
+
+  html.nav-collapsed .admin-nav-item svg {
+    width: 18px;
+    height: 18px;
+    opacity: 0.85;
+  }
+
+  html.nav-collapsed .admin-sidebar-footer {
+    flex-direction: column;
+    padding: 10px 8px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .admin-page {
+    margin-inline-start: 0;
+  }
+
+  .admin-sidebar {
+    width: min(300px, 86vw);
+    transform: translateX(var(--sidebar-hide));
+    box-shadow: var(--shadow-lg);
+  }
+
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .admin-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 190;
+    background: rgba(20, 10, 5, 0.45);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--dur-med) var(--ease-out-soft),
+      visibility 0s linear var(--dur-med);
+  }
+
+  .admin-backdrop.show {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity var(--dur-med) var(--ease-out-soft);
+  }
+
+  body.admin-nav-locked {
+    overflow: hidden;
+  }
+}

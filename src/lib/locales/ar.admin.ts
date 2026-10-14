@@ -92,4 +92,9 @@ export const arAdmin = {
   "admin.products.slug": "الرابط (slug)",
   "admin.products.created": "تم إنشاء المنتج",
   "admin.delivery.etaDays": "مدة (أيام)",
+  "admin.nav.manage": "الإدارة",
+  "admin.nav.collapse": "طيّ القائمة",
+  "admin.nav.expand": "توسيع القائمة",
+  "admin.nav.menu": "فتح القائمة",
+  "admin.shopLink": "عرض المتجر",
 };

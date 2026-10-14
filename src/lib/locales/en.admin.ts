@@ -93,4 +93,9 @@ export const enAdmin = {
   "admin.products.slug": "URL (slug)",
   "admin.products.created": "Product created",
   "admin.delivery.etaDays": "Delivery time (days)",
+  "admin.nav.manage": "Manage",
+  "admin.nav.collapse": "Collapse menu",
+  "admin.nav.expand": "Expand menu",
+  "admin.nav.menu": "Open menu",
+  "admin.shopLink": "View shop",
 };

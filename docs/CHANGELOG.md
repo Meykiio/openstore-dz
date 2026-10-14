@@ -430,3 +430,36 @@ Known issues:
 Next:
 
 - The admin shell: port the collapsible sidebar from design system 02.
+
+## Session report - the admin shell
+
+Completed:
+
+- Admin shell rebuilt on the design system's sidebar: collapsible fixed rail from
+  1024px, overlay drawer with backdrop below it, one component for both.
+- Ported with logical properties. The reference is LTR-only, so a literal copy
+  would have put the rail on the wrong edge and slid the drawer the wrong way.
+- Collapse preference persisted; drawer closes on backdrop click and Escape.
+- Fixed a nav label that said "Orders" for a page headed "Overview".
+- Explained the theme-toggle report: it was never missing, only below the fold
+  inside an overflow-y-auto column. The shell footer is pinned now.
+
+Verified (what was actually run):
+
+- npm run check green.
+- Full Playwright suite against the built output: 39 passed.
+- Three new shell tests assert geometry, not classes: drawer open/close on a phone,
+  collapse narrows the rail and the page margin follows, and the rail's right edge
+  lands on the viewport's right edge in Arabic.
+
+Known issues:
+
+- The cart drawer and the size guide are still outstanding, as are the additional
+  shop settings and the Google Sheets integration.
+- Nothing is deployed and performance is still unmeasured, so the shell has not
+  been seen on a real phone by a real person.
+
+Next:
+
+- The storefront cart drawer, which has the same "not responsive" report as the
+  sidebar had.

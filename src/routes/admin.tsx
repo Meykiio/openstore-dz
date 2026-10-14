@@ -1,28 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
-import {
-  ClipboardList,
-  LogOut,
-  Menu,
-  Package,
-  Settings,
-  Star,
-  Store,
-  Truck,
-  X,
-} from "lucide-react";
+import { Menu } from "lucide-react";
+import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { Button } from "@/components/ui/button";
 import { LoadingState } from "@/components/ui/feedback";
-import { LocaleSwitcher } from "@/components/locale-switcher";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n-context";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "لوحة التحكم" }, { name: "robots", content: "noindex" }] }),
   component: AdminLayout,
 });
+
+const COLLAPSE_KEY = "openstore-admin-nav-collapsed";
 
 /**
  * Admin shell and guard.
@@ -34,8 +24,44 @@ export const Route = createFileRoute("/admin")({
  */
 function AdminLayout() {
   const { t } = useI18n();
-  const { isAdmin, loading, user, signOut } = useAuth();
+  const { isAdmin, loading, user } = useAuth();
   const [navOpen, setNavOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+
+  // Read the stored preference after mount rather than in the initialiser: the
+  // server cannot read localStorage, and rendering the collapsed rail on the
+  // client's first pass would be a hydration mismatch.
+  useEffect(() => {
+    if (window.localStorage.getItem(COLLAPSE_KEY) === "1") setCollapsed(true);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("nav-collapsed", collapsed);
+    return () => document.documentElement.classList.remove("nav-collapsed");
+  }, [collapsed]);
+
+  // The drawer covers the page, so the page underneath must not scroll.
+  useEffect(() => {
+    document.body.classList.toggle("admin-nav-locked", navOpen);
+    return () => document.body.classList.remove("admin-nav-locked");
+  }, [navOpen]);
+
+  // An overlay is expected to close on Escape, and a phone keyboard is the case
+  // this actually matters for.
+  useEffect(() => {
+    if (!navOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setNavOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [navOpen]);
+
+  const toggleCollapse = () => {
+    const next = !collapsed;
+    setCollapsed(next);
+    window.localStorage.setItem(COLLAPSE_KEY, next ? "1" : "0");
+  };
 
   if (loading) return <LoadingState className="min-h-dvh" />;
 
@@ -53,89 +79,33 @@ function AdminLayout() {
     );
   }
 
-  const links = [
-    { to: "/admin", label: t("admin.orders.title"), icon: ClipboardList },
-    { to: "/admin/products", label: t("admin.products.title"), icon: Package },
-    { to: "/admin/reviews", label: t("admin.reviews.title"), icon: Star },
-    { to: "/admin/delivery", label: t("admin.delivery.title"), icon: Truck },
-    { to: "/admin/settings", label: t("admin.settings.title"), icon: Settings },
-  ] as const;
-
   return (
-    <div className="flex min-h-dvh flex-col lg:flex-row">
-      <aside
-        className={cn(
-          "border-b border-outline bg-surface lg:w-64 lg:border-b-0 lg:border-e",
-          "lg:sticky lg:top-0 lg:h-dvh lg:overflow-y-auto",
-        )}
-      >
-        <div className="flex items-center justify-between gap-3 px-4 py-3 lg:px-5 lg:py-5">
-          <Link to="/admin" className="flex items-center gap-2 font-display font-semibold">
-            <Store size={18} className="text-primary" aria-hidden="true" />
-            {t("nav.dashboard")}
-          </Link>
+    <div className="admin-shell">
+      <AdminSidebar
+        open={navOpen}
+        collapsed={collapsed}
+        onNavigate={() => setNavOpen(false)}
+        onToggleCollapse={toggleCollapse}
+      />
+
+      <div className="admin-page">
+        <div className="admin-topbar">
           <button
             type="button"
-            onClick={() => setNavOpen((open) => !open)}
+            onClick={() => setNavOpen(true)}
+            aria-label={t("admin.nav.menu")}
             aria-expanded={navOpen}
-            aria-label={navOpen ? t("common.close") : t("admin.orders.title")}
-            className="inline-flex size-9 items-center justify-center rounded-full border border-outline lg:hidden"
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-outline text-on-surface"
           >
-            {navOpen ? <X size={16} aria-hidden="true" /> : <Menu size={16} aria-hidden="true" />}
+            <Menu size={18} aria-hidden="true" />
           </button>
+          <span className="truncate font-display font-semibold">{t("admin.dashboard.title")}</span>
         </div>
 
-        <nav
-          className={cn(
-            "overflow-hidden px-2 pb-3 transition-[max-height] duration-300 lg:max-h-none",
-            navOpen ? "max-h-96" : "max-h-0 lg:max-h-none",
-          )}
-          aria-label={t("nav.dashboard")}
-        >
-          <ul className="flex flex-col gap-1">
-            {links.map((link) => (
-              <li key={link.to}>
-                <Link
-                  to={link.to}
-                  onClick={() => setNavOpen(false)}
-                  activeProps={{ className: "bg-primary/10 text-primary font-medium" }}
-                  activeOptions={{ exact: link.to === "/admin" }}
-                  className="flex items-center gap-2.5 rounded-[10px] px-3 py-2.5 text-sm text-on-surface-muted transition-colors hover:bg-surface-mid hover:text-on-surface"
-                >
-                  <link.icon size={16} aria-hidden="true" />
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <div className="flex items-center gap-2 border-t border-outline px-3 py-3 lg:px-4">
-          <LocaleSwitcher />
-          <ThemeToggle />
-        </div>
-
-        <div className="flex flex-col gap-2 border-t border-outline px-3 py-3 lg:px-4">
-          <Button asChild variant="outline" size="sm">
-            <Link to="/">{t("nav.shop")}</Link>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => void signOut()}
-            className="justify-start text-on-surface-muted"
-          >
-            <LogOut size={15} aria-hidden="true" />
-            {t("nav.logout")}
-          </Button>
-        </div>
-      </aside>
-
-      <main className="min-w-0 flex-1 bg-bg">
-        <div className="container-page py-6 sm:py-8">
+        <main className="container-page py-6 sm:py-8">
           <Outlet />
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
