@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState, LoadingState } from "@/components/ui/feedback";
 import { useI18n } from "@/lib/i18n-context";
-import { updateProduct, useAdminProduct, useAdminProducts } from "@/lib/admin-products";
+import { updateProduct, useAdminProduct, useProductPicker } from "@/lib/admin-products";
 
 export const Route = createFileRoute("/admin/product/$id")({
   component: ProductEditPage,
@@ -25,8 +25,8 @@ function ProductEditPage() {
   const { t } = useI18n();
   const queryClient = useQueryClient();
   const { data: product, isPending } = useAdminProduct(id);
-  // Every variant in the catalogue, for the pack contents picker.
-  const { data: allProducts } = useAdminProducts();
+  // Variants for the pack contents picker. A narrow query, not the admin list.
+  const { data: allProducts } = useProductPicker();
   const allVariants = (allProducts ?? []).flatMap((p) => p.product_variants);
 
   const [draft, setDraft] = useState<ProductDraft | null>(null);

@@ -84,7 +84,10 @@ test("the storefront meets its payload and LCP budgets on a throttled connection
     };
   });
 
-  // Printed so the numbers are visible in the run, not just asserted on.
+  // Printed so the numbers are visible in the run, not just asserted on. This is
+  // the point of the test: an assertion that fails tells you it is over budget,
+  // and these numbers tell you by how much and what is responsible.
+  // eslint-disable-next-line no-console -- diagnostic output is the deliverable here
   console.log(
     `[perf] payload ${(metrics.transfer / 1024).toFixed(0)} KB across ${metrics.resourceCount} files, ` +
       `LCP ${Math.round(metrics.lcp)} ms, DCL ${Math.round(metrics.domContentLoaded)} ms, ` +

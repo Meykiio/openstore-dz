@@ -16,7 +16,7 @@ import {
   deleteProduct,
   setProductStatus,
   suggestSlug,
-  useAdminProducts,
+  useAdminProductsPage,
   type AdminProduct,
 } from "@/lib/admin-products";
 
@@ -36,22 +36,31 @@ function useProductInvalidation() {
 
 function ProductsPage() {
   const { t } = useI18n();
-  const { data: products, isPending, isError, error, refetch } = useAdminProducts();
+  const products = useAdminProductsPage();
   const [open, setOpen] = useState(false);
 
-  if (isPending) return <LoadingState />;
-  if (isError) return <ErrorState message={error.message} onRetry={() => void refetch()} />;
+  if (products.isPending) return <LoadingState />;
+  if (products.isError) {
+    return <ErrorState message={products.error.message} onRetry={() => void products.refetch()} />;
+  }
 
-  const list = products ?? [];
+  const list = (products.data?.pages ?? []).flatMap((page) => page.rows);
+  const total = products.data?.pages[0]?.total ?? 0;
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-2xl font-semibold">{t("admin.products.title")}</h1>
-        <Button onClick={() => setOpen(true)}>
-          <Plus size={16} aria-hidden="true" />
-          {t("admin.products.new")}
-        </Button>
+        <span className="flex items-center gap-3">
+          {/* A paged list and a complete one look identical without this. */}
+          <span className="font-mono text-xs text-on-surface-muted" data-testid="products-count">
+            {list.length} / {total}
+          </span>
+          <Button onClick={() => setOpen(true)}>
+            <Plus size={16} aria-hidden="true" />
+            {t("admin.products.new")}
+          </Button>
+        </span>
       </div>
 
       {list.length === 0 ? (
@@ -60,11 +69,25 @@ function ProductsPage() {
           action={<Button onClick={() => setOpen(true)}>{t("admin.products.new")}</Button>}
         />
       ) : (
-        <ul className="flex flex-col gap-3">
-          {list.map((product) => (
-            <ProductRow key={product.id} product={product} />
-          ))}
-        </ul>
+        <>
+          <ul className="flex flex-col gap-3">
+            {list.map((product) => (
+              <ProductRow key={product.id} product={product} />
+            ))}
+          </ul>
+
+          {products.hasNextPage && (
+            <Button
+              variant="outline"
+              className="self-center"
+              data-testid="products-load-more"
+              disabled={products.isFetchingNextPage}
+              onClick={() => void products.fetchNextPage()}
+            >
+              {products.isFetchingNextPage ? t("common.loading") : t("common.loadMore")}
+            </Button>
+          )}
+        </>
       )}
 
       <CreateProductDialog open={open} onClose={() => setOpen(false)} />

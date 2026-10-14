@@ -684,3 +684,26 @@ Known issues:
   page. It is the next piece of work and is recorded in ROADMAP.
 - The storefront facets (sizes, colours, price range) are still derived from all
   loaded products, which has the same problem for the same reason.
+
+## Session report - pagination, part 2: admin products
+
+Completed:
+
+- The admin product list pages. It was unbounded, and each row carries its variants
+  and each variant its images, so the list pulled the whole catalogue nested on
+  every visit.
+- The pack-contents picker no longer reuses that query. It has a narrow one, with a
+  `PickerVariant` type declaring exactly the four fields it reads.
+- A "loaded / total" indicator, same reason as the orders list.
+
+Verified (what was actually run):
+
+- npm run check green.
+- Authenticated suite against the built output: 5 passed.
+
+Known issues:
+
+- The storefront catalogue is still unpaginated, and it is the biggest remaining
+  piece. Paginating it means moving filter, sort, search and the facets to the
+  server: filtering in the browser over a paged list would only ever see the loaded
+  page, which is a wrong answer rather than a slow one. Planned in ROADMAP E2b.

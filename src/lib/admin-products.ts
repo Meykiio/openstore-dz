@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { getSupabase } from "./supabase/client";
 import { slugify } from "./format";
 
@@ -54,13 +54,48 @@ const ADMIN_SELECT = `
   )
 `;
 
-async function fetchAdminProducts(): Promise<AdminProduct[]> {
-  const { data, error } = await getSupabase()
+const PRODUCTS_PAGE_SIZE = 20;
+
+/** One page of products, plus what is needed to ask for the next one. */
+type AdminProductsPage = {
+  rows: AdminProduct[];
+  total: number;
+  nextOffset: number | null;
+};
+
+/*
+ * A page of products, newest first.
+ *
+ * Unbounded before, which was worse than it looks: each row carries its variants
+ * and each variant its images, so the list fetched the whole catalogue with
+ * everything nested on every visit. Paging bounds the payload, not just the rows.
+ *
+ * Ordered by `created_at` then `id`, the same tiebreaker the order list uses:
+ * `created_at` is not unique, and without a stable second key rows repeat or
+ * vanish between pages.
+ */
+async function fetchAdminProductsPage(offset: number): Promise<AdminProductsPage> {
+  const { data, error, count } = await getSupabase()
     .from("products")
-    .select(ADMIN_SELECT)
-    .order("created_at", { ascending: false });
+    .select(ADMIN_SELECT, { count: "exact" })
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .range(offset, offset + PRODUCTS_PAGE_SIZE - 1);
   if (error) throw new Error(error.message);
-  return (data ?? []) as unknown as AdminProduct[];
+
+  const rows = (data ?? []) as unknown as AdminProduct[];
+  const total = count ?? 0;
+  const consumed = offset + rows.length;
+  return { rows, total, nextOffset: consumed < total ? consumed : null };
+}
+
+export function useAdminProductsPage() {
+  return useInfiniteQuery({
+    queryKey: ["admin_products"] as const,
+    queryFn: ({ pageParam }) => fetchAdminProductsPage(pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (last) => last.nextOffset,
+  });
 }
 
 async function fetchAdminProduct(id: string): Promise<AdminProduct | null> {
@@ -73,19 +108,12 @@ async function fetchAdminProduct(id: string): Promise<AdminProduct | null> {
   return (data as unknown as AdminProduct | null) ?? null;
 }
 
-const adminProductsQuery = () =>
-  queryOptions({ queryKey: ["admin_products"] as const, queryFn: fetchAdminProducts });
-
 const adminProductQuery = (id: string) =>
   queryOptions({
     queryKey: ["admin_product", id] as const,
     queryFn: () => fetchAdminProduct(id),
     enabled: Boolean(id),
   });
-
-export function useAdminProducts() {
-  return useQuery(adminProductsQuery());
-}
 
 export function useAdminProduct(id: string) {
   return useQuery(adminProductQuery(id));
@@ -194,4 +222,55 @@ export async function addVariantImage(variantId: string, url: string): Promise<v
 export async function deleteVariantImage(id: string): Promise<void> {
   const { error } = await getSupabase().from("variant_images").delete().eq("id", id);
   if (error) throw new Error(error.message);
+}
+
+/**
+ * A variant as the pack picker needs it.
+ *
+ * Deliberately narrower than `AdminVariant`: no images, no price, no stock. The
+ * picker only labels a variant and remembers its id, and declaring that is how the
+ * query stays small. If the picker ever needs a price it should say so here.
+ */
+export type PickerVariant = {
+  id: string;
+  size: string | null;
+  color_name: string | null;
+  sku: string | null;
+};
+
+type PickerProduct = {
+  id: string;
+  name: string;
+  slug: string;
+  kind: string;
+  product_variants: PickerVariant[];
+};
+
+const PICKER_SELECT = `
+  id, name, slug, kind,
+  product_variants ( id, size, color_name, sku )
+`;
+
+/**
+ * Products and variants for the pack-contents picker.
+ *
+ * Not paginated, and deliberately far narrower than the admin list: no images, no
+ * prices, no stock. It exists because the picker used to reuse the list query, so
+ * opening one product pulled the whole admin payload with every image nested
+ * inside it, purely to populate a dropdown.
+ *
+ * A shop with thousands of products wants a typeahead here rather than a full
+ * list. At a few hundred this is a few kilobytes.
+ */
+async function fetchProductPicker(): Promise<PickerProduct[]> {
+  const { data, error } = await getSupabase()
+    .from("products")
+    .select(PICKER_SELECT)
+    .order("name", { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as unknown as PickerProduct[];
+}
+
+export function useProductPicker() {
+  return useQuery({ queryKey: ["product_picker"] as const, queryFn: fetchProductPicker });
 }

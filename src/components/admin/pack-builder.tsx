@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/lib/i18n-context";
-import type { AdminVariant } from "@/lib/admin-products";
+import type { PickerVariant } from "@/lib/admin-products";
 import { fetchPackItems, removePackItem, upsertPackItem, type PackItem } from "@/lib/admin-content";
 
 /** "M / أبيض", matching how the storefront labels a variant. */
-function label(variant: AdminVariant | undefined): string {
+function label(variant: PickerVariant | undefined): string {
   if (!variant) return "—";
   const parts = [variant.size, variant.color_name].filter(Boolean);
   return parts.length > 0 ? parts.join(" / ") : variant.id.slice(0, 8);
@@ -30,7 +30,7 @@ export function PackBuilder({
 }: {
   productId: string;
   /** Every variant in the catalogue, so a pack can reference other products. */
-  variants: AdminVariant[];
+  variants: PickerVariant[];
 }) {
   const { t } = useI18n();
   const queryClient = useQueryClient();
@@ -111,7 +111,7 @@ function AddPackItem({
   onAdd,
   busy,
 }: {
-  variants: AdminVariant[];
+  variants: PickerVariant[];
   onAdd: (input: { variant_id: string; quantity: number }) => void;
   busy: boolean;
 }) {
