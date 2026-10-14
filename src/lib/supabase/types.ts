@@ -2,9 +2,13 @@
  * GENERATED FILE — do not hand-edit the shape of it.
  *
  * Regenerate after every schema change:
- *   npx supabase gen types typescript --project-id zupldepebwdasoziwjyt \
+ *   npx supabase gen types typescript --project-id <project-ref> \
  *     > src/lib/supabase/types.ts
  * or the `generate_typescript_types` MCP tool against the linked project.
+ *
+ * The project ref is deliberately not recorded here. This repository is public
+ * and meant to be forked, so it should not pin the original author's live
+ * backend; `VITE_SUPABASE_PROJECT_ID` in `.env` is the source of that value.
  *
  * Two deviations from the raw generator output, both documented:
  *

@@ -339,3 +339,39 @@ Next:
 - Passwords on a public repo: the owner's admin password currently equals the
   email address. That must change before any deploy.
 - Phase B, next item: stopdesk pickup.
+
+## Session report - repo readiness, and a security pass
+
+Completed:
+
+- Structure checked against the owner's reference repo (Receipto-dz). SECURITY.md,
+  SUPPORT.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md, LICENSE, issue templates, PR
+  template, dependabot, CodeQL and the three-language READMEs were all already
+  present; my first listing was truncated at 30 entries and I wrongly reported
+  some as missing.
+- docs/DESIGN_SYSTEM.html created, which PROJECT.md and AGENTS.md already exempted
+  from the file-size rule. It documents the real tokens read out of styles.css.
+- Security pass: owner email not in any tracked file, .env ignored, both master
+  files ignored, no keys or tokens committed. Removed the live project ref from
+  src/lib/supabase/types.ts and docs/PROJECT.md, because a public template should
+  not pin the author's backend.
+- The nine-phase roadmap and FEATURES.md now match what actually ships.
+
+Verified (what was actually run):
+
+- npm run check green.
+- Full Playwright suite against the built output: 36 passed.
+- Grepped tracked files for the email, the project ref, publishable keys and
+  service-role tokens.
+
+Known issues:
+
+- NOT BLOCKING A LOCAL BUILD, BLOCKING A DEPLOY: the admin password equals the
+  admin email. Anyone who knows the email can sign in. This must change before
+  the shop is public.
+- The live store_settings.whatsapp row still holds the malformed seed value.
+- Nothing is deployed and performance is still unmeasured.
+
+Next:
+
+- Stopdesk pickup (B1), the highest remaining Algeria item.

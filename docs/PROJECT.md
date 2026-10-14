@@ -23,7 +23,7 @@ npm run check                       # the one gate: typecheck, lint, test, knip,
 npm run test:e2e                    # Playwright against the dev server
 E2E_BASE_URL=http://127.0.0.1:3000 npm run test:e2e   # against the built output
 npx supabase db advisors            # ran both classes; findings fixed
-npx supabase gen types typescript --project-id zupldepebwdasoziwjyt \
+npx supabase gen types typescript --project-id <project-ref> \
   > src/lib/supabase/types.ts       # regenerate after any schema change
 ```
 
@@ -37,11 +37,12 @@ The authenticated layout audit is skipped unless `E2E_ADMIN_EMAIL` and
 
 ### Database
 
-Project ref `zupldepebwdasoziwjyt`. Credentials live in `.env`, which is gitignored and
-never committed. The schema is one file, `supabase/schema.sql`, with no migrations by
-design — see `docs/DECISIONS.md` entry 4. It has been applied to the live project through
-the MCP `apply_migration` tool and verified by hand; `supabase/verify.sql` is the
-regression net.
+Project ref: it lives in `.env` as `VITE_SUPABASE_PROJECT_ID` and is deliberately not
+written down here, because this repository is public and will be forked. Credentials live
+in `.env`, which is gitignored and never committed. The schema is one file,
+`supabase/schema.sql`, with no migrations by design — see `docs/DECISIONS.md` entry 4. It
+has been applied to the live project through the MCP `apply_migration` tool and verified by
+hand; `supabase/verify.sql` is the regression net.
 
 Four defects were found during verification, two of which compiled cleanly and would have
 surfaced as a mysterious checkout failure on the first real order. They are itemised in
