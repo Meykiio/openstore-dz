@@ -128,7 +128,7 @@ export function VariantImages({ variant }: { variant: AdminVariant }) {
           onClick={() => fileInput.current?.click()}
         >
           {uploading ? <Loader2 size={15} className="animate-spin" /> : <Camera size={15} />}
-          {uploading ? "جار الرفع…" : "أضف صورة"}
+          {uploading ? t("admin.images.uploading") : t("admin.images.add")}
         </Button>
       </div>
 
@@ -163,7 +163,7 @@ export function VariantImages({ variant }: { variant: AdminVariant }) {
           if (url.trim()) addUrl.mutate(url.trim());
         }}
       >
-        <Field label="أو ألصق رابط صورة" className="min-w-56 flex-1">
+        <Field label={t("admin.images.pasteUrl")} className="min-w-56 flex-1">
           <Input
             value={url}
             onChange={(event) => setUrl(event.target.value)}

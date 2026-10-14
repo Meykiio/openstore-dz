@@ -19,7 +19,8 @@ import { cn } from "@/lib/utils";
  * status is quiet by comparison.
  */
 export function AdminOrderList({ orders }: { orders: AdminOrder[] }) {
-  if (orders.length === 0) return <EmptyState title="لا توجد طلبات" />;
+  const { t } = useI18n();
+  if (orders.length === 0) return <EmptyState title={t("admin.orders.empty")} />;
   return (
     <ul className="flex flex-col gap-3">
       {orders.map((order) => (
@@ -77,7 +78,7 @@ function OrderRow({ order }: { order: AdminOrder }) {
               {formatDzd(order.total, locale)}
             </p>
             <p className="text-xs text-on-surface-muted">
-              {itemCount} × {t("common.quantity")}
+              {t("admin.orders.itemCount", { count: itemCount })}
             </p>
           </div>
           <button

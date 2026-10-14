@@ -115,7 +115,7 @@ function CarrierAction({ order }: { order: AdminOrder }) {
         onClick={() => mutation.mutate()}
       >
         <PackageCheck size={15} aria-hidden="true" />
-        {mutation.isPending ? t("common.loading") : "أرسل عبر Guepex"}
+        {mutation.isPending ? t("common.loading") : t("admin.orders.sendParcel")}
       </Button>
       {mutation.isError && (
         <p className="text-xs text-error" role="alert">
@@ -165,7 +165,7 @@ function OrderActions({ order }: { order: AdminOrder }) {
           <Input
             value={reason}
             onChange={(event) => setReason(event.target.value)}
-            placeholder="لم يجب على الهاتف"
+            placeholder={t("admin.orders.refusePlaceholder")}
             maxLength={200}
           />
         </Field>

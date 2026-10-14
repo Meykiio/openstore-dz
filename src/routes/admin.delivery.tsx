@@ -157,7 +157,7 @@ function ZoneForm() {
           className="font-mono"
         />
       </Field>
-      <Field label="مدة (أيام)">
+      <Field label={t("admin.delivery.etaDays")}>
         <Input
           type="number"
           min={1}

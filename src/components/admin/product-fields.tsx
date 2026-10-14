@@ -30,13 +30,13 @@ export function ProductFieldsCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("common.description")}</CardTitle>
+        <CardTitle>{t("admin.products.details")}</CardTitle>
       </CardHeader>
       <CardBody className="grid gap-4 sm:grid-cols-2">
         <Field label={t("common.name")} required>
           <Input value={draft.name} onChange={(e) => set("name", e.target.value)} maxLength={120} />
         </Field>
-        <Field label="الاسم بالفرنسية">
+        <Field label={t("admin.products.nameFr")}>
           <Input
             value={draft.name_fr}
             onChange={(e) => set("name_fr", e.target.value)}
@@ -52,7 +52,7 @@ export function ProductFieldsCard({
             maxLength={4000}
           />
         </Field>
-        <Field label="الوصف بالفرنسية">
+        <Field label={t("admin.products.descriptionFr")}>
           <Textarea
             value={draft.description_fr}
             onChange={(e) => set("description_fr", e.target.value)}
@@ -66,7 +66,9 @@ export function ProductFieldsCard({
             new one on every typo, which is why categories are entities now. */}
         <Field
           label={t("common.category")}
-          hint={categories && categories.length === 0 ? "أنشئ فئة أولاً" : undefined}
+          hint={
+            categories && categories.length === 0 ? t("admin.products.noCategories") : undefined
+          }
         >
           <Select
             value={draft.category_id}
@@ -81,7 +83,7 @@ export function ProductFieldsCard({
           </Select>
         </Field>
 
-        <Field label="الحالة">
+        <Field label={t("common.status")}>
           <Select
             value={status}
             onChange={(event) => onStatusChange(event.target.value as AdminProduct["status"])}

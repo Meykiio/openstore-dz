@@ -182,7 +182,7 @@ function CreateProductDialog({ open, onClose }: { open: boolean; onClose: () => 
       onClose();
       setName("");
       setSlug("");
-      toast.success("تم إنشاء المنتج");
+      toast.success(t("admin.products.created"));
       void navigate({ to: "/admin/product/$id", params: { id } });
     },
     onError: (mutationError: Error) => toast.error(mutationError.message),
@@ -219,7 +219,7 @@ function CreateProductDialog({ open, onClose }: { open: boolean; onClose: () => 
             autoFocus
           />
         </Field>
-        <Field label="الرابط (slug)" required>
+        <Field label={t("admin.products.slug")} required>
           <Input
             value={slug}
             onChange={(event) => setSlug(event.target.value)}

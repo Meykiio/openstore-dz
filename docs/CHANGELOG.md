@@ -375,3 +375,31 @@ Known issues:
 Next:
 
 - Stopdesk pickup (B1), the highest remaining Algeria item.
+
+## Session report - admin i18n gaps, and a copy bug
+
+Completed:
+
+- 24 missing translation keys across three locales; the admin UI no longer has
+  Arabic baked into JSX in eleven files.
+- Fixed a real copy bug: the order row printed "3 × Quantity". The item count was
+  being interpolated into the label for the word Quantity.
+- Split admin.settings.tsx past the 250-line limit into page plus form sections.
+- Logged the page-title limitation (locale is in localStorage, head runs on the
+  server) in LATER.md with a trigger, rather than half-fixing it.
+
+Verified (what was actually run):
+
+- npm run check green.
+- Playwright responsive project against the built output: 10 passed, including the
+  authenticated check that visits /admin/settings, so the settings split renders.
+
+Known issues:
+
+- Page titles remain hardcoded Arabic. Documented as a limitation with a trigger.
+- The size guide editor still has hardcoded strings; it is being redesigned, so
+  translating it twice would be waste.
+
+Next:
+
+- The admin shell: port the collapsible sidebar from design system 02.

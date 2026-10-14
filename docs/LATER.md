@@ -27,6 +27,16 @@ Darija is actively harmful, because Darija has no written standard and is writte
 three different scripts depending on the person. Do not attempt it without a native
 speaker.
 
+**Localised page titles.**
+
+Every route's `head` title is a hardcoded Arabic string. The locale lives in
+`localStorage`, which the server cannot read, so `head` (which runs per request on
+the server) has no way to know the visitor's language.
+Trigger: when the locale moves to a cookie, or when the first non-Arabic shop owner
+complains. Moving it is an architecture change, not a copy fix: it touches how the
+locale is bootstrapped, and the bootstrap script exists specifically to avoid a
+flash of the wrong language. Not worth doing for a browser tab.
+
 **Abandoned-cart WhatsApp follow-up.**
 Trigger: after the confirmation queue ships and there is real order volume. The research
 says the phone call is what works, not the message.

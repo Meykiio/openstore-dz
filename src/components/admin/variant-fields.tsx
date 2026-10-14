@@ -83,7 +83,7 @@ export function DraftFields({
           className="font-mono"
         />
       </Field>
-      <Field label="الوزن (غ)">
+      <Field label={t("admin.variants.weight")}>
         <Input
           type="number"
           min={0}

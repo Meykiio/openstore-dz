@@ -99,7 +99,7 @@ export function CartDrawer() {
  * free delivery never shows a bar it can never fill.
  */
 function ShippingBar({ subtotal, threshold }: { subtotal: number; threshold: number }) {
-  const { locale } = useI18n();
+  const { t, locale } = useI18n();
   const { items } = useCart();
   if (threshold <= 0 || items.length === 0) return null;
 
@@ -111,10 +111,15 @@ function ShippingBar({ subtotal, threshold }: { subtotal: number; threshold: num
       <p className="msg">
         {remaining > 0 ? (
           <>
-            أضف <b dir="ltr">{formatDzd(remaining, locale)}</b> للحصول على توصيل مجاني
+            {/* Split around the amount rather than interpolated into one string:
+                the figure needs `dir="ltr"` so it does not reorder inside Arabic,
+                and it needs to stay bold. All three locales happen to read
+                verb, amount, rest, so the seam holds. */}
+            {t("cart.freeShippingAdd")} <b dir="ltr">{formatDzd(remaining, locale)}</b>{" "}
+            {t("cart.freeShippingRemaining")}
           </>
         ) : (
-          <b>تحصل على توصيل مجاني</b>
+          <b>{t("cart.gotFreeShipping")}</b>
         )}
       </p>
       <div
@@ -123,7 +128,7 @@ function ShippingBar({ subtotal, threshold }: { subtotal: number; threshold: num
         aria-valuenow={progress}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label="التقدم نحو التوصيل المجاني"
+        aria-label={t("cart.freeShippingProgress")}
       >
         <div className="cart-ship-fill" style={{ width: `${progress}%` }} />
       </div>
