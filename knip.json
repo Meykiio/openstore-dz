@@ -1,24 +1,7 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": [
-    "src/router.tsx",
-    "src/start.ts",
-    "src/routes/**/*.tsx",
-    "scripts/**/*.ts",
-    "scripts/**/*.mjs",
-    "eslint-rules/**/*.mjs",
-    "vitest.config.ts",
-    "vite.config.ts"
-  ],
+  "entry": ["src/routes/**/*.tsx", "scripts/**/*.ts", "scripts/**/*.mjs", "eslint-rules/**/*.mjs"],
   "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{ts,mjs}", "eslint-rules/**/*.mjs"],
-  "ignore": [
-    "src/routeTree.gen.ts",
-    "src/lib/supabase/types.ts",
-    "src/components/ui/**",
-    "src/i18n/locales/**",
-    "docs/**",
-    "supabase/functions/**"
-  ],
-  "ignoreBinaries": ["playwright", "supabase"],
-  "ignoreDependencies": ["tailwindcss", "tw-animate-css", "@testing-library/jest-dom"]
+  "ignore": ["src/lib/supabase/types.ts", "src/components/ui/**"],
+  "ignoreDependencies": ["tailwindcss", "tw-animate-css"]
 }

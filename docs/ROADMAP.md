@@ -42,12 +42,18 @@ offering it means either overcharging buyers or absorbing the difference.
 carrier, which matches on an exact string. A typo is a rejected parcel. Guepex
 exposes `/communes` per wilaya; fetch and cache, and let the buyer pick.
 
-### B3. WhatsApp order
+### B3. WhatsApp order ✔ DONE
 
 WhatsApp is how a large share of Algerian commerce actually happens. A buyer who
 is unsure will not fill a form; they will send a message. A prefilled
 `wa.me` link carrying the product and the cart turns that hesitation into an
 order, and costs nothing to maintain.
+
+Shipped on the product page, carrying the product, variant, quantity and page URL.
+Fixing it surfaced a real bug: the stored number was being passed to `wa.me`
+unmodified, so an owner typing the local form `0555123456` produced a link that
+resolved to nobody. Numbers are now normalised, with unit tests for the four forms
+an owner or a seed actually produces.
 
 ### B4. Sale prices
 

@@ -3,6 +3,7 @@ import { Mail, MapPin, Phone, ShieldCheck } from "lucide-react";
 import { useI18n } from "@/lib/i18n-context";
 import { useStoreSettings } from "@/lib/queries";
 import { formatDzd } from "@/lib/format";
+import { waLink } from "@/lib/whatsapp";
 
 /**
  * Storefront footer.
@@ -24,6 +25,11 @@ export function SiteFooter() {
   ].filter(Boolean) as { label: string; value: string }[];
 
   const hasLegal = identity.length > 0 || tax.length > 0 || Boolean(settings?.phone);
+
+  // Normalised, because an owner types the number the local way and wa.me needs
+  // the international form. Null when there is no usable number, so the row is
+  // omitted rather than rendered as a link that goes nowhere.
+  const whatsappHref = waLink(settings?.whatsapp);
 
   return (
     <footer className="mt-16 border-t border-outline bg-section-alt">
@@ -68,16 +74,16 @@ export function SiteFooter() {
               </span>
             </a>
           )}
-          {settings?.whatsapp && (
+          {whatsappHref && (
             <a
-              href={`https://wa.me/${settings.whatsapp.replace(/\D/g, "")}`}
+              href={whatsappHref}
               className="flex min-h-11 items-center gap-2 text-sm text-on-surface-muted hover:text-on-surface"
               rel="noopener noreferrer"
               target="_blank"
             >
               <Phone size={15} aria-hidden="true" />
               <span dir="ltr" className="font-mono text-xs">
-                {settings.whatsapp}
+                {settings?.whatsapp}
               </span>
             </a>
           )}

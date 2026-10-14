@@ -124,7 +124,12 @@ test("every interactive control is reachable by keyboard", async ({ page }) => {
 });
 
 test("the cart badge is announced, not just drawn", async ({ page }) => {
-  await page.goto("/product/shirt-demo", { waitUntil: "networkidle" });
+  // Discovered, not hardcoded. This previously named a seed slug that no longer
+  // exists, so the test was navigating to a 404 and passing on the layout shell.
+  const path = await firstProductPath(page);
+  test.skip(!path, "no published product to test");
+
+  await page.goto(path!, { waitUntil: "networkidle" });
 
   // An item count that only exists as a coloured dot is invisible to a screen
   // reader, which is why there is a live region alongside it.

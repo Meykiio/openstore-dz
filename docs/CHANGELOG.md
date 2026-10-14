@@ -294,3 +294,48 @@ Known issues:
 Next:
 
 - Phase B. Stopdesk pickup first.
+
+## Session report - Phase B3, WhatsApp ordering, and the layout bug it found
+
+Completed:
+
+- WhatsApp order link on the product page, carrying product, variant, quantity
+  and page URL. Stage B3 of the roadmap.
+- Fixed a live bug: wa.me was being given the stored number unmodified, so an
+  owner typing 0555123456 produced a link that resolved to nobody. Normalised,
+  with unit tests and two end-to-end tests.
+- Fixed the malformed seed WhatsApp number (+21355500000000, fourteen digits).
+- Fixed a real dashboard overflow at 360px: 39px wider than the viewport, caused
+  by grid items refusing to shrink. min-w-0 on the widget roots.
+- Split product-detail.tsx by responsibility when it passed 250 lines.
+- Cleaned knip.json: it pointed at a path that does not exist, and most of it was
+  redundant. Hint noise 12 to 1.
+- Capped Playwright workers when targeting a built server.
+- Fixed an accessibility test that was navigating a slug that no longer exists and
+  passing against a 404.
+
+Verified (what was actually run):
+
+- Full Playwright suite against the built output: 36 passed, including the
+  responsive audit at seven widths and the authenticated dashboard check.
+- npm run check green.
+- The dashboard overflow was measured before and after: html.scrollWidth fell
+  from 399 to 360 at a 360px viewport.
+
+Known issues:
+
+- The live store_settings.whatsapp row is still the malformed seed value. Only the
+  schema was corrected. Changing existing data needs the owner's approval, so it
+  is left alone and recorded here.
+- The responsive audit needed two corrections before it could be trusted. It was
+  excluding every element as clipped because body has overflow-x hidden, which is
+  wrong for fixed-position elements, and it filtered out zero-height elements. An
+  overflow check that cannot name the offender is not a check.
+- No horizontal overflow now, but the audit only covers 360 and 1280 for admin
+  routes and seven widths for visitor routes.
+
+Next:
+
+- Passwords on a public repo: the owner's admin password currently equals the
+  email address. That must change before any deploy.
+- Phase B, next item: stopdesk pickup.

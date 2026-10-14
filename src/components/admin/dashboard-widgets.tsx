@@ -34,7 +34,7 @@ export function StatTile({
   trend?: number | null;
 }) {
   return (
-    <div className="rounded-[16px] border border-outline bg-surface px-5 py-4">
+    <div className="min-w-0 rounded-[16px] border border-outline bg-surface px-5 py-4">
       <p className="text-xs text-on-surface-muted">{label}</p>
       <p
         className={cn(
@@ -97,7 +97,7 @@ export function RevenueChart({ days, locale }: { days: RevenueDay[]; locale: "ar
   const total = days.reduce((sum, day) => sum + day.value, 0);
 
   return (
-    <section className="rounded-[16px] border border-outline bg-surface p-5">
+    <section className="min-w-0 rounded-[16px] border border-outline bg-surface p-5">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-3">
         <h2 className="text-sm font-semibold">{t("admin.chart.revenue")}</h2>
         <span className="flex items-center gap-2">
@@ -150,7 +150,7 @@ export function WilayaTable({ analytics }: { analytics: Analytics }) {
 
   if (rows.length === 0) {
     return (
-      <section className="rounded-[16px] border border-outline bg-surface p-5">
+      <section className="min-w-0 rounded-[16px] border border-outline bg-surface p-5">
         <h2 className="text-sm font-semibold">{t("admin.chart.wilaya")}</h2>
         <p className="mt-2 text-xs text-on-surface-muted">{t("admin.chart.needMoreData")}</p>
       </section>
@@ -158,7 +158,7 @@ export function WilayaTable({ analytics }: { analytics: Analytics }) {
   }
 
   return (
-    <section className="rounded-[16px] border border-outline bg-surface p-5">
+    <section className="min-w-0 rounded-[16px] border border-outline bg-surface p-5">
       <h2 className="mb-3 text-sm font-semibold">{t("admin.chart.wilaya")}</h2>
       <div className="overflow-x-auto">
         <table className="ds-table">
@@ -208,7 +208,7 @@ export function TopProducts({ analytics }: { analytics: Analytics }) {
   if (analytics.topProducts.length === 0) return null;
 
   return (
-    <section className="rounded-[16px] border border-outline bg-surface p-5">
+    <section className="min-w-0 rounded-[16px] border border-outline bg-surface p-5">
       <h2 className="mb-3 text-sm font-semibold">{t("admin.chart.topProducts")}</h2>
       <ul className="flex flex-col gap-2.5">
         {analytics.topProducts.map((product) => (
@@ -229,7 +229,7 @@ export function LowStock({ analytics }: { analytics: Analytics }) {
   if (analytics.lowStock.length === 0) return null;
 
   return (
-    <section className="rounded-[16px] border border-tertiary/40 bg-tertiary/5 p-5">
+    <section className="min-w-0 rounded-[16px] border border-tertiary/40 bg-tertiary/5 p-5">
       <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
         <Package size={15} className="text-tertiary" aria-hidden="true" />
         {t("admin.chart.lowStock")}

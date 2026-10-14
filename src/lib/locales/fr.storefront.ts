@@ -52,6 +52,8 @@ export const frStorefront = {
   "store.inStock": "En stock",
   "store.lowStock": "Plus que {count}",
   "store.addToCart": "Ajouter au panier",
+  "store.orderViaWhatsapp": "Commander via WhatsApp",
+  "store.waOrderIntro": "Bonjour, je souhaite commander :",
   "store.viewDetails": "Détails",
   "store.from": "À partir de",
   "store.sizeGuide": "Guide des tailles",

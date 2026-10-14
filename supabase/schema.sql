@@ -943,7 +943,7 @@ insert into public.store_settings (
   'OpenStore DZ',
   'متجرك الإلكتروني — الدفع عند الاستلام',
   'This is the demo shop created by supabase/schema.sql. Edit it in Settings, or delete the demo products and add your own.',
-  'Demo SARL', '000000000000000', '00/00-0000000', '+213 555 00 00 00', '+21355500000000',
+       'Demo SARL', '000000000000000', '00/00-0000000', '+213 555 00 00 00', '+213 555 00 00 00',
   'Alger, Algeria',
   600,
   array['الجزائر','وهران','قسنطينة','عنابة','سطيف','تلمسان','بجاية','ورقلة','أدرار','تيميمون'],

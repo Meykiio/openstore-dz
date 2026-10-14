@@ -22,6 +22,11 @@ Last verified against the built output, not the dev server.
 - **Product pages.** Variant selection (colour and size), gallery, size guide, reviews,
   and a pack showing its contents.
 - **Cart.** Drawer-based, with quantity edits and a live item count.
+- **WhatsApp order.** A prefilled `wa.me` link on the product page carrying the product,
+  the variant, the quantity and the page URL. A buyer who is unsure will not fill in a
+  form; they will send a message. The stored number is normalised, so an owner who types
+  the number the way it is written in Algeria (`0555123456`) gets a link that resolves
+  rather than one that opens WhatsApp and finds nobody.
 - **Checkout.** Cash on delivery, with the delivery fee resolved from the wilaya and
   shown before submit. The order is written by a database function, so pricing cannot
   be tampered with from the browser.
@@ -109,7 +114,6 @@ Listed so the remaining scope is visible, with reasons, in `docs/ROADMAP.md`.
 - Stopdesk (pickup-point) delivery, which Guepex charges less for and many Algerian
   buyers prefer
 - Commune picker instead of free-text commune
-- WhatsApp order button
 - Sale prices: `compare_at_price` exists and the storefront styling exists, but there is
   no admin input yet
 - Delivered-cost preview on the product page

@@ -22,7 +22,10 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  // The dev and preview servers are single Node processes, so parallel workers
+  // contend rather than help. At the default (one per core) `networkidle` starts
+  // timing out on slower routes, which looks like a page bug and is not one.
+  workers: process.env.CI || process.env.E2E_BASE_URL ? 2 : undefined,
   reporter: process.env.CI ? [["github"], ["list"]] : [["list"]],
 
   use: {

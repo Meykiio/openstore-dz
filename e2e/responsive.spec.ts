@@ -100,8 +100,16 @@ async function measureOverflow(page: Page, width: number, path: string) {
       return false;
     };
 
+    /**
+     * A fixed-position element escapes its ancestors' clipping, so `body`'s
+     * `overflow-x: hidden` does not contain it. That is the one case that can
+     * still widen the document, and treating it as clipped is how this check
+     * once reported an overflow with nothing to point at.
+     */
+    const escapesClipping = (el: HTMLElement) => getComputedStyle(el).position === "fixed";
+
     for (const el of bad) {
-      if (clippedByScroller(el)) continue;
+      if (!escapesClipping(el) && clippedByScroller(el)) continue;
 
       let covered = false;
       let parent = el.parentElement;
@@ -160,6 +168,9 @@ test("touch targets are large enough to hit on a phone", async ({ page }) => {
      * nobody can open.
      */
     const isClipped = (el: HTMLElement) => {
+      // Fixed elements are not clipped by their ancestors.
+      if (getComputedStyle(el).position === "fixed") return false;
+
       const own = el.getBoundingClientRect();
       let parent = el.parentElement;
       while (parent && parent !== document.documentElement) {
