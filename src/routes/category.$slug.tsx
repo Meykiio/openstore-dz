@@ -1,21 +1,13 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { StoreLayout } from "@/components/storefront/store-layout";
-import {
-  CatalogueError,
-  CatalogueLoading,
-  CatalogueView,
-} from "@/components/storefront/catalogue-view";
-import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/feedback";
+import { CatalogueView } from "@/components/storefront/catalogue-view";
 import { useI18n } from "@/lib/i18n-context";
-import { categoriesQuery, productsQuery, useCategories, useProducts } from "@/lib/queries";
+import { categoriesQuery, useCategories } from "@/lib/queries";
+import { EMPTY_FILTERS } from "@/lib/catalogue";
 
 export const Route = createFileRoute("/category/$slug")({
   loader: async ({ context, params }) => {
-    const [categories] = await Promise.all([
-      context.queryClient.ensureQueryData(categoriesQuery()).catch(() => []),
-      context.queryClient.ensureQueryData(productsQuery()).catch(() => []),
-    ]);
+    const categories = await context.queryClient.ensureQueryData(categoriesQuery()).catch(() => []);
     const category = categories.find((entry) => entry.slug === params.slug);
     if (!category) throw notFound();
     return { category };
@@ -42,12 +34,8 @@ export const Route = createFileRoute("/category/$slug")({
 function CategoryPage() {
   const { category } = Route.useLoaderData();
   const { t, locale } = useI18n();
-  const { data: products, isPending, isError, error, refetch } = useProducts();
   const { data: categories } = useCategories();
 
-  const inCategory = (products ?? []).filter(
-    (product) => product.categories?.slug === category.slug,
-  );
   const others = (categories ?? []).filter(
     (entry) => entry.slug !== category.slug && entry.product_count > 0,
   );
@@ -57,27 +45,14 @@ function CategoryPage() {
   return (
     <StoreLayout>
       <div className="container-page py-10">
-        {isPending ? (
-          <CatalogueLoading />
-        ) : isError ? (
-          <CatalogueError message={error.message} onRetry={() => void refetch()} />
-        ) : inCategory.length === 0 ? (
-          <EmptyState
-            title={t("catalogue.noResults")}
-            body={t("catalogue.noResultsBody")}
-            action={
-              <Button asChild variant="secondary">
-                <Link to="/">{t("cart.emptyAction")}</Link>
-              </Button>
-            }
-          />
-        ) : (
-          <CatalogueView
-            products={inCategory}
-            heading={heading}
-            subheading={category.description ?? undefined}
-          />
-        )}
+        {/* The view owns its own query, loading and empty states now: filtering and
+            paging happen in the database, so a component handed a list could only
+            ever filter the list it was given. */}
+        <CatalogueView
+          heading={heading}
+          subheading={category.description ?? undefined}
+          initialFilters={{ ...EMPTY_FILTERS, categorySlug: category.slug }}
+        />
 
         {/* Other categories, so a buyer who landed here from search can keep
             browsing instead of hitting a dead end. */}

@@ -1558,3 +1558,230 @@ grant execute on function public.category_product_counts() to anon, authenticate
 -- Supports the group-by above, and the catalogue's category filter.
 create index if not exists products_status_category_idx
   on public.products (status, category_id);
+
+-- -----------------------------------------------------------------------------
+-- The storefront catalogue, filtered, sorted, searched and paged in SQL
+-- -----------------------------------------------------------------------------
+--
+-- The storefront used to filter, sort, search and compute its facets in the
+-- browser over the whole catalogue. That stops working the moment the list is
+-- paged, and it fails in the worst way: filtering a paged list client-side only
+-- ever sees the loaded page, so a result count becomes a wrong answer rather than
+-- a slow one. This moves all of it to the database, so the count is always the
+-- count of the whole matching set.
+
+/*
+ * Arabic normalisation. The rules are the ones a phone keyboard makes necessary:
+ * diacritics and tatweel are stripped because nobody types them, hamza forms
+ * collapse to bare alef, the two ya forms to one, and taa marbuta to ha, because
+ * all of those are written interchangeably in practice.
+ */
+create or replace function public.normalize_arabic(input text)
+returns text
+language sql
+immutable
+as $$
+  select trim(
+    regexp_replace(
+      regexp_replace(
+        translate(lower(coalesce(input, '')), 'أإآٱىةؤئ', 'ااااييهءء'),
+        '[ً-ْٰـ]', '', 'g'
+      ),
+      '\s+', ' ', 'g'
+    )
+  );
+$$;
+
+comment on function public.normalize_arabic(text) is
+  'Normalises Arabic for search. The rules are the ones a phone keyboard makes necessary.';
+
+/*
+ * One page of the published catalogue, plus the total and the facets.
+ *
+ * Returns JSON in the shape the storefront already expects, so this was a change
+ * of transport rather than of shape. Every word of the query must match, which is
+ * what makes a second word narrow the results instead of widening them.
+ *
+ * Sort is a text switch rather than four queries, so a caller cannot ask for a
+ * sort this does not know and silently get the default.
+ */
+create or replace function public.catalogue_page(
+  p_category_slug text default null,
+  p_query text default null,
+  p_sizes text[] default null,
+  p_colors text[] default null,
+  p_min_price int default null,
+  p_max_price int default null,
+  p_in_stock boolean default false,
+  p_sort text default 'newest',
+  p_limit int default 12,
+  p_offset int default 0
+)
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+with matched as (
+  select
+    p.id,
+    p.name,
+    p.published_at,
+    (select min(v.price) from public.product_variants v
+      where v.product_id = p.id and v.is_active) as min_price,
+    (select max(v.price) from public.product_variants v
+      where v.product_id = p.id and v.is_active) as max_price
+  from public.products p
+  left join public.categories c on c.id = p.category_id
+  where p.status = 'published'
+    and (p_category_slug is null or c.slug = p_category_slug)
+    and (
+      coalesce(trim(p_query), '') = ''
+      or not exists (
+        select 1
+        from unnest(string_to_array(public.normalize_arabic(p_query), ' ')) as word
+        where word <> ''
+          and public.normalize_arabic(
+            p.name || ' ' || coalesce(p.name_fr, '') || ' ' || coalesce(p.description, '')
+            || ' ' || p.slug || ' ' || coalesce((
+              select string_agg(
+                coalesce(v.sku, '') || ' ' || coalesce(v.size, '') || ' ' || coalesce(v.color_name, ''),
+                ' '
+              )
+              from public.product_variants v where v.product_id = p.id
+            ), '')
+          ) not like '%' || word || '%'
+      )
+    )
+    and (
+      coalesce(array_length(p_sizes, 1), 0) = 0
+      or exists (select 1 from public.product_variants v
+        where v.product_id = p.id and v.is_active and v.size = any(p_sizes))
+    )
+    and (
+      coalesce(array_length(p_colors, 1), 0) = 0
+      or exists (select 1 from public.product_variants v
+        where v.product_id = p.id and v.is_active and v.color_name = any(p_colors))
+    )
+    and (
+      not coalesce(p_in_stock, false)
+      or exists (select 1 from public.product_variants v
+        where v.product_id = p.id and v.is_active and v.stock > 0)
+    )
+    and (
+      p_min_price is null
+      or exists (select 1 from public.product_variants v
+        where v.product_id = p.id and v.is_active and v.price >= p_min_price)
+    )
+    and (
+      p_max_price is null
+      or exists (select 1 from public.product_variants v
+        where v.product_id = p.id and v.is_active and v.price <= p_max_price)
+    )
+),
+ranked as (
+  select
+    m.id,
+    row_number() over (
+      order by
+        case when p_sort = 'price-asc' then m.min_price end asc nulls last,
+        case when p_sort = 'price-desc' then m.max_price end desc nulls last,
+        case when p_sort = 'name' then m.name end asc,
+        case when p_sort not in ('price-asc', 'price-desc', 'name') then m.published_at end desc nulls last,
+        m.id
+    ) as ord
+  from matched m
+),
+page as (
+  select r.id, r.ord from ranked r
+  order by r.ord
+  limit greatest(coalesce(p_limit, 12), 1)
+  offset greatest(coalesce(p_offset, 0), 0)
+)
+select jsonb_build_object(
+  'total', (select count(*) from matched),
+  'products', coalesce((
+    select jsonb_agg(
+      jsonb_build_object(
+        'id', p.id,
+        'slug', p.slug,
+        'name', p.name,
+        'name_fr', p.name_fr,
+        'description', p.description,
+        'description_fr', p.description_fr,
+        'kind', p.kind,
+        'status', p.status,
+        'category_id', p.category_id,
+        'published_at', p.published_at,
+        'categories', case when c.id is null then null else jsonb_build_object(
+          'slug', c.slug, 'name', c.name, 'name_fr', c.name_fr
+        ) end,
+        'product_variants', coalesce((
+          select jsonb_agg(
+            jsonb_build_object(
+              'id', v.id,
+              'product_id', v.product_id,
+              'size', v.size,
+              'color_name', v.color_name,
+              'color_hex', v.color_hex,
+              'sku', v.sku,
+              'price', v.price,
+              'stock', v.stock,
+              'is_active', v.is_active,
+              'sort_order', v.sort_order,
+              'variant_images', coalesce((
+                select jsonb_agg(
+                  jsonb_build_object('id', i.id, 'url', i.url, 'alt', i.alt, 'sort_order', i.sort_order)
+                  order by i.sort_order
+                )
+                from public.variant_images i where i.variant_id = v.id
+              ), '[]'::jsonb)
+            )
+            order by v.sort_order
+          )
+          from public.product_variants v
+          where v.product_id = p.id and v.is_active
+        ), '[]'::jsonb)
+      )
+      order by page.ord
+    )
+    from page
+    join public.products p on p.id = page.id
+    left join public.categories c on c.id = p.category_id
+  ), '[]'::jsonb),
+  -- Facets come from the whole published catalogue, not the filtered page, so the
+  -- filter panel does not empty itself out as the buyer narrows.
+  'facets', jsonb_build_object(
+    'sizes', coalesce((
+      select jsonb_agg(distinct v.size order by v.size)
+      from public.product_variants v
+      join public.products p on p.id = v.product_id
+      where p.status = 'published' and v.is_active and coalesce(v.size, '') <> ''
+    ), '[]'::jsonb),
+    'colors', coalesce((
+      select jsonb_agg(distinct v.color_name order by v.color_name)
+      from public.product_variants v
+      join public.products p on p.id = v.product_id
+      where p.status = 'published' and v.is_active and coalesce(v.color_name, '') <> ''
+    ), '[]'::jsonb),
+    'priceMin', coalesce((
+      select min(v.price) from public.product_variants v
+      join public.products p on p.id = v.product_id
+      where p.status = 'published' and v.is_active
+    ), 0),
+    'priceMax', coalesce((
+      select max(v.price) from public.product_variants v
+      join public.products p on p.id = v.product_id
+      where p.status = 'published' and v.is_active
+    ), 0)
+  )
+);
+$$;
+
+comment on function public.catalogue_page(text, text, text[], text[], int, int, boolean, text, int, int) is
+  'One page of the published catalogue with filtering, sorting, search, facets and total. Exists so the storefront can page without filtering only the loaded page.';
+
+revoke all on function public.catalogue_page(text, text, text[], text[], int, int, boolean, text, int, int) from public;
+grant execute on function public.catalogue_page(text, text, text[], text[], int, int, boolean, text, int, int) to anon, authenticated;
+grant execute on function public.normalize_arabic(text) to anon, authenticated;

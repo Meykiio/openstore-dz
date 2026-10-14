@@ -718,6 +718,25 @@ export type Database = {
           product_count: number;
         }[];
       };
+      catalogue_page: {
+        Args: {
+          p_category_slug?: string | null;
+          p_colors?: string[] | null;
+          p_in_stock?: boolean;
+          p_limit?: number;
+          p_max_price?: number | null;
+          p_min_price?: number | null;
+          p_offset?: number;
+          p_query?: string | null;
+          p_sizes?: string[] | null;
+          p_sort?: string;
+        };
+        Returns: Json;
+      };
+      normalize_arabic: {
+        Args: { input: string };
+        Returns: string;
+      };
       claim_store: {
         Args: Record<PropertyKey, never>;
         Returns: Database["public"]["Enums"]["admin_role"];

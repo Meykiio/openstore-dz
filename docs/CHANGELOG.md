@@ -737,3 +737,33 @@ Known issues:
   is the remaining piece and the reason is in ROADMAP E2b: paging it means moving
   filter, sort, search and facets to the server first, and half-doing it produces a
   wrong result count rather than a slow one.
+
+## Session report - storefront pagination
+
+Completed:
+
+- Filter, sort, search, facets and paging moved from the browser into the database.
+  `normalize_arabic()` and `catalogue_page()` in the schema do it in one call.
+- The client-side filter, sort, search and facet code is deleted, not left dormant,
+  along with the unbounded product fetch.
+- `CatalogueView` owns its own query. A component handed a list can only filter the
+  list it was given, which is the bug this replaced.
+- `/catalogue` added as a paged all-products page, because the home grid shows one
+  page now and neither a category page nor a search page can show the rest.
+- Twelve products a page.
+
+Verified (what was actually run):
+
+- The SQL directly: normalisation on diacritics, hamza, taa marbuta and both ya
+  forms; paging returning 12/12/9 with no overlap and stable totals; search
+  narrowing to 8; sorting ascending and descending; facets present.
+- npm run check green. Full suite 50 passed.
+- Three new catalogue tests, including page two is not page one.
+
+Known issues:
+
+- The demo catalogue has inconsistent data the facets now surface: size `S` and `s`
+  exist separately, and one colour is `red` while the rest are Arabic. Pre-existing
+  seed drift, visible for the first time because the facets come from the server.
+- The search box fires a request per keystroke. It wants a debounce, which the
+  previous in-memory filtering did not need.

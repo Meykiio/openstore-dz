@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { StoreLayout } from "@/components/storefront/store-layout";
 import { ProductGrid } from "@/components/storefront/product-card";
 import { HomeHero, TrustBar } from "@/components/storefront/home-hero";
@@ -11,7 +11,8 @@ import {
 import { ErrorState, NoProducts, ProductSkeleton } from "@/components/ui/feedback";
 import { SetupCheck } from "@/components/setup-check";
 import { supabaseConfigProblem } from "@/lib/supabase/client";
-import { productsQuery, reviewsQuery, storeSettingsQuery, useProducts } from "@/lib/queries";
+import { reviewsQuery, storeSettingsQuery } from "@/lib/queries";
+import { EMPTY_FILTERS, useCataloguePage } from "@/lib/catalogue";
 import { useI18n } from "@/lib/i18n-context";
 
 export const Route = createFileRoute("/")({
@@ -23,7 +24,6 @@ export const Route = createFileRoute("/")({
       .ensureQueryData(storeSettingsQuery())
       .catch(() => null);
     await Promise.all([
-      context.queryClient.ensureQueryData(productsQuery()).catch(() => null),
       // Reviews feed the testimonial wall below the fold. Fetching them during
       // SSR avoids a visible pop-in and lets crawlers see the social proof.
       context.queryClient.ensureQueryData(reviewsQuery()).catch(() => null),
@@ -53,7 +53,7 @@ export const Route = createFileRoute("/")({
 function Home() {
   const { t } = useI18n();
   const { settings } = Route.useLoaderData();
-  const { data: products, isPending, isError, error, refetch } = useProducts();
+  const catalogue = useCataloguePage(EMPTY_FILTERS, 1);
   const configProblem = supabaseConfigProblem();
 
   // A shop that has not been connected to a database yet must see the setup
@@ -68,7 +68,8 @@ function Home() {
     );
   }
 
-  const list = products ?? [];
+  const list = catalogue.data?.products ?? [];
+  const catalogueTotal = catalogue.data?.total ?? 0;
   const featured = list[0] ?? null;
 
   return (
@@ -82,22 +83,28 @@ function Home() {
             <span className="section-label">{t("home.featured")}</span>
             <h2 className="mt-2 font-display text-xl font-semibold sm:text-2xl">{t("nav.shop")}</h2>
           </div>
-          {list.length > 0 && (
-            <span className="font-mono text-xs text-on-surface-muted">
-              {t("store.productCount", { count: list.length })}
-            </span>
+          {catalogueTotal > 0 && (
+            <Link
+              to="/catalogue"
+              className="inline-flex min-h-9 items-center text-sm text-primary hover:underline"
+            >
+              {t("store.productCount", { count: catalogueTotal })}
+            </Link>
           )}
         </div>
 
-        {isPending ? (
+        {catalogue.isPending ? (
           <div className="product-grid">
             {Array.from({ length: 6 }, (_, index) => (
               <ProductSkeleton key={index} />
             ))}
           </div>
-        ) : isError ? (
+        ) : catalogue.isError ? (
           <div className="mx-auto flex max-w-xl flex-col gap-4">
-            <ErrorState message={error.message} onRetry={() => void refetch()} />
+            <ErrorState
+              message={catalogue.error.message}
+              onRetry={() => void catalogue.refetch()}
+            />
             <SetupCheck />
           </div>
         ) : list.length === 0 ? (

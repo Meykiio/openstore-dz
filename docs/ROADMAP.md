@@ -177,7 +177,7 @@ dev` means anything. Budgets: 1.5 MB initial payload, LCP under 2.5s on a
   typography, and guessing at them without measuring the fix would be worse than
   the honest number.
 
-- **E2b. Paginate the storefront catalogue, which means moving filtering server-side.**
+- **E2b. Paginate the storefront catalogue, which means moving filtering server-side.** ✔ DONE
 
   The admin lists are paged. The storefront catalogue is not, and it is a
   different size of job for one reason: `src/lib/catalogue.ts` filters, sorts and
@@ -201,8 +201,11 @@ dev` means anything. Budgets: 1.5 MB initial payload, LCP under 2.5s on a
   5. Tests asserting that a filtered page reports the filtered total, because that
      is the assertion that catches the failure above.
 
-  Worth doing before the catalogue passes a few hundred products, which is exactly
-  when the current design is documented to stop being viable.
+  Done. `normalize_arabic()` and `catalogue_page()` in the schema do all of it in
+  one call, returning the page, the total and the facets together. `src/lib/catalogue.ts`
+  is now a query layer rather than a filter, the client-side filter, sort, search
+  and facet code is deleted, and `/catalogue` exists as a paged all-products page
+  because the home grid now shows one page and needed somewhere to send the rest.
 
 - **E3.** Deploy to Vercel, set `GUEPEX_WEBHOOK_SECRET`, replace the placeholder
   demo imagery, and connect error monitoring.

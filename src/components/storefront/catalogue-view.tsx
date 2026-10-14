@@ -1,33 +1,31 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { PackageSearch } from "lucide-react";
 import { ProductGrid } from "./product-card";
 import { CatalogueToolbar } from "./catalogue-toolbar";
+import { Pagination } from "@/components/ui/pagination";
 import { EmptyState, ErrorState, ProductSkeleton } from "@/components/ui/feedback";
 import { useI18n } from "@/lib/i18n-context";
-import type { CatalogueProduct } from "@/lib/queries";
-import {
-  applyCatalogueFilters,
-  facetsFor,
-  EMPTY_FILTERS,
-  type CatalogueFilters,
-} from "@/lib/catalogue";
+import { EMPTY_FILTERS, useCataloguePage, type CatalogueFilters } from "@/lib/catalogue";
 
 /**
- * A browsable catalogue: heading, filters, grid.
+ * A browsable catalogue: heading, filters, grid, pages.
  *
- * Shared by the category page and the search page so the two cannot drift into
- * two different shopping experiences. Filter state is local because it is a view
- * concern, not something a buyer needs in their history on these pages.
+ * Shared by the category page and the search page so the two cannot drift into two
+ * different shopping experiences. It owns its query rather than receiving
+ * products, because filtering and paging happen in the database now: a component
+ * that receives a list can only ever filter the list it was given, which is the
+ * bug this replaced.
+ *
+ * Filter state is local because it is a view concern. Changing a filter resets to
+ * page one, because staying on page 4 of a different result set shows nothing.
  */
 export function CatalogueView({
-  products,
   heading,
   subheading,
   initialFilters,
   emptyTitle,
   emptyBody,
 }: {
-  products: CatalogueProduct[];
   heading: string;
   subheading?: string;
   initialFilters?: Partial<CatalogueFilters>;
@@ -39,9 +37,23 @@ export function CatalogueView({
     ...EMPTY_FILTERS,
     ...initialFilters,
   });
+  const [page, setPage] = useState(1);
 
-  const facets = useMemo(() => facetsFor(products), [products]);
-  const visible = useMemo(() => applyCatalogueFilters(products, filters), [products, filters]);
+  const catalogue = useCataloguePage(filters, page);
+  const products = catalogue.data?.products ?? [];
+  const facets = catalogue.data?.facets ?? { sizes: [], colors: [], priceMin: 0, priceMax: 0 };
+
+  const applyFilters = (next: CatalogueFilters) => {
+    setFilters(next);
+    setPage(1);
+  };
+
+  const goToPage = (next: number) => {
+    setPage(next);
+    // A page change is a new set of products, so the buyer should start at the top
+    // rather than halfway down the previous page's scroll position.
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -52,29 +64,44 @@ export function CatalogueView({
 
       <CatalogueToolbar
         filters={filters}
-        onChange={setFilters}
+        onChange={applyFilters}
         sizes={facets.sizes}
         colors={facets.colors}
         priceMin={facets.priceMin}
         priceMax={facets.priceMax}
-        resultCount={visible.length}
+        resultCount={catalogue.data?.total ?? 0}
       />
 
-      {visible.length === 0 ? (
+      {catalogue.isPending ? (
+        <CatalogueLoading />
+      ) : catalogue.isError ? (
+        <CatalogueError
+          message={catalogue.error.message}
+          onRetry={() => void catalogue.refetch()}
+        />
+      ) : products.length === 0 ? (
         <EmptyState
           icon={<PackageSearch size={28} />}
           title={emptyTitle ?? t("catalogue.noResults")}
           body={emptyBody ?? t("catalogue.noResultsBody")}
         />
       ) : (
-        <ProductGrid products={visible} />
+        <>
+          <ProductGrid products={products} />
+          <Pagination
+            page={page}
+            pageCount={catalogue.data?.pageCount ?? 1}
+            onPageChange={goToPage}
+            testId="catalogue-pagination"
+          />
+        </>
       )}
     </div>
   );
 }
 
 /** Loading and error wrappers so both catalogue pages behave identically. */
-export function CatalogueLoading() {
+function CatalogueLoading() {
   return (
     <div className="product-grid">
       {Array.from({ length: 6 }, (_, index) => (
@@ -84,6 +111,6 @@ export function CatalogueLoading() {
   );
 }
 
-export function CatalogueError({ message, onRetry }: { message: string; onRetry: () => void }) {
+function CatalogueError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return <ErrorState message={message} onRetry={onRetry} />;
 }

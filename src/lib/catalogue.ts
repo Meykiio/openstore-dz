@@ -1,20 +1,19 @@
-import { sortVariants, type CatalogueProduct } from "./queries";
+import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query";
+import { getSupabase } from "./supabase/client";
+import type { CatalogueProduct } from "./queries";
 
 /**
- * Catalogue filtering, sorting and search.
+ * Catalogue browsing: filtering, sorting, search and paging.
  *
- * Runs in the browser over the already-loaded catalogue rather than as a query
- * per keystroke. That is a deliberate choice for this scale: a single Algerian
- * shop typically carries tens to a couple of hundred products, and the whole
- * catalogue is already fetched for the home page. Filtering in memory makes
- * every filter change instant with no round trip, which on a 3G connection is
- * the difference between a shop that feels responsive and one that does not.
+ * All of it happens in the database, in one call. It used to happen here, over the
+ * whole catalogue, which was a deliberate choice for a shop with tens of products
+ * and stopped being viable the moment the list was paged: filtering a page in the
+ * browser only ever sees that page, so a result count becomes a wrong answer
+ * rather than a slow one.
  *
- * The threshold where this stops being true is roughly a few hundred products,
- * at which point the whole-catalogue fetch becomes the payload problem rather
- * than the filtering. At that point this module is the thing to replace with a
- * server-side query, and the signatures below are designed so that swap is a
- * change of implementation, not of callers.
+ * The Arabic normalisation that used to live here now lives in
+ * `normalize_arabic()` in the schema, for the same reason. One implementation, on
+ * the side that has the whole set.
  */
 
 export type SortKey = "newest" | "price-asc" | "price-desc" | "name";
@@ -42,118 +41,73 @@ export const EMPTY_FILTERS: CatalogueFilters = {
 };
 
 /**
- * Fold the spelling variation Arabic actually has.
+ * Products per page.
  *
- * A buyer typing "قميص" must find "قَميص", and someone typing "احمد" must match
- * "أحمد". Hamza forms, the two ya forms and the taa marbuta are all written
- * interchangeably on phones, which is where most of this traffic comes from.
- * Diacritics are stripped because nobody types them.
+ * Twelve, which is three rows of four on a desktop and six rows of two on a phone.
+ * Small enough that a page arrives quickly on mobile data, large enough that
+ * browsing does not become a series of single rows.
  */
-export function normalizeArabic(input: string): string {
-  return input
-    .toLowerCase()
-    .replace(/[\u064B-\u0652\u0670\u0640]/g, "")
-    .replace(/[أإآٱ]/g, "ا")
-    .replace(/ى/g, "ي")
-    .replace(/ة/g, "ه")
-    .replace(/[ؤئ]/g, "ء")
-    .replace(/\s+/g, " ")
-    .trim();
-}
+const CATALOGUE_PAGE_SIZE = 12;
 
-/** Cheapest and dearest active variant, the range a card should show. */
-function productPrice(product: CatalogueProduct): { min: number; max: number } | null {
-  const variants = sortVariants(product.product_variants);
-  if (variants.length === 0) return null;
-  const prices = variants.map((v) => v.price);
-  return { min: Math.min(...prices), max: Math.max(...prices) };
-}
-
-/** Every distinct size and colour the catalogue offers, for the filter UI. */
-export function facetsFor(products: CatalogueProduct[]): {
+type CatalogueFacets = {
   sizes: string[];
   colors: string[];
   priceMin: number;
   priceMax: number;
-} {
-  const sizes = new Set<string>();
-  const colors = new Set<string>();
-  let priceMin = Number.POSITIVE_INFINITY;
-  let priceMax = 0;
+};
 
-  for (const product of products) {
-    for (const variant of sortVariants(product.product_variants)) {
-      if (variant.size) sizes.add(variant.size);
-      if (variant.color_name) colors.add(variant.color_name);
-      priceMin = Math.min(priceMin, variant.price);
-      priceMax = Math.max(priceMax, variant.price);
-    }
-  }
+export type CataloguePage = {
+  products: CatalogueProduct[];
+  total: number;
+  pageCount: number;
+  facets: CatalogueFacets;
+};
+
+/** The shape `catalogue_page()` returns, before the page count is derived. */
+type CatalogueResponse = {
+  total: number;
+  products: CatalogueProduct[];
+  facets: CatalogueFacets;
+};
+
+async function fetchCataloguePage(filters: CatalogueFilters, page: number): Promise<CataloguePage> {
+  const { data, error } = await getSupabase().rpc("catalogue_page", {
+    p_category_slug: filters.categorySlug,
+    p_query: filters.query.trim() || null,
+    p_sizes: filters.sizes.length > 0 ? filters.sizes : null,
+    p_colors: filters.colors.length > 0 ? filters.colors : null,
+    p_min_price: filters.minPrice,
+    p_max_price: filters.maxPrice,
+    p_in_stock: filters.inStockOnly,
+    p_sort: filters.sort,
+    p_limit: CATALOGUE_PAGE_SIZE,
+    p_offset: (Math.max(page, 1) - 1) * CATALOGUE_PAGE_SIZE,
+  });
+
+  if (error) throw new Error(error.message);
+  const response = (data ?? { total: 0, products: [], facets: EMPTY_FACETS }) as CatalogueResponse;
 
   return {
-    sizes: [...sizes].sort((a, b) => a.localeCompare(b, "ar")),
-    colors: [...colors].sort((a, b) => a.localeCompare(b, "ar")),
-    priceMin: Number.isFinite(priceMin) ? priceMin : 0,
-    priceMax,
+    products: response.products ?? [],
+    total: response.total ?? 0,
+    pageCount: Math.max(1, Math.ceil((response.total ?? 0) / CATALOGUE_PAGE_SIZE)),
+    facets: response.facets ?? EMPTY_FACETS,
   };
 }
 
-function matchesQuery(product: CatalogueProduct, needle: string): boolean {
-  if (!needle) return true;
-  const haystack = normalizeArabic(
-    [product.name, product.name_fr ?? "", product.description ?? "", product.slug]
-      .join(" ")
-      .concat(
-        " ",
-        product.product_variants
-          .map((v) => [v.sku ?? "", v.size ?? "", v.color_name ?? ""].join(" "))
-          .join(" "),
-      ),
-  );
-  // Every word must appear, so "قميص ابيض" narrows rather than widens.
-  return needle.split(" ").every((word) => haystack.includes(word));
-}
+const EMPTY_FACETS: CatalogueFacets = { sizes: [], colors: [], priceMin: 0, priceMax: 0 };
 
-function matchesVariants(product: CatalogueProduct, filters: CatalogueFilters): boolean {
-  const variants = sortVariants(product.product_variants).filter((variant) => {
-    if (filters.inStockOnly && variant.stock <= 0) return false;
-    if (filters.sizes.length > 0 && (!variant.size || !filters.sizes.includes(variant.size))) {
-      return false;
-    }
-    if (
-      filters.colors.length > 0 &&
-      (!variant.color_name || !filters.colors.includes(variant.color_name))
-    ) {
-      return false;
-    }
-    if (filters.minPrice !== null && variant.price < filters.minPrice) return false;
-    if (filters.maxPrice !== null && variant.price > filters.maxPrice) return false;
-    return true;
-  });
-  return variants.length > 0;
-}
-
-const SORTERS: Record<SortKey, (a: CatalogueProduct, b: CatalogueProduct) => number> = {
-  newest: (a, b) => (b.published_at ?? "").localeCompare(a.published_at ?? ""),
-  name: (a, b) => a.name.localeCompare(b.name, "ar"),
-  "price-asc": (a, b) => (productPrice(a)?.min ?? 0) - (productPrice(b)?.min ?? 0),
-  "price-desc": (a, b) => (productPrice(b)?.max ?? 0) - (productPrice(a)?.max ?? 0),
-};
-
-export function applyCatalogueFilters(
-  products: CatalogueProduct[],
-  filters: CatalogueFilters,
-): CatalogueProduct[] {
-  const needle = normalizeArabic(filters.query);
-
-  const matched = products.filter((product) => {
-    if (filters.categorySlug && product.categories?.slug !== filters.categorySlug) return false;
-    if (!matchesQuery(product, needle)) return false;
-    if (!matchesVariants(product, filters)) return false;
-    return true;
+const cataloguePageQuery = (filters: CatalogueFilters, page: number) =>
+  queryOptions({
+    queryKey: ["catalogue", filters, page] as const,
+    queryFn: () => fetchCataloguePage(filters, page),
+    // Keeps the current page on screen while the next loads, so paging does not
+    // flash a skeleton over products the buyer is already looking at.
+    placeholderData: keepPreviousData,
   });
 
-  return matched.sort(SORTERS[filters.sort]);
+export function useCataloguePage(filters: CatalogueFilters, page: number) {
+  return useQuery(cataloguePageQuery(filters, page));
 }
 
 /** Which filters are actually narrowing the list, so the UI can show a count. */

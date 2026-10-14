@@ -6,8 +6,7 @@ import { CatalogueView } from "@/components/storefront/catalogue-view";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form";
 import { useI18n } from "@/lib/i18n-context";
-import { useProducts } from "@/lib/queries";
-import { EMPTY_FILTERS, normalizeArabic } from "@/lib/catalogue";
+import { EMPTY_FILTERS } from "@/lib/catalogue";
 
 export const Route = createFileRoute("/search")({
   validateSearch: (search: Record<string, unknown>): { q?: string } => ({
@@ -29,11 +28,10 @@ function SearchPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const { q } = Route.useSearch();
-  const { data: products, isPending } = useProducts();
   const [draft, setDraft] = useState(q ?? "");
 
   const query = (q ?? "").trim();
-  const hasQuery = normalizeArabic(query).length > 0;
+  const hasQuery = query.length > 0;
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -60,9 +58,8 @@ function SearchPage() {
           </Button>
         </form>
 
-        {hasQuery && !isPending && (
+        {hasQuery && (
           <CatalogueView
-            products={products ?? []}
             heading={`${t("search.for")} "${query}"`}
             initialFilters={{ ...EMPTY_FILTERS, query }}
           />

@@ -91,16 +91,6 @@ const PRODUCT_SELECT = `
   )
 `;
 
-async function fetchProducts(): Promise<CatalogueProduct[]> {
-  const { data, error } = await getSupabase()
-    .from("products")
-    .select(PRODUCT_SELECT)
-    .eq("status", "published")
-    .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
-  return (data ?? []) as unknown as CatalogueProduct[];
-}
-
 async function fetchProduct(slug: string): Promise<CatalogueProduct | null> {
   const { data, error } = await getSupabase()
     .from("products")
@@ -172,9 +162,6 @@ export function useCategories() {
   return useQuery(categoriesQuery());
 }
 
-export const productsQuery = () =>
-  queryOptions({ queryKey: ["products"] as const, queryFn: fetchProducts });
-
 export const productQuery = (slug: string) =>
   queryOptions({
     queryKey: ["product", slug] as const,
@@ -187,10 +174,6 @@ export const reviewsQuery = (productId?: string) =>
     queryKey: ["reviews", productId ?? "all"] as const,
     queryFn: () => fetchReviews(productId),
   });
-
-export function useProducts() {
-  return useQuery(productsQuery());
-}
 
 export function useProduct(slug: string) {
   return useQuery(productQuery(slug));

@@ -52,16 +52,19 @@ export default defineConfig({
     {
       name: "desktop",
       use: { ...devices["Desktop Chrome"] },
-      testIgnore: /(responsive|admin-shell|cart-drawer|admin-export|performance)\.spec\.ts/,
+      testIgnore:
+        /(responsive|admin-shell|cart-drawer|admin-export|performance|catalogue)\.spec\.ts/,
     },
     {
       name: "mobile",
       use: { ...devices["Pixel 7"] },
-      testIgnore: /(responsive|admin-shell|cart-drawer|admin-export|performance)\.spec\.ts/,
+      testIgnore:
+        /(responsive|admin-shell|cart-drawer|admin-export|performance|catalogue)\.spec\.ts/,
     },
     {
       name: "responsive",
-      testMatch: /(responsive|admin-shell|cart-drawer|admin-export|performance)\.spec\.ts/,
+      testMatch:
+        /(responsive|admin-shell|cart-drawer|admin-export|performance|catalogue)\.spec\.ts/,
     },
   ],
 
