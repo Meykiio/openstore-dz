@@ -851,6 +851,21 @@
   border-color: var(--primary-solid);
   box-shadow: 0 0 0 4px var(--primary-glow-sm);
 }
+
+/*
+ * Compact select for headers and toolbars.
+ *
+ * Same affordance as the form select, sized to 40px so it sits flush beside the
+ * icon buttons in a header row instead of making that row taller than they are.
+ */
+.form-select-compact {
+  height: 40px;
+  padding: 0 10px;
+  font-size: 13px;
+  width: auto;
+  min-width: 7.5rem;
+  max-width: 11rem;
+}
 .form-input[aria-invalid="true"],
 .form-textarea[aria-invalid="true"] {
   border-color: var(--error);

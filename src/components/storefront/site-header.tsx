@@ -52,7 +52,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="ms-auto flex items-center gap-2">
-          <LocaleSwitcher className="hidden sm:inline-flex" />
+          <LocaleSwitcher className="hidden sm:block" />
           <ThemeToggle />
 
           <button
@@ -104,7 +104,7 @@ export function SiteHeader() {
               {link.label}
             </Link>
           ))}
-          <LocaleSwitcher className="mt-2 self-start sm:hidden" />
+          <LocaleSwitcher className="mt-2 sm:hidden" />
         </nav>
       </div>
     </header>

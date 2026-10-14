@@ -403,3 +403,30 @@ Known issues:
 Next:
 
 - The admin shell: port the collapsible sidebar from design system 02.
+
+## Session report - language dropdown, and the theme toggle question
+
+Completed:
+
+- The language switcher is a native select (a real dropdown) instead of three
+  segmented buttons, with a compact variant for header rows.
+- Playwright timeout and worker count now scale for the built-preview case. Some
+  routes take over 40s against the old 45s ceiling, which was surfacing as
+  intermittent failures that looked like page bugs.
+
+Verified (what was actually run):
+
+- npm run check green.
+- Responsive suite against the built output, 1 worker: 10 passed.
+
+Known issues:
+
+- The theme toggle was never missing; it renders in both the storefront header and
+  the admin aside. In the admin it sits below the fold inside an overflow-y-auto
+  column. That is a shell layout bug and is being fixed with the sidebar, not
+  patched separately. Recorded so it is not "fixed" twice.
+- The reported "not responsive" cart drawer and admin sidebar are still outstanding.
+
+Next:
+
+- The admin shell: port the collapsible sidebar from design system 02.

@@ -77,6 +77,7 @@ export const arStorefront = {
   "cart.freeShippingRemaining": "للحصول على توصيل مجاني",
   "cart.gotFreeShipping": "تحصل على توصيل مجاني",
   "cart.freeShippingProgress": "التقدم نحو التوصيل المجاني",
+  "nav.language": "اللغة",
   "checkout.title": "إتمام الطلب",
   "checkout.yourInfo": "معلومات التوصيل",
   "checkout.fullName": "الاسم الكامل",

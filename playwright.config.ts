@@ -17,15 +17,16 @@ import { defineConfig, devices } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./e2e",
-  timeout: 45_000,
+  // The dev and preview servers are single Node processes. Against a built
+  // preview, `networkidle` on a Supabase-backed route can take tens of seconds,
+  // so both the timeout and the worker count are relaxed for that case rather
+  // than left to fail intermittently and be mistaken for a page bug.
+  timeout: process.env.E2E_BASE_URL ? 120_000 : 45_000,
   expect: { timeout: 10_000 },
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
-  // The dev and preview servers are single Node processes, so parallel workers
-  // contend rather than help. At the default (one per core) `networkidle` starts
-  // timing out on slower routes, which looks like a page bug and is not one.
-  workers: process.env.CI || process.env.E2E_BASE_URL ? 2 : undefined,
+  workers: process.env.CI ? 2 : process.env.E2E_BASE_URL ? 1 : undefined,
   reporter: process.env.CI ? [["github"], ["list"]] : [["list"]],
 
   use: {
