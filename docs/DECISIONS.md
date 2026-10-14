@@ -113,23 +113,33 @@ and must never carry a `VITE_` prefix.
 
 ---
 
-## 7. Algerian Emerald palette, on the Commerce Storefront reference system
+## 7. Burnt orange palette, on the Commerce Storefront reference system
 
 **Context.** A colour palette was required. The reference design system's own
 "Commerce Storefront" system (system 02) supplied the token vocabulary, component
 structure, motion, spacing, radius and elevation.
 
-**Decision.** Carry the reference system verbatim and replace only colour values with an
-Algerian Emerald palette. `--primary` is `#047857` light and `#34d399` dark, on a
-neutral ladder with a faint green cast.
+**Decision.** Carry the reference system and its palette: burnt orange primary
+(`#c2410c` light, `#fb923c` dark), a crimson secondary (`#e11d48`) and an amber
+tertiary (`#b45309`). Two values deviate from the reference for contrast, both
+measured rather than assumed. The reference primary `#d9480f` scores 4.29:1
+white-on-orange and 4.02:1 orange-on-cream, under the 4.5:1 AA floor for text below
+18.66px, so `#c2410c` is used: the same hue one step darker, at 5.18:1 and 4.85:1.
+Muted text was darkened from `#78716c` to `#6b6460` for the same reason.
 
-**Reason.** OpenStore is a platform, not a brand. Neutral-first chrome lets any seller's
-product photography lead, whatever the vertical. Green and white is the most loaded pair
-in Algeria, so the default install reads as native without explanation.
+**Reason.** OpenStore is a platform, not a brand. Neutral-first chrome lets any
+seller's product photography lead, whatever the vertical. The palette is carried
+rather than invented, so the component CSS and the tokens do not fight.
 
-**Consequences.** The reference's three fonts were Latin-only, so Cairo was added as the
-Arabic fallback and an Arabic density override was introduced. Both are additive; no
-structural rule from the reference was changed.
+**Correction.** This entry previously recorded an "Algerian Emerald" palette with
+`--primary: #047857` on a green-cast neutral ladder. That palette was never shipped
+and appears nowhere in `src/styles.css`. It was documented long after the code had
+moved, and it was repeated in `FEATURES.md` until both were corrected. The earlier
+text was wrong; the code was right.
+
+**Consequences.** The reference's three fonts were Latin-only, so Cairo was added as
+the Arabic fallback and an Arabic density override was introduced. Both are
+additive; no structural rule from the reference was changed.
 
 ---
 
@@ -172,3 +182,34 @@ The beta is already running in production in the owner's `aura-wear-dz`.
 **Consequences.** If Nitro breaks, the fallback is a Vite SPA plus a build-time prerender
 step for product pages, which is a real amount of work. Revisit when Nitro reaches 3.0
 stable.
+
+---
+
+## 11. The size guide editor asks for three things, not one
+
+**Context.** The editor was a textarea expecting a tab-separated table, with a
+placeholder as the only instruction, and every label written in Arabic regardless of
+the owner's language. The owner reported it as confusing and predicted that shop
+owners would be too. Fashion returns run 35 to 50 percent without a size guide
+against 8 to 15 percent with one, so this is load-bearing rather than polish.
+
+**Decision.** Ask for three things. The table, as an editable grid with add and
+remove for rows and columns. The unit, carried in the column labels. And how the
+measurements were taken, as a prompted textarea rather than an optional extra. A
+clothing template fills a worked example, and pasting a spreadsheet still replaces
+the whole table in one action.
+
+**Reason.** Nielsen Norman Group's sizing research found the most common failure is
+a chart that never explains how a measurement was taken, whether a shoe length is
+inner or outer, so a buyer cannot act on the number. Shopify's guidance adds that
+most shoppers do not own a tape measure. A table of bare numbers therefore cannot do
+the job alone, and the original editor made entering the numbers hard as well, which
+is the opposite of the point.
+
+**Consequences.** Saving is refused until there is at least one column. The unit
+lives in the column labels instead of its own field, because a separate field would
+have to be combined with the headers anyway and two sources of truth invite drift.
+The paste path is kept, because an owner whose numbers are already in a spreadsheet
+should not be made to retype them. The grid's operations are pure functions in
+`src/lib/size-guide-grid.ts`, unit-tested at the edges that matter: removing the last
+column, and pasting a ragged copy.

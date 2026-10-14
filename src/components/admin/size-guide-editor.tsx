@@ -5,64 +5,39 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, Input, Textarea } from "@/components/ui/form";
+import { SizeGuideGrid } from "./size-guide-grid";
 import { useI18n } from "@/lib/i18n-context";
-import { getSupabase } from "@/lib/supabase/client";
+import { deleteSizeGuide, fetchAdminSizeGuide, saveSizeGuide } from "@/lib/admin-content";
 import {
-  deleteSizeGuide,
-  formatGuideTable,
-  parseGuideTable,
-  saveSizeGuide,
-  type SizeGuideRow,
-} from "@/lib/admin-content";
-
-async function fetchGuide(productId: string): Promise<SizeGuideRow | null> {
-  const { data, error } = await getSupabase()
-    .from("size_guides")
-    .select("id, product_id, name, headers, rows, note, sort_order")
-    .eq("product_id", productId)
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data) return null;
-  const rows = Array.isArray(data.rows)
-    ? (data.rows as unknown[])
-        .filter((row): row is unknown[] => Array.isArray(row))
-        .map((row) => row.map((cell) => String(cell ?? "")))
-    : [];
-  return {
-    id: data.id,
-    product_id: data.product_id,
-    name: data.name,
-    headers: (data.headers as string[]) ?? [],
-    rows,
-    note: data.note,
-    sort_order: data.sort_order,
-  };
-}
+  EMPTY_GUIDE_GRID,
+  clothingTemplateGrid,
+  type SizeGuideGridValue,
+} from "@/lib/size-guide-grid";
 
 /**
  * Size guide editor for one product.
  *
- * The editor is a plain textarea of tab- or comma-separated values rather than a
- * grid widget, because a shop owner's measurements live in a spreadsheet and
- * pasting is faster than typing into cell inputs. `parseGuideTable` accepts
- * either separator, so a paste from Sheets, Excel or a CSV all work.
+ * Asks for the table, the unit and how the measurements were taken. The reasoning
+ * for all three, and what happens when one is missing, is in `docs/DECISIONS.md`
+ * entry 11. The short version: a chart with no method is the single most common
+ * reason a buyer still guesses.
  */
 export function SizeGuideEditor({ productId }: { productId: string }) {
   const { t } = useI18n();
   const queryClient = useQueryClient();
   const { data: guide, isPending } = useQuery({
     queryKey: ["admin_size_guide", productId],
-    queryFn: () => fetchGuide(productId),
+    queryFn: () => fetchAdminSizeGuide(productId),
   });
 
   const [name, setName] = useState("");
-  const [table, setTable] = useState("");
+  const [grid, setGrid] = useState<SizeGuideGridValue>(EMPTY_GUIDE_GRID);
   const [note, setNote] = useState("");
 
   useEffect(() => {
     if (!guide) return;
     setName(guide.name);
-    setTable(formatGuideTable(guide.headers, guide.rows));
+    setGrid({ headers: guide.headers, rows: guide.rows });
     setNote(guide.note ?? "");
   }, [guide]);
 
@@ -72,17 +47,15 @@ export function SizeGuideEditor({ productId }: { productId: string }) {
   };
 
   const save = useMutation({
-    mutationFn: () => {
-      const parsed = parseGuideTable(table);
-      return saveSizeGuide({
+    mutationFn: () =>
+      saveSizeGuide({
         id: guide?.id,
         product_id: productId,
-        name: name.trim() || "دليل المقاسات",
-        headers: parsed.headers,
-        rows: parsed.rows,
+        name: name.trim() || t("admin.sizeGuide.defaultName"),
+        headers: grid.headers,
+        rows: grid.rows,
         note: note.trim() || null,
-      });
-    },
+      }),
     onSuccess: () => {
       invalidate();
       toast.success(t("admin.settings.saved"));
@@ -94,14 +67,29 @@ export function SizeGuideEditor({ productId }: { productId: string }) {
     mutationFn: () => deleteSizeGuide(guide!.id),
     onSuccess: () => {
       setName("");
-      setTable("");
+      setGrid(EMPTY_GUIDE_GRID);
       setNote("");
       invalidate();
     },
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const applyClothingTemplate = () => {
+    setGrid(
+      clothingTemplateGrid({
+        size: t("admin.sizeGuide.dimSize"),
+        chest: t("admin.sizeGuide.dimChest"),
+        waist: t("admin.sizeGuide.dimWaist"),
+        length: t("admin.sizeGuide.dimLength"),
+      }),
+    );
+    if (!name.trim()) setName(t("admin.sizeGuide.defaultName"));
+    if (!note.trim()) setNote(t("admin.sizeGuide.templateNote"));
+  };
+
   if (isPending) return null;
+
+  const hasTable = grid.headers.length > 0;
 
   return (
     <Card>
@@ -110,36 +98,43 @@ export function SizeGuideEditor({ productId }: { productId: string }) {
       </CardHeader>
       <CardBody className="flex flex-col gap-4">
         <p className="rounded-[10px] bg-surface-mid px-4 py-3 text-xs text-on-surface-muted">
-          الصق الجدول من Excel أو Google Sheets مباشرة. السطر الأول عناوين الأعمدة، والأسطر الموالية
-          القياسات.
+          {t("admin.sizeGuide.intro")}
         </p>
 
         <Field label={t("common.name")}>
           <Input
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder="دليل المقاسات"
+            placeholder={t("admin.sizeGuide.defaultName")}
             maxLength={80}
           />
         </Field>
 
-        <Field label="الجدول">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={applyClothingTemplate}>
+            {t("admin.sizeGuide.useTemplate")}
+          </Button>
+          {hasTable && (
+            <span className="text-xs text-on-surface-muted">
+              {t("admin.sizeGuide.templateHint")}
+            </span>
+          )}
+        </div>
+
+        <SizeGuideGrid value={grid} onChange={setGrid} />
+
+        <Field label={t("admin.sizeGuide.methodLabel")} hint={t("admin.sizeGuide.methodHint")}>
           <Textarea
-            value={table}
-            onChange={(event) => setTable(event.target.value)}
-            rows={6}
-            dir="ltr"
-            className="font-mono text-xs"
-            placeholder={"المقاس\tالصدر\tالطول\nS\t96\t68\nM\t100\t70"}
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            rows={2}
+            maxLength={300}
+            placeholder={t("admin.sizeGuide.methodPlaceholder")}
           />
         </Field>
 
-        <Field label={t("checkout.note")}>
-          <Input value={note} onChange={(event) => setNote(event.target.value)} maxLength={200} />
-        </Field>
-
         <div className="flex flex-wrap gap-2">
-          <Button disabled={!table.trim() || save.isPending} onClick={() => save.mutate()}>
+          <Button disabled={!hasTable || save.isPending} onClick={() => save.mutate()}>
             <Save size={16} aria-hidden="true" />
             {save.isPending ? t("common.saving") : t("common.save")}
           </Button>

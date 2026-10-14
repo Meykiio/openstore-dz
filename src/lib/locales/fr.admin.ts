@@ -99,4 +99,29 @@ export const frAdmin = {
   "admin.nav.expand": "Développer le menu",
   "admin.nav.menu": "Ouvrir le menu",
   "admin.shopLink": "Voir la boutique",
+  "admin.sizeGuide.intro":
+    "Ajoutez le tableau des tailles. Mettez les intitulés sur la première ligne et les valeurs en dessous. Vous pouvez aussi coller un tableau entier depuis Excel ou Google Sheets.",
+  "admin.sizeGuide.empty":
+    "Aucun tableau pour l'instant. Utilisez un modèle, ou ajoutez une colonne pour commencer.",
+  "admin.sizeGuide.columnLabel": "Colonne {index}",
+  "admin.sizeGuide.columnHint": "Intitulé",
+  "admin.sizeGuide.removeColumn": "Supprimer la colonne",
+  "admin.sizeGuide.removeRow": "Supprimer la ligne",
+  "admin.sizeGuide.addColumn": "Ajouter une colonne",
+  "admin.sizeGuide.addRow": "Ajouter une ligne",
+  "admin.sizeGuide.pasteHint":
+    "Collez un tableau entier depuis Excel ou Google Sheets dans n'importe quelle case : il remplacera le tableau actuel.",
+  "admin.sizeGuide.dimSize": "Taille",
+  "admin.sizeGuide.dimChest": "Poitrine (cm)",
+  "admin.sizeGuide.dimWaist": "Taille (cm)",
+  "admin.sizeGuide.dimLength": "Longueur (cm)",
+  "admin.sizeGuide.defaultName": "Guide des tailles",
+  "admin.sizeGuide.templateNote":
+    "Toutes les mesures sont en centimètres, prises sur le vêtement posé à plat.",
+  "admin.sizeGuide.useTemplate": "Utiliser un modèle de vêtement",
+  "admin.sizeGuide.templateHint": "Le modèle remplacera le tableau actuel.",
+  "admin.sizeGuide.methodLabel": "Comment les mesures ont-elles été prises ?",
+  "admin.sizeGuide.methodHint": "L'information la plus souvent absente.",
+  "admin.sizeGuide.methodPlaceholder":
+    "Ex. : longueur de l'épaule au bas, poitrine mesurée sous les aisselles.",
 };

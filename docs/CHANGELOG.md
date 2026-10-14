@@ -519,3 +519,37 @@ Next:
 
 - The size guide, which the owner described as confusing, so the fix is copy and
   structure rather than layout.
+
+## Session report - the size guide, rebuilt
+
+Completed:
+
+- Size guide editor rebuilt as an editable grid. The owner no longer types a
+  tab-separated table into a blank box.
+- Clothing template, real empty state, add/remove row and column, all copy
+  translated into three languages.
+- The editor now asks for the table, the unit and the measurement method. The
+  research was decisive that a bare table of numbers does not reduce returns;
+  NN/G's most-observed failure is a chart that never explains how a length was
+  measured.
+- Spreadsheet paste preserved: a tab or newline paste replaces the whole table.
+- Grid operations extracted to `src/lib/size-guide-grid.ts` with 14 unit tests,
+  covering removing the last column and pasting a ragged copy.
+- Corrected DECISIONS.md entry 7, which documented an "Algerian Emerald" palette
+  that never existed in the code.
+
+Verified (what was actually run):
+
+- npm run check green, unit tests included.
+- Responsive and shell suites against the built output: 19 passed.
+
+Known issues:
+
+- The storefront rendering of the guide was not changed, only the editor. It has
+  always rendered headers and rows correctly.
+- Still outstanding: the extra shop and delivery settings, and the Google Sheets
+  export.
+
+Next:
+
+- The remaining shop and delivery settings.

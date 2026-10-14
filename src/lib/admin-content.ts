@@ -108,7 +108,27 @@ export function parseGuideTable(text: string): { headers: string[]; rows: string
   return { headers: split(first), rows: rest.map(split) };
 }
 
-/** The inverse, so the editor can round-trip without losing data. */
-export function formatGuideTable(headers: string[], rows: string[][]): string {
-  return [headers.join("\t"), ...rows.map((row) => row.join("\t"))].join("\n");
+/** The size guide row for one product, or null when it has none yet. */
+export async function fetchAdminSizeGuide(productId: string): Promise<SizeGuideRow | null> {
+  const { data, error } = await getSupabase()
+    .from("size_guides")
+    .select("id, product_id, name, headers, rows, note, sort_order")
+    .eq("product_id", productId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) return null;
+  const rows = Array.isArray(data.rows)
+    ? (data.rows as unknown[])
+        .filter((row): row is unknown[] => Array.isArray(row))
+        .map((row) => row.map((cell) => String(cell ?? "")))
+    : [];
+  return {
+    id: data.id,
+    product_id: data.product_id,
+    name: data.name,
+    headers: (data.headers as string[]) ?? [],
+    rows,
+    note: data.note,
+    sort_order: data.sort_order,
+  };
 }

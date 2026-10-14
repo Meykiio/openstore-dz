@@ -98,4 +98,28 @@ export const enAdmin = {
   "admin.nav.expand": "Expand menu",
   "admin.nav.menu": "Open menu",
   "admin.shopLink": "View shop",
+  "admin.sizeGuide.intro":
+    "Add the size table. Put the labels in the first row and the values underneath. You can also paste a whole table from Excel or Google Sheets.",
+  "admin.sizeGuide.empty": "No table yet. Use a template, or add a column to start.",
+  "admin.sizeGuide.columnLabel": "Column {index}",
+  "admin.sizeGuide.columnHint": "Label",
+  "admin.sizeGuide.removeColumn": "Remove column",
+  "admin.sizeGuide.removeRow": "Remove row",
+  "admin.sizeGuide.addColumn": "Add column",
+  "admin.sizeGuide.addRow": "Add row",
+  "admin.sizeGuide.pasteHint":
+    "Paste a whole table from Excel or Google Sheets into any cell, and it replaces the table.",
+  "admin.sizeGuide.dimSize": "Size",
+  "admin.sizeGuide.dimChest": "Chest (cm)",
+  "admin.sizeGuide.dimWaist": "Waist (cm)",
+  "admin.sizeGuide.dimLength": "Length (cm)",
+  "admin.sizeGuide.defaultName": "Size guide",
+  "admin.sizeGuide.templateNote":
+    "All measurements are in centimetres, taken from the garment laid flat.",
+  "admin.sizeGuide.useTemplate": "Use a clothing template",
+  "admin.sizeGuide.templateHint": "The template will replace the current table.",
+  "admin.sizeGuide.methodLabel": "How were the measurements taken?",
+  "admin.sizeGuide.methodHint": "The most commonly missing piece of information.",
+  "admin.sizeGuide.methodPlaceholder":
+    "e.g. length from shoulder to hem, chest measured under the arms.",
 };
