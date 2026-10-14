@@ -78,6 +78,7 @@ export const frStorefront = {
   "cart.gotFreeShipping": "Vous bénéficiez de la livraison gratuite",
   "cart.freeShippingProgress": "Progression vers la livraison gratuite",
   "nav.language": "Langue",
+  "common.loadMore": "Charger plus",
   "checkout.title": "Finaliser la commande",
   "checkout.yourInfo": "Informations de livraison",
   "checkout.fullName": "Nom complet",

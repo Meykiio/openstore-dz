@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { PhoneCall } from "lucide-react";
-import { AdminOrderList } from "@/components/admin/order-list";
+import { OrdersSection } from "@/components/admin/orders-section";
 import {
   LowStock,
   RevenueChart,
@@ -9,12 +8,11 @@ import {
   TopProducts,
   WilayaTable,
 } from "@/components/admin/dashboard-widgets";
-import { Button } from "@/components/ui/button";
 import { ErrorState, LoadingState } from "@/components/ui/feedback";
 import { useI18n } from "@/lib/i18n-context";
 import { formatDzd } from "@/lib/format";
 import { useAnalytics, refusalRate, wilayasToWatch } from "@/lib/analytics";
-import { needsCall, sortOrdersForQueue, useAdminOrders } from "@/lib/admin";
+import { useOrdersPage, usePendingOrdersCount } from "@/lib/admin";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/")({
@@ -29,15 +27,18 @@ function DashboardPage() {
   const [queueOnly, setQueueOnly] = useState(false);
 
   const analytics = useAnalytics(range);
-  const orders = useAdminOrders();
+  // The queue is a server-side filter, not a re-sort of whatever happened to be
+  // loaded. Loading the first page and filtering it in the browser would report a
+  // queue size that depends on the page size.
+  const orders = useOrdersPage(queueOnly ? "pending" : null);
+  const pending = usePendingOrdersCount();
 
-  const queue = useMemo(() => (orders.data ?? []).filter(needsCall), [orders.data]);
-
-  // All orders by default, queue first. See `sortOrdersForQueue` for why.
   const shown = useMemo(
-    () => sortOrdersForQueue(orders.data ?? [], queueOnly),
-    [orders.data, queueOnly],
+    () => (orders.data?.pages ?? []).flatMap((page) => page.rows),
+    [orders.data],
   );
+  const total = orders.data?.pages[0]?.total ?? 0;
+  const queueCount = pending.data ?? 0;
 
   if (orders.isPending) return <LoadingState />;
   if (orders.isError) {
@@ -95,36 +96,24 @@ function DashboardPage() {
             <StatTile label={t("admin.chart.avgOrder")} value={formatDzd(avgOrder, locale)} />
             <StatTile
               label={t("admin.orders.needsCall")}
-              value={String(queue.length)}
-              tone={queue.length > 0 ? "warning" : "positive"}
+              value={String(queueCount)}
+              tone={queueCount > 0 ? "warning" : "positive"}
             />
           </div>
 
-          {/* Confirmations first, because that is the daily job, but every order
-              stays on the page so nothing appears to vanish. */}
-          <section className="flex flex-col gap-3">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="flex items-center gap-2 font-display text-lg font-semibold">
-                <PhoneCall size={17} className="text-primary" aria-hidden="true" />
-                {t("admin.orders.title")}
-                {queue.length > 0 && (
-                  <span className="grid size-6 place-items-center rounded-full bg-tertiary text-xs font-semibold text-on-tertiary">
-                    {queue.length}
-                  </span>
-                )}
-              </h2>
-              <Button
-                variant={queueOnly ? "primary" : "ghost"}
-                size="sm"
-                aria-pressed={queueOnly}
-                onClick={() => setQueueOnly((value) => !value)}
-              >
-                {queueOnly ? t("admin.orders.all") : t("admin.orders.queue")}
-              </Button>
-            </div>
-
-            <AdminOrderList orders={shown} />
-          </section>
+          {/* Every order stays on the page, so nothing appears to vanish when it
+              is confirmed. The queue is a filter, and its count comes from the
+              server so it does not depend on how many rows are loaded. */}
+          <OrdersSection
+            orders={shown}
+            total={total}
+            queueCount={queueCount}
+            queueOnly={queueOnly}
+            onToggleQueue={() => setQueueOnly((value) => !value)}
+            hasNextPage={Boolean(orders.hasNextPage)}
+            loadingMore={orders.isFetchingNextPage}
+            onLoadMore={() => void orders.fetchNextPage()}
+          />
 
           {data && (
             <div className="grid gap-4 xl:grid-cols-2" data-testid="dashboard-analytics">

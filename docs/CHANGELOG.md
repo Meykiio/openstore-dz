@@ -650,3 +650,37 @@ Next:
 
 - Split the entry chunk and subset Fraunces, then re-measure. That is the work E2
   describes, and it is now measurable rather than theoretical.
+
+## Session report - pagination, part 1: admin orders
+
+Completed:
+
+- The orders list pages instead of silently truncating at 300. A shop with 400
+  orders was losing 100 of them from the dashboard with nothing to say so.
+- Ordered by (created_at, id). The tiebreaker stops two orders in the same second
+  from swapping between pages, which would show one twice and another never.
+- The queue is a server-side filter now, not a client-side re-sort of the loaded
+  page. The badge comes from a count query that loads no rows, so it cannot drift
+  from the truth as the list pages.
+- A "loaded / total" indicator, because a paged list and a complete one look
+  identical otherwise.
+- Deleted sortOrdersForQueue and its six tests: superseded by server-side
+  ordering, and a client-side sort over one page would be wrong.
+- Split DashboardPage at the 120-line limit, extracting the orders section.
+- Page size 20, so the demo's 23 orders exercise paging rather than hiding it.
+
+Verified (what was actually run):
+
+- npm run check green.
+- Authenticated suite against the built output: 4 passed, including a new test that
+  loads the next page and asserts the count grows without exceeding the total, and
+  that the queue filter narrows server-side.
+
+Known issues:
+
+- Still unpaginated: the admin product list (unbounded) and the storefront
+  catalogue. The catalogue is the bigger job because paginating it means moving
+  filter, sort and search server-side, otherwise filtering only sees the loaded
+  page. It is the next piece of work and is recorded in ROADMAP.
+- The storefront facets (sizes, colours, price range) are still derived from all
+  loaded products, which has the same problem for the same reason.

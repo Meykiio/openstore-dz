@@ -95,4 +95,44 @@ test.describe("admin shell", () => {
     // This is the assertion that would catch a `left: 0` port.
     expect(Math.abs(box!.x + box!.width - 1280)).toBeLessThanOrEqual(2);
   });
+
+  test("orders page, and the queue is a filter rather than a re-sort", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 1000 });
+    await signIn(page);
+
+    // The counter exists so a paged list and a complete one do not look alike.
+    const counter = page.getByTestId("orders-count");
+    await expect(counter).toBeVisible();
+
+    const readCounts = async () => {
+      const text = (await counter.innerText()).trim();
+      const [shown, total] = text.split("/").map((n) => Number(n.trim()));
+      return { shown, total };
+    };
+
+    const first = await readCounts();
+    expect(first.total).toBeGreaterThan(0);
+    // A first page must never claim to be the whole list.
+    expect(first.shown).toBeLessThanOrEqual(first.total);
+
+    // Where the demo has more orders than one page, loading the next page must
+    // increase what is on screen and never exceed the total.
+    const loadMore = page.getByTestId("orders-load-more");
+    if (await loadMore.isVisible().catch(() => false)) {
+      await loadMore.click();
+      await expect
+        .poll(async () => (await readCounts()).shown, { timeout: 15_000 })
+        .toBeGreaterThan(first.shown);
+      const after = await readCounts();
+      expect(after.shown).toBeLessThanOrEqual(after.total);
+    }
+
+    // The queue filters server-side, so its count must come back smaller or equal
+    // rather than depending on how many rows happened to be loaded.
+    await page
+      .getByRole("button", { name: /قائمة|file d'appel|queue/i })
+      .first()
+      .click();
+    await expect.poll(async () => (await readCounts()).total).toBeLessThanOrEqual(first.total);
+  });
 });

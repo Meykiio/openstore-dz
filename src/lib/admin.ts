@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { getSupabase } from "./supabase/client";
 import type { Database } from "./supabase/types";
 import type { StoreSettings } from "./queries";
@@ -52,26 +52,76 @@ const ORDER_SELECT = `
   order_items ( id, product_name, variant_label, quantity, unit_price )
 `;
 
-async function fetchAdminOrders(): Promise<AdminOrder[]> {
-  const { data, error } = await getSupabase()
+/** One page of orders, plus what is needed to ask for the next one. */
+export type OrdersPage = {
+  rows: AdminOrder[];
+  total: number;
+  nextOffset: number | null;
+};
+
+const ORDERS_PAGE_SIZE = 20;
+
+/**
+ * A page of orders, newest first.
+ *
+ * This used to be `.limit(300)` with no paging, which meant a shop with 400 orders
+ * silently lost 100 of them from the dashboard. Silent truncation is worse than a
+ * slow list: nothing tells the owner that orders are missing.
+ *
+ * Ordered by `created_at` then `id`. The tiebreaker is not decoration: `created_at`
+ * is not unique, and without a stable second key two orders created in the same
+ * second can swap places between pages, so one is shown twice and another never.
+ */
+async function fetchOrdersPage(offset: number, status: OrderStatus | null): Promise<OrdersPage> {
+  const supabase = getSupabase();
+  let request = supabase
     .from("orders")
-    .select(ORDER_SELECT)
+    .select(ORDER_SELECT, { count: "exact" })
     .order("created_at", { ascending: false })
-    .limit(300);
+    .order("id", { ascending: false });
+
+  if (status) request = request.eq("status", status);
+
+  const { data, error, count } = await request.range(offset, offset + ORDERS_PAGE_SIZE - 1);
   if (error) throw new Error(error.message);
-  return (data ?? []) as unknown as AdminOrder[];
+
+  const rows = (data ?? []) as unknown as AdminOrder[];
+  const total = count ?? 0;
+  const consumed = offset + rows.length;
+  return { rows, total, nextOffset: consumed < total ? consumed : null };
 }
 
-const adminOrdersQuery = () =>
-  queryOptions({ queryKey: ["admin_orders"] as const, queryFn: fetchAdminOrders });
-
-export function useAdminOrders() {
-  return useQuery(adminOrdersQuery());
+/**
+ * Paged orders. `status` null means every order; a status narrows it server-side.
+ *
+ * The queue is a filter here, not a client-side re-sort of whatever happened to be
+ * loaded. That distinction is the whole reason the badge and the list can disagree
+ * with the truth if the filtering is done in the browser.
+ */
+export function useOrdersPage(status: OrderStatus | null) {
+  return useInfiniteQuery({
+    queryKey: ["admin_orders", status ?? "all"] as const,
+    queryFn: ({ pageParam }) => fetchOrdersPage(pageParam, status),
+    initialPageParam: 0,
+    getNextPageParam: (last) => last.nextOffset,
+  });
 }
 
-/** Statuses that still need a phone call. The queue that protects margin. */
-export function needsCall(order: AdminOrder): boolean {
-  return order.status === "pending";
+/** Count only, for the queue badge. Never loads a row. */
+async function countOrders(status: OrderStatus): Promise<number> {
+  const { count, error } = await getSupabase()
+    .from("orders")
+    .select("id", { count: "exact", head: true })
+    .eq("status", status);
+  if (error) throw new Error(error.message);
+  return count ?? 0;
+}
+
+export function usePendingOrdersCount() {
+  return useQuery({
+    queryKey: ["admin_orders_count", "pending"] as const,
+    queryFn: () => countOrders("pending"),
+  });
 }
 
 export async function setOrderStatus(
@@ -133,22 +183,4 @@ export async function deleteReview(id: string): Promise<void> {
 export async function saveStoreSettings(patch: Partial<StoreSettings>): Promise<void> {
   const { error } = await getSupabase().from("store_settings").update(patch).eq("id", 1);
   if (error) throw new Error(error.message);
-}
-
-/**
- * Orders in the order the dashboard should show them: the ones needing a call
- * first, then newest first.
- *
- * Confirming an order drops it out of the queue and down the list rather than
- * making it disappear. An order that vanishes from the screen reads as deleted,
- * which is a worse failure than a longer list.
- *
- * Pure and separate from the component so the ordering is unit-testable.
- */
-export function sortOrdersForQueue(orders: AdminOrder[], queueOnly = false): AdminOrder[] {
-  const visible = queueOnly ? orders.filter(needsCall) : orders;
-  return [...visible].sort((a, b) => {
-    const queueDiff = Number(needsCall(b)) - Number(needsCall(a));
-    return queueDiff !== 0 ? queueDiff : b.created_at.localeCompare(a.created_at);
-  });
 }
