@@ -26,7 +26,8 @@ OpenStore répond à ça : une vraie boutique, en arabe, qui s'installe en une �
 
 **Version 0.1.0 — pas encore une boutique utilisable.** Le socle est construit et
 vérifié : le projet démarre, le contrôle qualité passe, le design system est en place. Le
-catalogue, le paiement et le tableau de bord suivent, dans l'ordre.
+catalogue, le paiement, le tableau de bord et la livraison sont construits et vérifiés. Ce
+qui reste est regroupé en phases dans `docs/ROADMAP.md`.
 
 | Sprint | Ce qu'il apporte                                             | État                            |
 | ------ | ------------------------------------------------------------ | ------------------------------- |
@@ -39,8 +40,20 @@ catalogue, le paiement et le tableau de bord suivent, dans l'ordre.
 | 6      | Boutique en ligne et pages produit                           | **Terminé**                     |
 | 7      | Panier et paiement à la livraison                            | **Terminé**                     |
 | 8      | Livraison Guepex et suivi                                    | **Terminé**                     |
-| 9      | Accessibilité et performance                                 | Prévu                           |
-| 10     | Mise en production                                           | Prévu                           |
+| 9      | Accessibilité                                                | **Terminé**                     |
+| 10     | Mise en production                                           | Partiel                         |
+
+> **Les sprints 0 à 9 sont implémentés.** Le sprint 10 est partiel : la performance n'a pas
+> encore été mesurée sur la version construite, et rien n'est déployé.
+>
+> L'accessibilité n'est pas un audit ponctuel : axe-core vérifie les règles WCAG 2.1 A et
+> AA sur chaque page, à chaque exécution. La mise en page est mesurée de la même façon — pas
+> de débordement horizontal entre 320 et 1280, avec une taille minimale des zones tactiles —
+> et toujours sur la version construite, jamais sur le serveur de développement.
+>
+> **Deux étapes humaines avant une vraie boutique.** Le webhook Guepex répond `503` tant que
+> `GUEPEX_WEBHOOK_SECRET` n'est pas défini, et les images de démonstration sont des
+> placeholders externes à remplacer.
 
 `docs/CHANGELOG.md` ne décrit que ce qui a été vérifié. Ce qui n'y figure pas n'existe
 pas encore.

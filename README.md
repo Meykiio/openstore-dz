@@ -16,8 +16,9 @@ Arabic (RTL) first. French. Cash on delivery. No subscription, no setup fee, no 
 
 **This is v0.1.0 and it is not usable as a shop yet.** The foundation is built and
 verified: the app runs, the quality gate is green, and the design system is in place. The
-catalogue, checkout and dashboard are being built in order, and this file will say so the
-moment each one is verified.
+catalogue, checkout, dashboard and delivery integration are built and verified. The sprint
+table below covers the original ten sprints; the work after them is grouped into phases in
+`docs/ROADMAP.md`, and `docs/CHANGELOG.md` records what was actually run.
 
 | Sprint | What it delivers                                           | State                         |
 | ------ | ---------------------------------------------------------- | ----------------------------- |
@@ -30,13 +31,18 @@ moment each one is verified.
 | 6      | Storefront, product pages, installable PWA                 | **Done**                      |
 | 7      | Cart and cash-on-delivery checkout                         | **Done**                      |
 | 8      | Guepex delivery, tracking, webhook                         | **Done**                      |
-| 9      | Full accessibility and performance gates                   | Partial                       |
+| 9      | Accessibility gates                                        | **Done**                      |
 | 10     | Launch readiness                                           | Partial                       |
 
-> **Sprints 0-8 are implemented.** Sprints 9 and 10 are partial: the app has a
-> three-language UI, SEO titles and route error boundaries, but no formal
-> accessibility or performance audit has been run against the built output, and
-> nothing has been deployed.
+> **Sprints 0-9 are implemented.** Sprint 10 is partial: the app has a three-language UI,
+> SEO titles and route error boundaries, but no measurement of performance against the
+> built output has been taken yet, and nothing has been deployed.
+>
+> Accessibility is done and enforced rather than audited once: axe-core runs against WCAG
+> 2.1 A and AA on every visitor page in desktop and mobile projects, on every run. Layout
+> is measured the same way, with no page-level horizontal overflow at any width from 320 to
+> 1280, and a minimum tap-target size, checked against the built output rather than the dev
+> server.
 >
 > **Two things need a human before this is a real shop.** The Guepex webhook
 > returns `503` until `GUEPEX_WEBHOOK_SECRET` is set on the Supabase project, and
@@ -66,7 +72,7 @@ That is not a design decision anyone made. It is the gap.
 
 ---
 
-## What it will do
+## What it does
 
 - **Storefront** in Arabic RTL, mobile-first, that a shop owner can run themselves
 - **Products and packs**, with colour and size variants and multi-image galleries

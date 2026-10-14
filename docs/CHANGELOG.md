@@ -261,3 +261,36 @@ Known issues:
 Next:
 
 - Phase B. Stopdesk pickup first.
+
+## Session report - README truth pass
+
+Completed:
+
+- All three READMEs corrected. English claimed the catalogue, checkout and
+  dashboard were still being built, two lines above a table marking their sprints
+  Done, and claimed no accessibility audit had run. Arabic carried the same
+  sentences. French stopped at sprint 8 entirely, with no sprint 9 or 10 row and
+  no note about the two human steps, so a French reader got a more optimistic
+  picture than an English or Arabic one.
+- Sprint 9 (Accessibility gates) is now Done in all three, because it is: axe-core
+  runs WCAG 2.1 A and AA on every visitor page on every run, and the responsive
+  audit measures layout against the built output. Sprint 10 stays Partial, because
+  performance is unmeasured and nothing is deployed.
+- docs/DESIGN_SYSTEM.html added, so the exemption already recorded in PROJECT.md
+  and AGENTS.md refers to a file that exists.
+
+Verified (what was actually run):
+
+- npm run check green after the edits.
+- Grepped all three READMEs for the stale phrasings to confirm none survived.
+
+Known issues:
+
+- Thirty percent of this session went to removing false statements from my own
+  documentation rather than to features. That is the cost of letting docs drift
+  while claims were made faster than they were checked. The gate cannot catch it;
+  only reading the docs against the code can.
+
+Next:
+
+- Phase B. Stopdesk pickup first.
