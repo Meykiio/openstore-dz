@@ -3,5 +3,6 @@
   "entry": ["src/routes/**/*.tsx", "scripts/**/*.ts", "scripts/**/*.mjs", "eslint-rules/**/*.mjs"],
   "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{ts,mjs}", "eslint-rules/**/*.mjs"],
   "ignore": ["src/lib/supabase/types.ts", "src/components/ui/**"],
-  "ignoreDependencies": ["tailwindcss", "tw-animate-css"]
+  "ignoreDependencies": ["tailwindcss", "tw-animate-css"],
+  "ignoreBinaries": ["ffmpeg", "ffprobe"]
 }
