@@ -767,3 +767,35 @@ Known issues:
   seed drift, visible for the first time because the facets come from the server.
 - The search box fires a request per keystroke. It wants a debounce, which the
   previous in-memory filtering did not need.
+
+## Session report - deployment
+
+Completed:
+
+- Set the four Supabase environment variables on the Vercel project, for production
+  and preview.
+- Deployed the site. Live at https://openstore-dz.vercel.app, aliased, publicly
+  reachable with no login wall.
+- Removed 10 accumulated `E2E-TEST` orders from the demo database, a third of the
+  order queue, and documented the cleanup.
+
+Verified (what was actually run):
+
+- The full suite against the live production URL: 51 passed, 0 failed, 0 skipped.
+  This includes the admin dashboard test, which needs credentials and had been
+  skipped in every local run.
+- The production URL returns 200 to an anonymous request and serves real storefront
+  HTML.
+
+Known issues:
+
+- Pushes to the repository do NOT deploy. Vercel blocks them with
+  `BLOCKED` / `troubleshoot-project-collaboration#account-configuration`, because
+  the commits are authored as `sifeddine.mebarki@gmail.com` and Vercel cannot match
+  that to the account that owns the project. The build never starts, so this is not
+  a code problem. Deploying works from the CLI, and from a directory without `.git`.
+  Fixes: verify that email on the Vercel account, make the repository public, or
+  keep deploying from the CLI.
+- The suite leaves an order behind on every run. Documented, not automated, because
+  the browser cannot delete orders under RLS.
+- The store name in the database is still the template default.

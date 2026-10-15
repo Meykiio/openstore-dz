@@ -92,3 +92,24 @@ fails only when a parcel is rejected. The seed originally got this wrong, and th
 Placeholder images from `picsum.photos`, seeded per SKU so a product always gets the
 same picture. They are not clothing, and they are not meant to be shipped to a real
 shop. Replace them with uploaded media before anything goes public.
+
+## Removing E2E test orders
+
+The end-to-end suite places a real order, because the order flow is the thing most
+worth testing. The browser client cannot delete orders (RLS forbids it), so every
+run leaves one behind, named `E2E-TEST`.
+
+That accumulates. A third of the demo queue was test noise before it was cleaned,
+and it is visible in the admin list and in the dashboard figures.
+
+Run this after a full suite run:
+
+```sql
+delete from public.order_items
+where order_id in (select id from public.orders where customer_name = 'E2E-TEST');
+
+delete from public.orders where customer_name = 'E2E-TEST';
+```
+
+`seed-demo.sql` does not remove these, because it is re-runnable and should not
+delete rows it did not create.
