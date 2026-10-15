@@ -3,13 +3,17 @@ import { StoreLayout } from "@/components/storefront/store-layout";
 import { CatalogueView } from "@/components/storefront/catalogue-view";
 import { useI18n } from "@/lib/i18n-context";
 import { categoriesQuery, useCategories } from "@/lib/queries";
-import { EMPTY_FILTERS } from "@/lib/catalogue";
+import { EMPTY_FILTERS, cataloguePageQuery } from "@/lib/catalogue";
 
 export const Route = createFileRoute("/category/$slug")({
   loader: async ({ context, params }) => {
     const categories = await context.queryClient.ensureQueryData(categoriesQuery()).catch(() => []);
     const category = categories.find((entry) => entry.slug === params.slug);
     if (!category) throw notFound();
+    // Prefetched so the server sends products rather than an empty grid.
+    await context.queryClient
+      .ensureQueryData(cataloguePageQuery({ ...EMPTY_FILTERS, categorySlug: category.slug }, 1))
+      .catch(() => null);
     return { category };
   },
   head: ({ loaderData }) => {

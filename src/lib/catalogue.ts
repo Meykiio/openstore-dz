@@ -97,7 +97,15 @@ async function fetchCataloguePage(filters: CatalogueFilters, page: number): Prom
 
 const EMPTY_FACETS: CatalogueFacets = { sizes: [], colors: [], priceMin: 0, priceMax: 0 };
 
-const cataloguePageQuery = (filters: CatalogueFilters, page: number) =>
+/**
+ * Exported so a route loader can prefetch a page during SSR.
+ *
+ * Without this the grid renders empty in the server HTML and fills in from the
+ * browser, which costs the first paint, the crawler, and anyone on a slow
+ * connection. The loader and the component must build the same key, so they must
+ * build it from the same function.
+ */
+export const cataloguePageQuery = (filters: CatalogueFilters, page: number) =>
   queryOptions({
     queryKey: ["catalogue", filters, page] as const,
     queryFn: () => fetchCataloguePage(filters, page),

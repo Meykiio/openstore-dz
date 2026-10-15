@@ -2,6 +2,7 @@ import { readFile, mkdir, rm, stat } from "node:fs/promises";
 import { join, dirname } from "node:path";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { slugify } from "./slug.mjs";
 
 /**
  * Turns the source photographs into web-ready product images.
@@ -22,15 +23,6 @@ const WIDTH = 1200;
 const HEIGHT = 1500;
 const QUALITY = 82;
 const WORKERS = 4;
-
-export function slugify(value) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
 
 function runFfmpeg(input, output) {
   return new Promise((resolve, reject) => {

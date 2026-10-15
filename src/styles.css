@@ -540,7 +540,7 @@
 }
 .pc-media {
   position: relative;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 5;
   background: linear-gradient(135deg, var(--surface-high), var(--surface-mid));
   display: flex;
   align-items: center;
@@ -666,7 +666,7 @@
 }
 .gallery-main {
   position: relative;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 4 / 5;
   border-radius: var(--r-lg);
   overflow: hidden;
   border: 1px solid var(--outline);
@@ -687,7 +687,7 @@
   gap: var(--s-sm);
 }
 .gallery-thumb {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 5;
   border-radius: var(--r-sm);
   border: 2px solid var(--outline);
   background: linear-gradient(135deg, var(--surface-high), var(--surface-mid));

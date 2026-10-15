@@ -12,7 +12,7 @@ import { ErrorState, NoProducts, ProductSkeleton } from "@/components/ui/feedbac
 import { SetupCheck } from "@/components/setup-check";
 import { supabaseConfigProblem } from "@/lib/supabase/client";
 import { reviewsQuery, storeSettingsQuery } from "@/lib/queries";
-import { EMPTY_FILTERS, useCataloguePage } from "@/lib/catalogue";
+import { EMPTY_FILTERS, cataloguePageQuery, useCataloguePage } from "@/lib/catalogue";
 import { useI18n } from "@/lib/i18n-context";
 
 export const Route = createFileRoute("/")({
@@ -27,6 +27,9 @@ export const Route = createFileRoute("/")({
       // Reviews feed the testimonial wall below the fold. Fetching them during
       // SSR avoids a visible pop-in and lets crawlers see the social proof.
       context.queryClient.ensureQueryData(reviewsQuery()).catch(() => null),
+      // The product grid is the page. Without this the server HTML ships an
+      // empty grid and the buyer waits for the browser to fill it in.
+      context.queryClient.ensureQueryData(cataloguePageQuery(EMPTY_FILTERS, 1)).catch(() => null),
     ]);
     return { settings };
   },

@@ -6,12 +6,20 @@ import { CatalogueView } from "@/components/storefront/catalogue-view";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form";
 import { useI18n } from "@/lib/i18n-context";
-import { EMPTY_FILTERS } from "@/lib/catalogue";
+import { EMPTY_FILTERS, cataloguePageQuery } from "@/lib/catalogue";
 
 export const Route = createFileRoute("/search")({
   validateSearch: (search: Record<string, unknown>): { q?: string } => ({
     q: typeof search.q === "string" ? search.q : undefined,
   }),
+  loaderDeps: ({ search }) => ({ q: search.q ?? "" }),
+  loader: async ({ context, deps }) => {
+    if (!deps.q.trim()) return;
+    // Prefetched so a shared search link renders its results server-side.
+    await context.queryClient
+      .ensureQueryData(cataloguePageQuery({ ...EMPTY_FILTERS, query: deps.q }, 1))
+      .catch(() => null);
+  },
   head: () => ({ meta: [{ title: "البحث" }, { name: "robots", content: "noindex" }] }),
   component: SearchPage,
 });

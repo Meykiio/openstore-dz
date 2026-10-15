@@ -60,6 +60,17 @@ export const COLOURS = {
   "Jaune moutarde": { ar: "أصفر خردلي", hex: "#b8912b" },
 };
 
+/**
+ * Case-insensitive index.
+ *
+ * The source folders do not capitalise consistently: some are `Gris Foncé` and
+ * some `Gris foncé`. Matching on exact case silently fell back to a grey swatch
+ * for two of the catalogue's colours, which is the kind of wrong that is easy to
+ * ship because it still renders.
+ */
+const BY_LOWER = new Map(Object.entries(COLOURS).map(([name, info]) => [name.toLowerCase(), info]));
+
 export function colourInfo(name) {
-  return COLOURS[name] ?? { ar: name, hex: "#8b8b90" };
+  if (name === null || name === undefined) return { ar: "", hex: null };
+  return COLOURS[name] ?? BY_LOWER.get(String(name).toLowerCase()) ?? { ar: name, hex: "#8b8b90" };
 }
