@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Save } from "lucide-react";
 import { toast } from "sonner";
 import { VariantEditor } from "@/components/admin/variant-editor";
+import { VariantGenerator } from "@/components/admin/variant-generator";
 import { ProductFieldsCard, type ProductDraft } from "@/components/admin/product-fields";
 import { PackBuilder } from "@/components/admin/pack-builder";
 import { SizeGuideEditor } from "@/components/admin/size-guide-editor";
@@ -119,7 +120,12 @@ function ProductEditPage() {
         <CardHeader>
           <CardTitle>{t("admin.products.variants")}</CardTitle>
         </CardHeader>
-        <CardBody>
+        <CardBody className="flex flex-col gap-4">
+          <VariantGenerator
+            productId={id}
+            productSlug={product.slug}
+            existing={product.product_variants}
+          />
           <VariantEditor productId={id} variants={product.product_variants} />
         </CardBody>
       </Card>

@@ -1,0 +1,69 @@
+/* fr copy for the owner's setup tools: categories, variant generator, setup wizard. */
+export const frTools = {
+  "admin.nav.categories": "Catégories",
+  "admin.categories.intro":
+    "Regroupez vos produits pour que les clients s’y retrouvent. Une catégorie vide reste cachée.",
+  "admin.categories.name": "Nom en arabe",
+  "admin.categories.nameLatin": "Nom en français",
+  "admin.categories.nameLatinHint":
+    "Sert à l’adresse de la page et aux clients francophones et anglophones.",
+  "admin.categories.add": "Ajouter une catégorie",
+  "admin.categories.empty": "Aucune catégorie pour l’instant",
+  "admin.categories.count": "{count} produit(s)",
+  "admin.categories.visible": "Visible",
+  "admin.categories.hidden": "Masquée",
+  "admin.categories.moveUp": "Monter",
+  "admin.categories.moveDown": "Descendre",
+  "admin.categories.deleteConfirm":
+    "Supprimer cette catégorie ? Ses {count} produit(s) restent en boutique, sans catégorie.",
+  "admin.gen.open": "Créer tailles et couleurs d’un coup",
+  "admin.gen.intro":
+    "Choisissez vos couleurs et tailles. Chaque combinaison devient une variante au même prix et stock, modifiable ensuite une par une.",
+  "admin.gen.colours": "Couleurs",
+  "admin.gen.colourName": "Nom de la couleur (ex. Noir)",
+  "admin.gen.addColour": "Ajouter la couleur",
+  "admin.gen.sizes": "Tailles",
+  "admin.gen.customSize": "Autre taille (ex. 42)",
+  "admin.gen.price": "Prix (DA)",
+  "admin.gen.stock": "Stock par variante",
+  "admin.gen.preview": "{count} variante(s) seront créées",
+  "admin.gen.skipped": "{count} existent déjà et ne changent pas",
+  "admin.gen.create": "Créer les variantes",
+  "admin.gen.done": "{count} variante(s) créée(s)",
+  "admin.gen.nothing": "Choisissez au moins une couleur ou une taille, et un prix",
+  "admin.setup.title": "Préparez votre boutique",
+  "admin.setup.intro":
+    "Quatre étapes courtes. Les clients voient tout cela : prenez une minute pour bien le remplir.",
+  "admin.setup.step": "Étape {n} sur {total}",
+  "admin.setup.shop": "Votre boutique",
+  "admin.setup.tagline": "Courte phrase d’accroche",
+  "admin.setup.contact": "Comment les clients vous joignent",
+  "admin.setup.contactHint":
+    "Les clients appellent ou écrivent à ce numéro pour leur commande. Mettez un numéro où vous répondez.",
+  "admin.setup.delivery": "Prix de livraison",
+  "admin.setup.deliveryHint":
+    "Un prix pour le nord, un pour le sud. Vous pourrez ajuster chaque wilaya ensuite dans Livraison.",
+  "admin.setup.north": "Nord et Hauts-Plateaux (DA)",
+  "admin.setup.south": "Wilayas du Sud (DA)",
+  "admin.setup.freeAbove": "Livraison offerte dès (DA, 0 = jamais)",
+  "admin.setup.legal": "Mentions légales",
+  "admin.setup.legalHint":
+    "La loi 18-05 les impose pour toute vente en ligne. Vous pouvez les ajouter plus tard, mais ne prenez pas de commandes sans elles.",
+  "admin.setup.next": "Continuer",
+  "admin.setup.finish": "Ouvrir mon tableau de bord",
+  "admin.setup.skip": "Plus tard",
+  "admin.setup.checklist": "Terminez la préparation de votre boutique",
+  "admin.setup.checklistBody":
+    "Les clients voient encore des informations manquantes ou fictives :",
+  "admin.setup.resume": "Reprendre",
+  "admin.setup.gap.name": "Nom de la boutique",
+  "admin.setup.gap.phone": "Numéro de téléphone",
+  "admin.setup.gap.whatsapp": "WhatsApp",
+  "admin.setup.gap.delivery": "Prix de livraison",
+  "admin.setup.gap.legal": "Mentions légales",
+  "admin.setup.phoneInvalid": "Saisissez un numéro algérien, ex. 0555 12 34 56",
+  "admin.setup.applyAll": "Appliquer ces prix aux 58 wilayas",
+  "admin.setup.zonesExist":
+    "Vous avez déjà des prix pour {count} wilayas. Activez ceci seulement pour les remplacer.",
+  "admin.setup.whatsappHint": "Laissez vide si c’est le même numéro.",
+};

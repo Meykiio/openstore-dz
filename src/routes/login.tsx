@@ -67,7 +67,7 @@ async function signInAndResolveRole(email: string, password: string): Promise<Si
 function LoginPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const { isAdmin, loading, user } = useAuth();
+  const { isAdmin, loading, user, refreshRole } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -99,6 +99,7 @@ function LoginPage() {
     const outcome = await signInAndResolveRole(email, password);
     setBusy(false);
     if (outcome.ok) {
+      await refreshRole();
       void navigate({ to: "/admin" });
       return;
     }

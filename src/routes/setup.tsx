@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form";
 import { LoadingState } from "@/components/ui/feedback";
 import { useI18n } from "@/lib/i18n-context";
+import { useAuth } from "@/lib/auth";
 import { getSupabase } from "@/lib/supabase/client";
 
 export const Route = createFileRoute("/setup")({
@@ -74,6 +75,7 @@ function Settled({ phase }: { phase: Exclude<Phase, "checking" | "claimable"> })
 function SetupForm({ onAwaitingEmail }: { onAwaitingEmail: () => void }) {
   const { t } = useI18n();
   const navigate = useNavigate();
+  const { refreshRole } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -119,7 +121,11 @@ function SetupForm({ onAwaitingEmail }: { onAwaitingEmail: () => void }) {
       setError(claimError.message);
       return;
     }
-    void navigate({ to: "/admin" });
+    // The role was looked up before the claim and said "not an admin". Without
+    // this the new owner lands on a sign-in prompt instead of their dashboard.
+    await refreshRole();
+    // Straight into setup: a shop claimed a minute ago still shows demo details.
+    void navigate({ to: "/admin/welcome" });
   };
 
   return (

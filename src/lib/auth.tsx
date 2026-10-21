@@ -87,9 +87,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setRole(null);
   }, []);
 
+  // Reads the session directly rather than the `user` state: right after a
+  // sign-up and claim, the auth event that sets that state may not have
+  // arrived yet, and the role would be looked up for nobody.
   const refreshRole = useCallback(async () => {
-    await loadRole(user);
-  }, [loadRole, user]);
+    const { data } = await getSupabase().auth.getSession();
+    const current = data.session?.user ?? null;
+    setUser(current);
+    await loadRole(current);
+  }, [loadRole]);
 
   const value = useMemo<AuthValue>(
     () => ({

@@ -214,6 +214,18 @@ export async function upsertVariant(input: VariantInput): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+/** Many variants in one request, for the colour × size generator. */
+export async function insertVariants(
+  productId: string,
+  rows: Omit<VariantInput, "product_id" | "weight_grams">[],
+): Promise<void> {
+  if (rows.length === 0) return;
+  const { error } = await getSupabase()
+    .from("product_variants")
+    .insert(rows.map((row) => ({ ...row, product_id: productId })));
+  if (error) throw new Error(error.message);
+}
+
 export async function deleteVariant(id: string): Promise<void> {
   const { error } = await getSupabase().from("product_variants").delete().eq("id", id);
   if (error) throw new Error(error.message);

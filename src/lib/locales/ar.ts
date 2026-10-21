@@ -1,4 +1,5 @@
 import { arAdmin } from "./ar.admin";
+import { arTools } from "./ar.tools";
 import { arStorefront } from "./ar.storefront";
 
 /**
@@ -10,4 +11,4 @@ import { arStorefront } from "./ar.storefront";
  * Split into storefront and admin halves because a single file passed the
  * project's 250-line limit. The seam is the audience, which is the real one.
  */
-export const ar = { ...arStorefront, ...arAdmin };
+export const ar = { ...arStorefront, ...arAdmin, ...arTools };

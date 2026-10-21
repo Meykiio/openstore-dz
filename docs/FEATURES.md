@@ -34,6 +34,18 @@ Last verified against the built output, not the dev server.
 
 ### Selling
 
+- **Setup wizard.** Straight after claiming the shop: name, phone and WhatsApp
+  (validated as Algerian), delivery prices for all 58 wilayas from a north and a
+  south price, free-delivery threshold, legal details. Demo values start blank.
+  The dashboard keeps a checklist of anything buyers still see as missing or fake.
+- **Categories screen.** Create, rename, hide, reorder and delete categories
+  without SQL. Deleting one leaves its products in the shop, uncategorised.
+- **Variant generator.** Colours × sizes with one price and stock, previewed
+  before writing; existing combinations are skipped, so running it twice is safe.
+  Swatch colours are guessed from common names in Arabic, French and English.
+- **Colour-first product page.** Buyers pick a colour, then a size; the gallery
+  follows the colour.
+
 - **First-run claim.** The first authenticated user claims the store, serialised with an
   advisory lock, and the claim route closes permanently afterwards.
 - **Dashboard.** Confirmed value, refusal rate, average order and call-queue size over a

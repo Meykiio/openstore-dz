@@ -6,6 +6,21 @@ All notable changes to OpenStore DZ. Format follows
 
 ## [Unreleased]
 
+### V1 owner tools — 2026-10-21
+
+**Added:** setup wizard (`/admin/welcome`) with a dashboard checklist, categories
+screen (`/admin/categories`), colour × size variant generator.
+
+**Fixed:** a new owner landed on "Admin sign in" right after claiming the shop,
+because the admin role was looked up before the claim and never refreshed.
+`refreshRole()` now reads the live session and both claim paths call it.
+
+**Verified** against a fresh local database: claimed the shop through `/setup`,
+walked the wizard (invalid phone rejected, 58 zones written at 650 / 1300, the
+checklist then listed only legal details), created and reordered a category,
+generated 9 variants and confirmed a second run skips existing ones. Admin layout
+tests including both new screens: 13 passed. `npm run check` green, 68 unit tests.
+
 ### Launch audit — 2026-10-21
 
 **Fixed**

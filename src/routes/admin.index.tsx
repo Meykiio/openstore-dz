@@ -13,6 +13,7 @@ import { useI18n } from "@/lib/i18n-context";
 import { formatDzd } from "@/lib/format";
 import { useAnalytics, refusalRate, wilayasToWatch } from "@/lib/analytics";
 import { useOrdersPage, usePendingOrdersCount } from "@/lib/admin";
+import { SetupChecklist } from "@/components/admin/setup-checklist";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/")({
@@ -74,6 +75,8 @@ function DashboardPage() {
           ))}
         </div>
       </div>
+
+      <SetupChecklist />
 
       {analytics.isError ? (
         <ErrorState message={analytics.error.message} onRetry={() => void analytics.refetch()} />

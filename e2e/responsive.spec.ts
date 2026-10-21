@@ -254,6 +254,8 @@ test("the dashboard signs in, renders real figures, and fits a phone", async ({ 
   const routes = [
     "/admin",
     "/admin/products",
+    "/admin/categories",
+    "/admin/welcome",
     "/admin/reviews",
     "/admin/delivery",
     "/admin/settings",

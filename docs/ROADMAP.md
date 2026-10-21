@@ -18,6 +18,10 @@ an owner hits in their first week. Ordered by what stops a real shop first.
 
 ### V1. Owner can set up without SQL — blocks every new shop
 
+**Done 2026-10-21:** setup wizard, dashboard checklist, categories screen,
+variant generator. **Left:** logo upload in the wizard, bulk photo upload per
+colour.
+
 - **First-run wizard after the claim:** shop name, logo, phone and WhatsApp,
   legal details, delivery prices. A shop must never go live with placeholder
   contact details; the reference shop did, and the video would have sent real

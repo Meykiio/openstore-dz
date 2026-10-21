@@ -1,0 +1,68 @@
+/* en copy for the owner's setup tools: categories, variant generator, setup wizard. */
+export const enTools = {
+  "admin.nav.categories": "Categories",
+  "admin.categories.intro":
+    "Group products so buyers can browse. Empty categories stay hidden from the shop.",
+  "admin.categories.name": "Name (Arabic)",
+  "admin.categories.nameLatin": "Name (French)",
+  "admin.categories.nameLatinHint":
+    "Used in the page address and shown to French and English buyers.",
+  "admin.categories.add": "Add category",
+  "admin.categories.empty": "No categories yet",
+  "admin.categories.count": "{count} products",
+  "admin.categories.visible": "Visible",
+  "admin.categories.hidden": "Hidden",
+  "admin.categories.moveUp": "Move up",
+  "admin.categories.moveDown": "Move down",
+  "admin.categories.deleteConfirm":
+    "Delete this category? Its {count} products stay in the shop without a category.",
+  "admin.gen.open": "Create sizes and colours in one go",
+  "admin.gen.intro":
+    "Pick the colours and sizes you sell. Every combination becomes a variant with the same price and stock, which you can still edit one by one.",
+  "admin.gen.colours": "Colours",
+  "admin.gen.colourName": "Colour name (e.g. Noir)",
+  "admin.gen.addColour": "Add colour",
+  "admin.gen.sizes": "Sizes",
+  "admin.gen.customSize": "Other size (e.g. 42)",
+  "admin.gen.price": "Price (DA)",
+  "admin.gen.stock": "Stock per variant",
+  "admin.gen.preview": "{count} variants will be created",
+  "admin.gen.skipped": "{count} already exist and stay as they are",
+  "admin.gen.create": "Create variants",
+  "admin.gen.done": "{count} variants created",
+  "admin.gen.nothing": "Pick at least one colour or size, and set a price",
+  "admin.setup.title": "Set up your shop",
+  "admin.setup.intro":
+    "Four short steps. Buyers see all of this, so take a minute to get it right.",
+  "admin.setup.step": "Step {n} of {total}",
+  "admin.setup.shop": "Your shop",
+  "admin.setup.tagline": "Short tagline",
+  "admin.setup.contact": "How buyers reach you",
+  "admin.setup.contactHint":
+    "Buyers call or message this number about their order. Use a number you answer.",
+  "admin.setup.delivery": "Delivery prices",
+  "admin.setup.deliveryHint":
+    "One price for the north and one for the south. You can adjust any wilaya later under Delivery.",
+  "admin.setup.north": "North and highlands (DA)",
+  "admin.setup.south": "Southern wilayas (DA)",
+  "admin.setup.freeAbove": "Free delivery from (DA, 0 = never)",
+  "admin.setup.legal": "Legal details",
+  "admin.setup.legalHint":
+    "Law 18-05 requires them for any online sale. You can add them later, but your shop should not take orders without them.",
+  "admin.setup.next": "Continue",
+  "admin.setup.finish": "Open my dashboard",
+  "admin.setup.skip": "Later",
+  "admin.setup.checklist": "Finish setting up your shop",
+  "admin.setup.checklistBody": "Buyers still see missing or placeholder details:",
+  "admin.setup.resume": "Continue setup",
+  "admin.setup.gap.name": "Shop name",
+  "admin.setup.gap.phone": "Phone number",
+  "admin.setup.gap.whatsapp": "WhatsApp",
+  "admin.setup.gap.delivery": "Delivery prices",
+  "admin.setup.gap.legal": "Legal details",
+  "admin.setup.phoneInvalid": "Enter an Algerian number, for example 0555 12 34 56",
+  "admin.setup.applyAll": "Apply these prices to all 58 wilayas",
+  "admin.setup.zonesExist":
+    "You already have prices for {count} wilayas. Turn this on only to replace them.",
+  "admin.setup.whatsappHint": "Leave empty if it is the same number as your phone.",
+};
