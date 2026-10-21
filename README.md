@@ -17,6 +17,12 @@ Arabic (RTL) first. French. Cash on delivery. No subscription, no setup fee, no 
 **Live demo: [openstore-dz.vercel.app](https://openstore-dz.vercel.app)**, a real
 clothing catalogue running on this exact code.
 
+> **The demo is a showroom, not a shop.** Orders placed there are never shipped.
+> OpenStore is not a hosted service: there is no central OpenStore website where
+> shops live. Each owner installs their own copy, with their own database, their
+> own domain and their own orders, using the setup prompt below. Nobody else,
+> including the author of this project, can see your shop's orders or customers.
+
 A shop owner can install this today and take cash-on-delivery orders. What is verified
 and working, in `docs/FEATURES.md`:
 

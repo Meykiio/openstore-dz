@@ -15,6 +15,7 @@ import { useCart } from "@/lib/cart";
 import { useI18n } from "@/lib/i18n-context";
 import { useStoreSettings } from "@/lib/queries";
 import { resolveDelivery, useDeliveryZones } from "@/lib/delivery";
+import { isDemoShop } from "@/components/storefront/demo-banner";
 import { placeOrder } from "@/lib/order";
 
 export const Route = createFileRoute("/checkout")({
@@ -122,6 +123,14 @@ function CheckoutPage() {
 
         <form onSubmit={submit} className="grid gap-8 lg:grid-cols-[1.3fr_1fr]">
           <div className="flex flex-col gap-5">
+            {isDemoShop && (
+              <p
+                role="note"
+                className="rounded-[10px] border border-tertiary/40 bg-tertiary/10 px-4 py-3 text-sm font-medium"
+              >
+                {t("demo.checkout")}
+              </p>
+            )}
             <AddressFields form={form} onChange={setForm} />
             <CodNotice />
           </div>

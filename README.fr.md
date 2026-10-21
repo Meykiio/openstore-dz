@@ -4,6 +4,12 @@
 
 [English](README.md) · [العربية](README.ar.md)
 
+> **La démo est une vitrine, pas une boutique.** Les commandes passées sur
+> [openstore-dz.vercel.app](https://openstore-dz.vercel.app) ne sont jamais expédiées.
+> OpenStore n’est pas un service hébergé : chaque commerçant installe sa propre copie,
+> avec sa base de données, son domaine et ses commandes. Personne d’autre ne voit ses
+> commandes ni ses clients.
+
 ---
 
 ## Ce que c'est

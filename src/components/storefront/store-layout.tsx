@@ -3,6 +3,7 @@ import { SiteFooter } from "./site-footer";
 import { CartDrawer } from "./cart-drawer";
 import { BottomNav } from "./bottom-nav";
 import { AnnouncementBar } from "./announcement-bar";
+import { DemoBanner } from "./demo-banner";
 
 /**
  * Shared storefront chrome.
@@ -17,6 +18,7 @@ import { AnnouncementBar } from "./announcement-bar";
 export function StoreLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col">
+      <DemoBanner />
       <AnnouncementBar />
       <SiteHeader />
       <main className="page-bottom-pad flex-1 lg:pb-0">{children}</main>
