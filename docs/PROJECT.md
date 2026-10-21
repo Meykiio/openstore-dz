@@ -29,12 +29,10 @@ Last updated 2026-10-15. Everything in this section was run, not assumed.
   re-run the whole file on production: its demo seed would re-insert the two
   demo products. See the 2026-10-21 entry in `docs/CHANGELOG.md`.
 
-- Pushes to the repository do not deploy. Vercel blocks them with `BLOCKED` and
-  `troubleshoot-project-collaboration#account-configuration`, because the commits
-  are authored as `sifeddine.mebarki@gmail.com` and Vercel cannot match that to the
-  account owning the project. The build never starts, so this is not a code
-  problem. Deploy from the CLI, verify that email on the Vercel account, or make
-  the repository public.
+- Deploys were blocked until 2026-10-22: commits were authored with an email no
+  GitHub account owned, so Vercel could not match the author. Fixed by committing
+  with the email on the Meykiio GitHub account. If a deploy shows `Blocked` again,
+  check `git config user.email` first.
 - The locale follows the browser. The server renders Arabic and the client switches
   on hydration, so an English or French browser sees the layout mirror once on
   first load. The fix is to carry the locale in a cookie so the server can render
