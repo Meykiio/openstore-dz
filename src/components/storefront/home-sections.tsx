@@ -4,6 +4,7 @@ import { useI18n } from "@/lib/i18n-context";
 import { formatRelative } from "@/lib/format";
 import { useCategories, useReviews } from "@/lib/queries";
 import { StarRating } from "./star-rating";
+import { localized } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 /**
@@ -15,7 +16,7 @@ import { cn } from "@/lib/utils";
  * end and makes a small shop look broken.
  */
 export function CategoryStrip() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { data: categories } = useCategories();
 
   const visible = (categories ?? []).filter((category) => category.product_count > 0);
@@ -46,7 +47,9 @@ export function CategoryStrip() {
               </span>
             )}
             <span className="min-w-0 flex-1 px-4 py-3.5">
-              <span className="block truncate text-sm font-medium">{category.name}</span>
+              <span className="block truncate text-sm font-medium">
+                {localized(locale, category.name, category.name_fr)}
+              </span>
               <span className="font-mono text-xs text-on-surface-muted">
                 {category.product_count} {t("nav.products")}
               </span>

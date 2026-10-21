@@ -34,6 +34,7 @@ export const frStorefront = {
   "common.draft": "Brouillon",
   "common.archived": "Archivé",
   "common.somethingWrong": "Une erreur est survenue. Réessayez.",
+  "nav.home": "Accueil",
   "nav.shop": "Boutique",
   "nav.cart": "Panier",
   "nav.trackOrder": "Suivre ma commande",
@@ -134,6 +135,9 @@ export const frStorefront = {
   "reviews.thanksBody": "Votre avis sera visible après validation par la boutique.",
   "reviews.count": "{count} avis",
   "reviews.awaitingModeration": "En attente de validation",
+  "home.hero.title": "La nouvelle collection, livrée chez vous",
+  "home.hero.body":
+    "Commandez aujourd’hui et payez en espèces à la livraison. Sans carte, sans compte.",
   "home.trust.cod.title": "Paiement à la livraison",
   "home.trust.cod.body": "Vous payez en espèces à la réception, sans carte bancaire.",
   "home.trust.delivery.title": "Livraison dans 58 wilayas",

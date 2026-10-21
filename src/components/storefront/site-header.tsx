@@ -23,7 +23,8 @@ export function SiteHeader() {
   const storeName = settings?.name?.trim() || t("app.tagline");
 
   const links = [
-    { to: "/", label: t("nav.shop") },
+    { to: "/", label: t("nav.home") },
+    { to: "/catalogue", label: t("nav.shop") },
     { to: "/track", label: t("nav.trackOrder") },
   ] as const;
 
@@ -44,6 +45,7 @@ export function SiteHeader() {
               key={link.to}
               to={link.to}
               className="rounded-full px-3 py-2 text-sm text-on-surface-muted transition-colors hover:bg-surface-mid hover:text-on-surface"
+              activeOptions={{ exact: link.to === "/" }}
               activeProps={{ className: "text-on-surface font-medium" }}
             >
               {link.label}

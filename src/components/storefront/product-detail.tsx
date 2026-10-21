@@ -1,16 +1,20 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import { useI18n } from "@/lib/i18n-context";
+import { averageRating, sortVariants, useReviews, type CatalogueProduct } from "@/lib/queries";
 import {
-  allImages,
-  averageRating,
-  sortVariants,
-  useReviews,
-  type CatalogueProduct,
-} from "@/lib/queries";
+  colourOptions,
+  findVariant,
+  imagesForColour,
+  initialChoice,
+  sizeAfterColourChange,
+  sizeOptions,
+} from "@/lib/variant-options";
 import { StarRating } from "./star-rating";
 import { ProductGallery } from "./product-gallery";
-import { AddToCart, StockLine, VariantPicker } from "./product-purchase";
+import { AddToCart, StockLine } from "./product-purchase";
+import { localized } from "@/lib/i18n";
+import { ColourPicker, SizePicker } from "./variant-picker";
 
 /**
  * Product page layout.
@@ -23,28 +27,43 @@ export function ProductDetail({ product }: { product: CatalogueProduct }) {
   const { data: reviews } = useReviews(product.id);
 
   const variants = sortVariants(product.product_variants);
-  const images = allImages(product);
   const stockable = variants.filter((v) => v.stock > 0);
 
-  const [selectedId, setSelectedId] = useState<string | null>(
-    stockable[0]?.id ?? variants[0]?.id ?? null,
-  );
+  const [choice, setChoice] = useState(() => initialChoice(variants));
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
 
-  const selected = useMemo(
-    () => variants.find((v) => v.id === selectedId) ?? variants[0] ?? null,
-    [variants, selectedId],
-  );
+  const colours = colourOptions(variants);
+  const sizes = sizeOptions(variants, colours.length > 0 ? choice.colour : null);
+  const selected = findVariant(variants, choice.colour, choice.size);
+  // The gallery follows the colour. With no colour photos, fall back to all.
+  const colourImages = imagesForColour(variants, choice.colour);
+  const images = colourImages.length > 0 ? colourImages : imagesForColour(variants, null);
+
+  const pickColour = (colour: string) => {
+    setChoice({ colour, size: sizeAfterColourChange(variants, colour, choice.size) });
+    setActiveImage(0);
+    setQuantity(1);
+  };
+  const pickSize = (size: string) => {
+    setChoice((current) => ({ ...current, size }));
+    setQuantity(1);
+  };
 
   const rating = reviews ? averageRating(reviews) : null;
-  const description =
-    locale === "fr" && product.description_fr ? product.description_fr : product.description;
-  const name = locale === "fr" && product.name_fr ? product.name_fr : product.name;
+  const description = product.description
+    ? localized(locale, product.description, product.description_fr)
+    : product.description_fr;
+  const name = localized(locale, product.name, product.name_fr);
 
   return (
     <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-      <ProductGallery images={images} alt={name} active={activeImage} onSelect={setActiveImage} />
+      <ProductGallery
+        images={images}
+        alt={choice.colour ? `${name} — ${choice.colour}` : name}
+        active={activeImage}
+        onSelect={setActiveImage}
+      />
 
       <div className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">
@@ -59,18 +78,12 @@ export function ProductDetail({ product }: { product: CatalogueProduct }) {
           )}
         </div>
 
-        <StockLine selected={selected} hasStock={stockable.length > 0} />
+        <StockLine selected={selected} hasStock={(selected?.stock ?? 0) > 0} />
 
-        <VariantPicker
-          variants={variants}
-          selectedId={selected?.id ?? null}
-          onSelect={(id) => {
-            setSelectedId(id);
-            setQuantity(1);
-          }}
-        />
+        <ColourPicker colours={colours} selected={choice.colour} onSelect={pickColour} />
+        <SizePicker sizes={sizes} selected={choice.size} onSelect={pickSize} />
 
-        {stockable.length > 0 && (
+        {stockable.length > 0 && selected && selected.stock > 0 && (
           <AddToCart
             product={product}
             name={name}

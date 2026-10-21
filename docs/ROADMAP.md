@@ -4,7 +4,62 @@ What is left, in priority order, with the reason each item matters. Phases are
 deliberately ordered: each one removes a reason a real shop cannot use the
 platform, before adding anything nice to have.
 
-Last updated after Phase A completed.
+Last updated 2026-10-21, after the launch audit.
+
+---
+
+## v1.0 — from "it works" to "an owner can run a shop alone"
+
+The goal: a non-technical owner pastes the setup prompt, answers a few
+questions, and is selling the same day without touching SQL or code. Not a
+rewrite. The foundation (prices and fees enforced in the database, RLS on every
+table, one schema file) is sound after the audit; what is missing is everything
+an owner hits in their first week. Ordered by what stops a real shop first.
+
+### V1. Owner can set up without SQL — blocks every new shop
+
+- **First-run wizard after the claim:** shop name, logo, phone and WhatsApp,
+  legal details, delivery prices. A shop must never go live with placeholder
+  contact details; the reference shop did, and the video would have sent real
+  buyers to a fake number.
+- **Delivery prices prefilled for all 58 wilayas** from one "base price + south
+  surcharge" input, editable per wilaya afterwards.
+- **Categories screen.** There is no way to create a category without SQL today.
+- **Variant generator.** Pick colours and sizes, set one price and stock, get
+  the matrix. Today each variant is a form; the polo has 140.
+- **Bulk photo upload per colour**, matching the storefront's colour-first
+  gallery.
+
+### V2. Owner knows an order arrived, and fake orders cost nothing
+
+- **New-order notification** by email, plus a Telegram bot option (free, instant,
+  what Algerian sellers already use).
+- **Fake-order protection:** limit pending orders per phone, a phone blocklist,
+  and a "repeat refuser" flag from the refusal history. Fake COD orders are the
+  most common way an Algerian shop loses money.
+- **Printable packing slip and order CSV** (Roadmap D2, D3).
+
+### V3. Buyer converts
+
+- **Stopdesk, commune picker, sale prices** (B1, B2, B4 below, unchanged).
+- **Language carried in a cookie** so the server renders the buyer's language
+  and the page does not flip direction on load.
+- **Related products** on the product page, and image zoom.
+- **Entry chunk under 150 KB** to bring LCP under 2.5 s on 4G.
+
+### V4. Install and grow
+
+- **Deploy button** (Vercel + Supabase) next to the agent prompt, for owners
+  without an agent.
+- **Carrier adapters:** ZR Express, Maystro, Ecotrack beside Guepex, behind one
+  interface, chosen in settings.
+- **Brand settings:** primary colour and logo applied to the theme tokens.
+
+### Deliberately not in v1
+
+Online payment (the platform never holds money, and COD is the market), a
+plugin system, multi-store, and a page builder. Each is months of work that no
+first-week owner is blocked by.
 
 ---
 

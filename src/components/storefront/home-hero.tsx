@@ -1,78 +1,106 @@
 import { Link } from "@tanstack/react-router";
-import { Banknote, Headphones, RotateCcw, Truck } from "lucide-react";
+import { ArrowRight, Banknote, Headphones, RotateCcw, Truck } from "lucide-react";
 import { useI18n } from "@/lib/i18n-context";
 import type { CatalogueProduct, StoreSettings } from "@/lib/queries";
 import { productImage } from "@/lib/queries";
+import { localized } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 /**
  * Storefront hero.
  *
- * Text left, newest product right. The reference's thesis is that photography
- * sells, so the visual is a real catalogue image rather than an illustration —
- * the hero is a preview of the shop, not a poster about it.
+ * Photography sells clothing, so the visual is the shop's own products: three
+ * portrait photos in a staggered row, each a link to that product. Portrait
+ * crops on purpose; the catalogue is shot 4:5, and a landscape frame cut the
+ * model's head off.
+ *
+ * The headline is interface copy in the buyer's language. The owner's tagline
+ * is written in one language, so it is shown only to readers of that language
+ * (Arabic, the default) instead of greeting an English reader in Arabic.
  */
 export function HomeHero({
   settings,
-  featured,
+  products,
 }: {
   settings: StoreSettings | null;
-  featured: CatalogueProduct | null;
+  products: CatalogueProduct[];
 }) {
-  const { t } = useI18n();
-  const image = featured ? productImage(featured) : null;
+  const { t, locale } = useI18n();
+  const shots = products
+    .map((product) => ({ product, image: productImage(product) }))
+    .filter((shot): shot is { product: CatalogueProduct; image: string } => shot.image !== null)
+    .slice(0, 3);
+  const tagline = settings?.tagline?.trim();
 
   return (
-    <section className="border-b border-outline bg-gradient-to-b from-bg to-bg-dim">
-      <div className="container-page grid items-center gap-10 py-12 sm:py-16 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
+    <section className="overflow-hidden border-b border-outline bg-gradient-to-b from-bg to-bg-dim">
+      <div className="container-page grid items-center gap-10 py-10 sm:py-14 lg:grid-cols-[1fr_1.1fr] lg:gap-14 lg:py-20">
         <div className="flex flex-col items-start">
-          <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-outline bg-surface px-3.5 py-1.5 text-[11px] font-semibold tracking-[0.03em] text-secondary">
+          <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-outline bg-surface px-3.5 py-1.5 text-xs font-semibold text-secondary">
             <span className="size-[7px] shrink-0 rounded-full bg-secondary" aria-hidden="true" />
-            {t("home.trust.cod.title")}
+            {settings?.name ?? "OpenStore DZ"}
           </span>
 
-          <h1 className="mb-4 max-w-xl font-display text-[clamp(32px,5vw,56px)] font-semibold leading-[1.04] tracking-[-0.02em]">
-            {settings?.name ?? "OpenStore DZ"}
+          <h1 className="mb-4 max-w-xl font-display text-[clamp(32px,5.2vw,60px)] font-semibold leading-[1.06] tracking-[-0.02em]">
+            {locale === "ar" && tagline ? tagline : t("home.hero.title")}
           </h1>
 
-          <p className="mb-7 max-w-[520px] text-base leading-[1.65] text-on-surface-muted">
-            {settings?.tagline ?? t("home.cta.body")}
+          <p className="mb-7 max-w-[480px] text-base leading-[1.7] text-on-surface-muted">
+            {t("home.hero.body")}
           </p>
 
-          <div className="flex flex-wrap gap-3">
-            <a href="#catalogue" className="btn btn-primary btn-lg">
+          <div className="flex w-full flex-wrap gap-3 sm:w-auto">
+            <Link to="/catalogue" className="btn btn-primary btn-lg flex-1 sm:flex-none">
               {t("home.promo.cta")}
-            </a>
-            <Link to="/track" className="btn btn-secondary btn-lg">
+              <ArrowRight size={18} className="rtl:rotate-180" aria-hidden="true" />
+            </Link>
+            <Link to="/track" className="btn btn-secondary btn-lg flex-1 sm:flex-none">
               {t("nav.trackOrder")}
             </Link>
           </div>
+
+          <ul className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-xs text-on-surface-muted">
+            <li className="inline-flex items-center gap-1.5">
+              <Banknote size={15} className="text-primary" aria-hidden="true" />
+              {t("home.trust.cod.title")}
+            </li>
+            <li className="inline-flex items-center gap-1.5">
+              <RotateCcw size={15} className="text-primary" aria-hidden="true" />
+              {t("home.trust.returns.title", { days: settings?.returns_days ?? 14 })}
+            </li>
+          </ul>
         </div>
 
-        {image && featured && (
-          <Link
-            to="/product/$slug"
-            params={{ slug: featured.slug }}
-            className="group relative overflow-hidden rounded-[24px] border border-outline bg-surface-high shadow-md"
-          >
-            {/* Shown on mobile too, not just desktop. The design thesis is that
-                product photography sells, and mobile is where most Algerian
-                buyers are — hiding the only product image above the fold on the
-                device most people use would invert the thesis. */}
-            <img
-              src={image}
-              alt={featured.name}
-              className="aspect-[4/3] w-full object-cover transition-transform duration-500 ease-out-soft group-hover:scale-[1.03]"
-            />
-            <span className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 rounded-[16px] border border-outline bg-surface/95 px-4 py-3 backdrop-blur">
-              <span className="min-w-0">
-                <span className="block truncate font-display text-sm font-semibold">
-                  {featured.name}
-                </span>
-                <span className="text-xs text-on-surface-muted">{t("home.newArrivals")}</span>
-              </span>
-              <span className="btn btn-primary btn-sm shrink-0">{t("store.viewDetails")}</span>
-            </span>
-          </Link>
+        {shots.length > 0 && (
+          <div className="grid grid-cols-3 items-start gap-3 sm:gap-4">
+            {shots.map(({ product, image }, index) => {
+              const name = localized(locale, product.name, product.name_fr);
+              return (
+                <Link
+                  key={product.id}
+                  to="/product/$slug"
+                  params={{ slug: product.slug }}
+                  className={cn(
+                    "group relative block overflow-hidden rounded-[18px] border border-outline bg-surface-high shadow-sm",
+                    index === 1 && "mt-8 sm:mt-12",
+                  )}
+                >
+                  <img
+                    src={image}
+                    alt={name}
+                    // The first photo is the largest paint above the fold.
+                    loading={index === 0 ? "eager" : "lazy"}
+                    fetchPriority={index === 0 ? "high" : "auto"}
+                    decoding="async"
+                    className="aspect-[4/5] w-full object-cover transition-transform duration-500 ease-out-soft group-hover:scale-[1.04]"
+                  />
+                  <span className="absolute inset-x-0 bottom-0 hidden bg-gradient-to-t from-black/65 to-transparent px-3 pt-8 pb-3 text-xs font-medium text-white sm:block">
+                    <span className="line-clamp-1">{name}</span>
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
         )}
       </div>
     </section>

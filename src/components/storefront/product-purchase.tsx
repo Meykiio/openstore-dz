@@ -6,7 +6,6 @@ import { useCart } from "@/lib/cart";
 import { useStoreSettings, type CatalogueProduct, type CatalogueVariant } from "@/lib/queries";
 import { waLink } from "@/lib/whatsapp";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 /**
  * The parts of a product page that actually sell something: stock, variant
@@ -57,41 +56,6 @@ export function StockLine({
         )}
       </div>
     </div>
-  );
-}
-
-export function VariantPicker({
-  variants,
-  selectedId,
-  onSelect,
-}: {
-  variants: CatalogueVariant[];
-  selectedId: string | null;
-  onSelect: (id: string) => void;
-}) {
-  const { t } = useI18n();
-  if (variants.length <= 1) return null;
-
-  return (
-    <fieldset className="flex flex-col gap-2">
-      <legend className="mb-1 text-xs font-semibold uppercase tracking-[0.03em] text-on-surface-muted">
-        {t("store.selectVariant")}
-      </legend>
-      <div className="flex flex-wrap gap-2">
-        {variants.map((variant) => (
-          <button
-            key={variant.id}
-            type="button"
-            onClick={() => onSelect(variant.id)}
-            disabled={variant.stock <= 0}
-            aria-pressed={variant.id === selectedId}
-            className={cn("chip", variant.id === selectedId && "filled")}
-          >
-            {variantLabel(variant)}
-          </button>
-        ))}
-      </div>
-    </fieldset>
   );
 }
 

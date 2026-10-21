@@ -3,6 +3,7 @@ import { StoreLayout } from "@/components/storefront/store-layout";
 import { CatalogueView } from "@/components/storefront/catalogue-view";
 import { useI18n } from "@/lib/i18n-context";
 import { categoriesQuery, useCategories } from "@/lib/queries";
+import { localized } from "@/lib/i18n";
 import { EMPTY_FILTERS, cataloguePageQuery } from "@/lib/catalogue";
 
 export const Route = createFileRoute("/category/$slug")({
@@ -44,7 +45,7 @@ function CategoryPage() {
     (entry) => entry.slug !== category.slug && entry.product_count > 0,
   );
 
-  const heading = locale === "fr" ? (category.name_fr ?? category.name) : category.name;
+  const heading = localized(locale, category.name, category.name_fr);
 
   return (
     <StoreLayout>
@@ -76,7 +77,7 @@ function CategoryPage() {
                   params={{ slug: entry.slug }}
                   className="chip"
                 >
-                  {entry.name}
+                  {localized(locale, entry.name, entry.name_fr)}
                   <span className="font-mono text-xs opacity-70">{entry.product_count}</span>
                 </Link>
               ))}

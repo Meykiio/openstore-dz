@@ -209,7 +209,7 @@ function CartFooter({ subtotal, onClose }: { subtotal: number; onClose: () => vo
         </span>
       </div>
       <p className="cart-note">{t("cart.deliveryCalculated")}</p>
-      <Button variant="berry" size="lg" asChild>
+      <Button variant="berry" size="lg" className="w-full" asChild>
         <Link to="/checkout" onClick={onClose}>
           {t("cart.checkout")}
         </Link>
@@ -217,7 +217,7 @@ function CartFooter({ subtotal, onClose }: { subtotal: number; onClose: () => vo
       <button
         type="button"
         onClick={onClose}
-        className="mt-2 w-full py-2 text-sm text-on-surface-muted hover:text-on-surface"
+        className="w-full py-1 text-sm text-on-surface-muted hover:text-on-surface"
       >
         {t("cart.continueShopping")}
       </button>

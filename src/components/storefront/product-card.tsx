@@ -10,6 +10,7 @@ import {
   type CatalogueProduct,
 } from "@/lib/queries";
 import { averageRating } from "@/lib/queries";
+import { localized } from "@/lib/i18n";
 import { StarRating } from "./star-rating";
 
 /**
@@ -31,10 +32,9 @@ function ProductCard({ product }: { product: CatalogueProduct }) {
   // Display only, not a link: the whole card is already an anchor, and a nested
   // anchor is invalid HTML. Category navigation lives on the category pages and
   // the category strip.
-  const category =
-    locale === "fr"
-      ? (product.categories?.name_fr ?? product.categories?.name)
-      : product.categories?.name;
+  const category = product.categories
+    ? localized(locale, product.categories.name, product.categories.name_fr)
+    : undefined;
 
   return (
     <Link to="/product/$slug" params={{ slug: product.slug }} className="product-card">
@@ -50,7 +50,7 @@ function ProductCard({ product }: { product: CatalogueProduct }) {
       <div className="pc-body">
         {category && <span className="pc-brand">{category}</span>}
 
-        <h3 className="pc-title">{product.name}</h3>
+        <h3 className="pc-title">{localized(locale, product.name, product.name_fr)}</h3>
 
         {rating !== null && reviews && reviews.length > 0 && (
           <span className="pc-rating">

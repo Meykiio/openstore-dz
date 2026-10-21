@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, LayoutDashboard, Search, ShoppingBag } from "lucide-react";
+import { Home, LayoutGrid, ShoppingBag, Truck } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { useI18n } from "@/lib/i18n-context";
 import { cn } from "@/lib/utils";
@@ -21,18 +21,24 @@ export function BottomNav() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   const tabs = [
-    { key: "home", to: "/", label: t("nav.shop"), icon: Home },
-    { key: "track", to: "/track", label: t("nav.trackOrder"), icon: Search },
-    { key: "admin", to: "/admin", label: t("nav.dashboard"), icon: LayoutDashboard },
+    { key: "home", to: "/", label: t("nav.home"), icon: Home },
+    { key: "shop", to: "/catalogue", label: t("nav.shop"), icon: LayoutGrid },
+    { key: "track", to: "/track", label: t("nav.trackOrder"), icon: Truck },
   ] as const;
+
+  // The owner reaches the dashboard from the footer. A buyer's tab bar is for
+  // buying, and a "Dashboard" tab there reads as a broken link.
+  const shopPaths = ["/catalogue", "/category", "/product", "/search"];
 
   return (
     <nav className="bottom-nav" aria-label={t("nav.shop")}>
       {tabs.map((tab) => {
         const active =
-          tab.to === "/"
-            ? pathname === "/" || pathname.startsWith("/product")
-            : pathname.startsWith(tab.to);
+          tab.key === "home"
+            ? pathname === "/"
+            : tab.key === "shop"
+              ? shopPaths.some((path) => pathname.startsWith(path))
+              : pathname.startsWith(tab.to);
         return (
           <Link key={tab.key} to={tab.to} className={cn("bn-item", active && "active")}>
             <tab.icon aria-hidden="true" />

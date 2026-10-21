@@ -73,11 +73,10 @@ function Home() {
 
   const list = catalogue.data?.products ?? [];
   const catalogueTotal = catalogue.data?.total ?? 0;
-  const featured = list[0] ?? null;
 
   return (
     <StoreLayout>
-      <HomeHero settings={settings} featured={featured} />
+      <HomeHero settings={settings} products={list} />
       <TrustBar returnsDays={settings?.returns_days ?? 14} />
 
       <section id="catalogue" className="container-page scroll-mt-20 py-12">

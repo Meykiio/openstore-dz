@@ -104,3 +104,13 @@ export function applyLocaleToDocument(locale: Locale): void {
 
 /** Inline script so the first paint is already in the right direction. */
 export const localeBootstrapScript = `(function(){try{var s=localStorage.getItem("${STORAGE_KEY}");var l=(s==="ar"||s==="fr"||s==="en")?s:"ar";var d=l==="ar"?"rtl":"ltr";document.documentElement.setAttribute("lang",l);document.documentElement.setAttribute("dir",d);}catch(e){}})();`;
+
+/**
+ * Pick the owner's text for a locale. Catalogue rows carry Arabic and a Latin
+ * (French) version; English readers get the Latin one too, which they can read,
+ * rather than Arabic they mostly cannot. Falls back to Arabic when no Latin text
+ * was written.
+ */
+export function localized(locale: Locale, arabic: string, latin: string | null | undefined) {
+  return locale !== "ar" && latin ? latin : arabic;
+}

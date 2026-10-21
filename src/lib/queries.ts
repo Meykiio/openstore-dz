@@ -204,16 +204,6 @@ export function productImage(product: CatalogueProduct): string | null {
   return null;
 }
 
-export function allImages(product: CatalogueProduct): string[] {
-  const urls: string[] = [];
-  for (const variant of sortVariants(product.product_variants)) {
-    for (const image of [...variant.variant_images].sort((a, b) => a.sort_order - b.sort_order)) {
-      if (!urls.includes(image.url)) urls.push(image.url);
-    }
-  }
-  return urls;
-}
-
 export function priceRange(product: CatalogueProduct): { min: number; max: number } | null {
   const variants = sortVariants(product.product_variants);
   if (variants.length === 0) return null;

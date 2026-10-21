@@ -14,8 +14,17 @@ import type { Page } from "@playwright/test";
  * set, page two is a different set, and a search narrows the count.
  */
 
-/** Product names currently on screen, so two pages can be compared. */
+/**
+ * Product names currently on screen, so two pages can be compared. Waits for the
+ * first card: `networkidle` can settle before the grid has rendered from a
+ * remote database, and reading then counts an empty grid.
+ */
 async function visibleProducts(page: Page): Promise<string[]> {
+  await page
+    .locator(".product-grid a[href^='/product/']")
+    .first()
+    .waitFor({ timeout: 15_000 })
+    .catch(() => undefined);
   return page
     .locator(".product-grid a[href^='/product/']")
     .evaluateAll((links) => links.map((link) => (link.textContent ?? "").trim()).filter(Boolean));
