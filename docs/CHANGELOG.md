@@ -6,6 +6,42 @@ All notable changes to OpenStore DZ. Format follows
 
 ## [Unreleased]
 
+### Launch audit — 2026-10-21
+
+**Fixed**
+
+- A fresh install from `supabase/schema.sql` failed. Production had a `categories`
+  table, `products.category_id`, `free_shipping_threshold` and `admin_analytics()`
+  that the file never created. All are now defined.
+- `size_guides` and `delivery_zones` had no RLS, policies or grants in the file, so
+  a fresh shop could not read its own size guides. Fixed.
+- The seeded delivery list used Arabic wilaya names while checkout matches Latin
+  ones, which left a fresh shop with an empty wilaya picker. Now empty, meaning
+  every wilaya.
+- Orders were charged the flat delivery fee while checkout showed the zone fee,
+  and the free-delivery threshold was never applied. `delivery_fee_for()` now
+  sets the fee and `src/lib/delivery.ts` mirrors it. Confirmed live in production
+  before the fix: 26 zones from 600 to 1600 DZD, every order recorded 600.
+- `supabase db reset` cannot apply the schema (its seed loader pipelines the
+  file). Install docs now apply it with `psql` or the SQL editor.
+- CI: Trivy pinned to v0.36.0 by commit; the e2e job is manual because it places
+  real orders.
+
+**Verified**
+
+- `schema.sql` applied twice to an empty local database, no errors; generated
+  types match production's.
+- Fee rules through `place_order`: zone 1600, flat 600, free above threshold.
+- Playwright against that fresh database with a freshly claimed owner: 51 passed,
+  1 skipped (pagination needs more than one page of products).
+- `npm run check` green.
+
+**Not verified**
+
+- The fee fix is not applied to production yet.
+- `admin_analytics()` was rebuilt from the dashboard's type; production keeps its
+  own version until the schema is reapplied there.
+
 ### Sprint 0 — Foundation
 
 **Added**

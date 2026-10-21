@@ -64,10 +64,13 @@ test("a search narrows the reported total, not just the visible rows", async ({ 
 });
 
 test("a category page shows only that category, and still pages", async ({ page }) => {
-  // `tshirts` is one of the real catalogue's categories. It was `shirts`, which
-  // belonged to the placeholder catalogue and no longer exists, so this test was
-  // asserting against an empty page.
-  await page.goto("/category/tshirts", { waitUntil: "networkidle" });
+  // Discovered from the home page, not hardcoded. A named slug broke twice: once
+  // when the placeholder catalogue was replaced, and again on a fresh install,
+  // which seeds different categories from the live shop.
+  await page.goto("/", { waitUntil: "networkidle" });
+  const categoryPath = await page.locator('a[href^="/category/"]').first().getAttribute("href");
+  expect(categoryPath).toBeTruthy();
+  await page.goto(categoryPath!, { waitUntil: "networkidle" });
 
   const products = await visibleProducts(page);
   expect(products.length).toBeGreaterThan(0);

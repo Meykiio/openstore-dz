@@ -160,9 +160,11 @@ Wait for the answer, then follow PATH A or PATH B.
 A1. START SUPABASE LOCALLY. Run `npx supabase start`. Wait for the API URL, anon key,
    Studio URL and DB URL. A "not linked" message is expected and is not an error here.
 
-A2. APPLY THE DATABASE SCHEMA. Run:
-   npx supabase db reset --local
-   This applies `supabase/schema.sql` and the demo seed data in one command.
+A2. APPLY THE DATABASE SCHEMA. From bash (Git Bash on Windows), run:
+   docker exec -i supabase_db_openstore-dz psql -U postgres -v ON_ERROR_STOP=1 < supabase/schema.sql
+   Do NOT use `npx supabase db reset`: its seed loader cannot run a file that
+   creates tables. Alternative: Studio (http://127.0.0.1:54323) -> SQL Editor,
+   paste the whole file, Run.
    Verify: `select count(*) from public.store_settings;` should return 1.
 
 A3. ENVIRONMENT. Create `.env` in the project root. Never commit it.

@@ -5,10 +5,11 @@ migration files by design, so a shop owner can install this by pasting one docum
 This is a deliberate, documented departure from the owner's general rule that every
 schema change is a versioned migration. See `docs/DECISIONS.md` entry 4.
 
-`supabase/schema.sql` now exists and is the whole database: 9 tables, RLS and grants on
+`supabase/schema.sql` now exists and is the whole database: 15 tables, RLS and grants on
 every one, the order-placement and order-tracking RPCs, storage policies, and a demo shop.
-It has **not** been executed against a live database. Run `npx supabase db reset --local`
-once before trusting it, and `npx supabase db advisors` after.
+Verified 2026-10-21: applied twice to an empty local database with no errors, and
+the generated types match production's. Apply it with `psql` or the SQL editor, not
+`supabase db reset`, whose seed loader cannot run a file that creates tables.
 
 ## Order placement is a function, not three inserts
 
@@ -172,7 +173,8 @@ business, remains the shop owner's legal obligation. This is not legal advice.
 ## Verifying a schema change
 
 ```bash
-npx supabase db reset --local   # applies schema.sql plus seed, from scratch
+npx supabase db reset --local   # wipe to an empty database
+docker exec -i supabase_db_openstore-dz psql -U postgres -v ON_ERROR_STOP=1 < supabase/schema.sql
 npx supabase db advisors        # RLS, security and performance review
 ```
 
@@ -188,6 +190,7 @@ Run it after every schema change:
 
 ```bash
 npx supabase db reset --local
+docker exec -i supabase_db_openstore-dz psql -U postgres -v ON_ERROR_STOP=1 < supabase/schema.sql
 docker exec -i supabase_db_<project>-<slug> psql -U postgres -d postgres -f - < supabase/verify.sql
 ```
 

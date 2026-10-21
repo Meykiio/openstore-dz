@@ -179,8 +179,11 @@ A1. START SUPABASE LOCALLY. Run `npx supabase start`. Docker must be running. Wa
 
 A2. APPLY THE DATABASE SCHEMA. Read `supabase/schema.sql` and run its FULL contents
    against the local database, once.
-   Preferred, non-interactive:  npx supabase db reset --local
-   That applies the schema and the seed data in a single command.
+   Preferred, non-interactive (bash, Git Bash on Windows, macOS, Linux):
+     docker exec -i supabase_db_openstore-dz psql -U postgres -v ON_ERROR_STOP=1 < supabase/schema.sql
+   Do NOT use `npx supabase db reset` for this: the CLI's seed loader cannot run a
+   file that creates tables, and leaves an empty database. In Windows PowerShell,
+   run the line above from Git Bash, because PowerShell's `<` is not redirection.
    Alternative: open Studio (usually http://127.0.0.1:54323) -> SQL Editor, paste the whole
    file, and Run.
    Verify: `select count(*) from public.store_settings;` should return 1, and

@@ -5,7 +5,7 @@
 -- THIS IS THE ONLY DATABASE FILE. There are no migrations.
 --
 -- A shop owner installs OpenStore by pasting this file once, or by running:
---     npx supabase db reset --local
+--     docker exec -i supabase_db_openstore-dz psql -U postgres -v ON_ERROR_STOP=1 < supabase/schema.sql
 --
 -- Every object below is created idempotently, so re-running this file against an
 -- existing database is safe. Seed data uses ON CONFLICT so it never duplicates.
@@ -1025,7 +1025,9 @@ insert into public.store_settings (
        'Demo SARL', '000000000000000', '00/00-0000000', '+213 555 00 00 00', '+213 555 00 00 00',
   'Alger, Algeria',
   600,
-  array['الجزائر','وهران','قسنطينة','عنابة','سطيف','تلمسان','بجاية','ورقلة','أدرار','تيميمون'],
+  -- Empty means every wilaya. It was a list of Arabic names, which the checkout
+  -- (matching on the carrier's Latin names) filtered down to nothing.
+  '{}',
   3, 14,
   10000
 )
