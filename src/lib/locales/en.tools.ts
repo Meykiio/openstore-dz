@@ -65,4 +65,6 @@ export const enTools = {
   "admin.setup.zonesExist":
     "You already have prices for {count} wilayas. Turn this on only to replace them.",
   "admin.setup.whatsappHint": "Leave empty if it is the same number as your phone.",
+  "admin.variants.compareAt": "Price before sale",
+  "admin.variants.compareAtHint": "Leave empty when it is not on sale.",
 };

@@ -5,6 +5,7 @@ import { formatDzd } from "@/lib/format";
 import { useCart } from "@/lib/cart";
 import { useStoreSettings, type CatalogueProduct, type CatalogueVariant } from "@/lib/queries";
 import { waLink } from "@/lib/whatsapp";
+import { saleOf } from "@/lib/sale";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -30,12 +31,25 @@ export function StockLine({
 }) {
   const { t, locale } = useI18n();
   const low = selected !== null && selected.stock > 0 && selected.stock <= 3;
+  const sale = selected ? saleOf(selected) : null;
 
   return (
     <div className="flex flex-col gap-2">
       {selected && (
-        <p className="font-mono text-2xl font-semibold text-primary" dir="ltr">
-          {formatDzd(selected.price, locale)}
+        <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1" dir="ltr">
+          <span className="font-mono text-2xl font-semibold text-primary">
+            {formatDzd(selected.price, locale)}
+          </span>
+          {sale && (
+            <>
+              <span className="font-mono text-base text-on-surface-muted line-through">
+                {formatDzd(sale.was, locale)}
+              </span>
+              <span className="rounded-full bg-positive/12 px-2 py-0.5 font-mono text-xs font-semibold text-positive">
+                −{sale.percent}%
+              </span>
+            </>
+          )}
         </p>
       )}
       <div className="flex flex-wrap items-center gap-3 text-sm">

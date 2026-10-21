@@ -32,6 +32,8 @@ export type CatalogueVariant = {
   color_hex: string | null;
   sku: string | null;
   price: number;
+  /** Original price when on sale; display only. */
+  compare_at_price?: number | null;
   stock: number;
   is_active: boolean;
   sort_order: number;
@@ -86,7 +88,7 @@ const PRODUCT_SELECT = `
   id, slug, name, name_fr, description, description_fr, kind, status, category_id, published_at,
   categories ( slug, name, name_fr ),
   product_variants (
-    id, size, color_name, color_hex, sku, price, stock, is_active, sort_order,
+    id, size, color_name, color_hex, sku, price, compare_at_price, stock, is_active, sort_order,
     variant_images ( id, url, alt, sort_order )
   )
 `;

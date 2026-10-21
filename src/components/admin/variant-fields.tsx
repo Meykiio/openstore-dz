@@ -14,6 +14,7 @@ export type VariantDraft = {
   color_hex: string;
   sku: string;
   price: string;
+  compare_at_price: string;
   stock: string;
   weight_grams: string;
 };
@@ -24,6 +25,7 @@ export const EMPTY_DRAFT: VariantDraft = {
   color_hex: "",
   sku: "",
   price: "",
+  compare_at_price: "",
   stock: "0",
   weight_grams: "",
 };
@@ -35,6 +37,10 @@ export function toDraft(variant: AdminVariant): VariantDraft {
     color_hex: variant.color_hex ?? "",
     sku: variant.sku ?? "",
     price: String(variant.price),
+    compare_at_price:
+      variant.compare_at_price === null || variant.compare_at_price === undefined
+        ? ""
+        : String(variant.compare_at_price),
     stock: String(variant.stock),
     weight_grams: variant.weight_grams === null ? "" : String(variant.weight_grams),
   };
@@ -52,7 +58,7 @@ export function DraftFields({
     onChange({ ...draft, [key]: value });
 
   return (
-    <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+    <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-4">
       <Field label={t("store.size")}>
         <Input value={draft.size} onChange={(e) => set("size", e.target.value)} maxLength={20} />
       </Field>
@@ -69,6 +75,16 @@ export function DraftFields({
           min={0}
           value={draft.price}
           onChange={(e) => set("price", e.target.value)}
+          dir="ltr"
+          className="font-mono"
+        />
+      </Field>
+      <Field label={t("admin.variants.compareAt")} hint={t("admin.variants.compareAtHint")}>
+        <Input
+          type="number"
+          min={0}
+          value={draft.compare_at_price}
+          onChange={(e) => set("compare_at_price", e.target.value)}
           dir="ltr"
           className="font-mono"
         />

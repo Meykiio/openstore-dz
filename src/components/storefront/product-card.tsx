@@ -4,6 +4,7 @@ import { useI18n } from "@/lib/i18n-context";
 import { formatDzd } from "@/lib/format";
 import {
   priceRange,
+  sortVariants,
   productImage,
   totalStock,
   useReviews,
@@ -11,6 +12,7 @@ import {
 } from "@/lib/queries";
 import { averageRating } from "@/lib/queries";
 import { localized } from "@/lib/i18n";
+import { saleOf } from "@/lib/sale";
 import { StarRating } from "./star-rating";
 
 /**
@@ -26,6 +28,9 @@ function ProductCard({ product }: { product: CatalogueProduct }) {
 
   const image = productImage(product);
   const range = priceRange(product);
+  // The cheapest variant sets the headline price, so its sale is the one shown.
+  const cheapest = sortVariants(product.product_variants).find((v) => v.price === range?.min);
+  const sale = cheapest ? saleOf(cheapest) : null;
   const stock = totalStock(product);
   const soldOut = stock <= 0;
   const rating = reviews ? averageRating(reviews) : null;
@@ -66,6 +71,16 @@ function ProductCard({ product }: { product: CatalogueProduct }) {
                 ? formatDzd(range.min, locale)
                 : `${t("store.from")} ${formatDzd(range.min, locale)}`}
             </span>
+            {sale && (
+              <>
+                <span className="pc-price-old" dir="ltr">
+                  {formatDzd(sale.was, locale)}
+                </span>
+                <span className="pc-price-save" dir="ltr">
+                  −{sale.percent}%
+                </span>
+              </>
+            )}
           </span>
         )}
 

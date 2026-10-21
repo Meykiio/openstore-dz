@@ -66,4 +66,6 @@ export const frTools = {
   "admin.setup.zonesExist":
     "Vous avez déjà des prix pour {count} wilayas. Activez ceci seulement pour les remplacer.",
   "admin.setup.whatsappHint": "Laissez vide si c’est le même numéro.",
+  "admin.variants.compareAt": "Prix avant remise",
+  "admin.variants.compareAtHint": "Laissez vide s’il n’est pas en promotion.",
 };

@@ -1969,6 +1969,7 @@ select jsonb_build_object(
               'color_hex', v.color_hex,
               'sku', v.sku,
               'price', v.price,
+              'compare_at_price', v.compare_at_price,
               'stock', v.stock,
               'is_active', v.is_active,
               'sort_order', v.sort_order,

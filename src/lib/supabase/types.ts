@@ -369,6 +369,7 @@ export type Database = {
         Row: {
           color_hex: string | null;
           color_name: string | null;
+          compare_at_price: number | null;
           created_at: string;
           height_cm: number | null;
           id: string;
@@ -387,6 +388,7 @@ export type Database = {
         Insert: {
           color_hex?: string | null;
           color_name?: string | null;
+          compare_at_price?: number | null;
           created_at?: string;
           height_cm?: number | null;
           id?: string;
@@ -405,6 +407,7 @@ export type Database = {
         Update: {
           color_hex?: string | null;
           color_name?: string | null;
+          compare_at_price?: number | null;
           created_at?: string;
           height_cm?: number | null;
           id?: string;

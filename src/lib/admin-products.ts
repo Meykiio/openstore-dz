@@ -19,6 +19,7 @@ export type AdminVariant = {
   color_hex: string | null;
   sku: string | null;
   price: number;
+  compare_at_price?: number | null;
   stock: number;
   weight_grams: number | null;
   sort_order: number;
@@ -48,7 +49,7 @@ const ADMIN_SELECT = `
   published_at, created_at,
   categories ( slug, name ),
   product_variants (
-    id, product_id, size, color_name, color_hex, sku, price, stock,
+    id, product_id, size, color_name, color_hex, sku, price, compare_at_price, stock,
     weight_grams, sort_order, is_active,
     variant_images ( id, url, alt, sort_order )
   )
@@ -201,6 +202,7 @@ export type VariantInput = {
   color_hex: string | null;
   sku: string | null;
   price: number;
+  compare_at_price?: number | null;
   stock: number;
   weight_grams: number | null;
   sort_order: number;

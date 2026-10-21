@@ -43,6 +43,7 @@ export function VariantEditor({
         color_hex: input.draft.color_hex.trim() || null,
         sku: input.draft.sku.trim() || null,
         price: Number(input.draft.price) || 0,
+        compare_at_price: Number(input.draft.compare_at_price) || null,
         stock: Number(input.draft.stock) || 0,
         weight_grams: input.draft.weight_grams ? Number(input.draft.weight_grams) : null,
         sort_order: input.sort_order,

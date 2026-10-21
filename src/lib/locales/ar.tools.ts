@@ -60,4 +60,6 @@ export const arTools = {
   "admin.setup.applyAll": "تطبيق هذه الأسعار على الولايات الـ58",
   "admin.setup.zonesExist": "لديك أسعار لـ{count} ولاية. فعّل هذا فقط إن أردت استبدالها.",
   "admin.setup.whatsappHint": "اتركه فارغاً إن كان نفس رقم الهاتف.",
+  "admin.variants.compareAt": "السعر قبل التخفيض",
+  "admin.variants.compareAtHint": "اتركه فارغاً إن لم يكن في تخفيض.",
 };
