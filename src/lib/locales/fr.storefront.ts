@@ -36,7 +36,8 @@ export const frStorefront = {
   "common.somethingWrong": "Une erreur est survenue. Réessayez.",
   "demo.banner": "Boutique de démonstration : les commandes ne sont pas expédiées.",
   "demo.cta": "Ouvrez votre boutique gratuite",
-  "demo.checkout": "Ceci est une boutique de démonstration. Votre commande sera enregistrée mais jamais livrée.",
+  "demo.checkout":
+    "Ceci est une boutique de démonstration. Votre commande sera enregistrée mais jamais livrée.",
   "nav.home": "Accueil",
   "nav.shop": "Boutique",
   "nav.cart": "Panier",
