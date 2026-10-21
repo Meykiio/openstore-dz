@@ -2,10 +2,9 @@
 
 Putting a shop online. Every step here is verified before it is written here.
 
-**Not verified yet.** OpenStore is at v0.1.0 and has not been deployed to production by
-anyone. The instructions below describe how the build output is structured, which is
-confirmed. The end-to-end deployment is Sprint 10 and this page will be updated with what
-actually happened, including what broke.
+**Verified once, on Vercel.** The reference shop runs at
+https://openstore-dz.vercel.app, built from this repository with the steps below. A
+Netlify or VPS deployment has not been tried by anyone yet.
 
 ## What gets built
 
@@ -49,6 +48,12 @@ Development:
 A variable with no `VITE_` prefix never reaches the browser. If a secret ever appears in
 browser code, rotate it immediately. See `SECURITY.md`.
 
+### Claim the shop immediately
+
+Open `https://<your-domain>/setup` as soon as the first deploy finishes and create the
+owner account there. Until someone does, **anyone who finds the URL can claim the shop
+and become its owner.** After the first claim the page closes permanently.
+
 ### Supabase Auth
 
 In **Authentication → URL Configuration**:
@@ -67,7 +72,7 @@ state.
 
 ### Guepex webhook
 
-After Sprint 8, the webhook is a Supabase Edge Function:
+The webhook is a Supabase Edge Function:
 
 ```
 https://<project-ref>.supabase.co/functions/v1/guepex-webhook
@@ -117,6 +122,7 @@ Before changing `schema.sql` on a live shop, take a backup first.
 ## Checklist before going live
 
 - [ ] `npm run check` passes in CI
+- [ ] The shop is claimed at `/setup` by its real owner
 - [ ] A test order completes end to end on a real phone
 - [ ] Guepex webhook verified with a real parcel (`?subscribe=1&crc_token=test123`)
 - [ ] Email confirmation turned **on**

@@ -86,6 +86,8 @@ create table if not exists public.store_settings (
   delivery_eta_days   int  not null default 3 check (delivery_eta_days >= 1),
   returns_days        int  not null default 14 check (returns_days >= 0),
   accepts_cod         boolean not null default true,
+  -- Delivery is free once the subtotal reaches this. 0 means never free.
+  free_shipping_threshold int not null default 0 check (free_shipping_threshold >= 0),
 
     -- Guepex origin. The carrier matches wilaya by exact name string, so this
     -- must match the carrier's spelling character for character.
@@ -117,6 +119,21 @@ create table if not exists public.admin_users (
   created_at  timestamptz not null default now()
 );
 
+-- Categories are rows, not free text, so a category page has a canonical slug and
+-- a renamed label does not split one category into two.
+create table if not exists public.categories (
+  id           uuid primary key default gen_random_uuid(),
+  slug         text not null unique,
+  name         text not null,
+  name_fr      text,
+  description  text,
+  image_url    text,
+  sort_order   int not null default 0,
+  is_active    boolean not null default true,
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now()
+);
+
 create table if not exists public.products (
   id            uuid primary key default gen_random_uuid(),
   slug          text not null unique,
@@ -126,7 +143,7 @@ create table if not exists public.products (
   description_fr text,
   kind          public.product_kind not null default 'single',
   status        text not null default 'draft' check (status in ('draft', 'published', 'archived')),
-  category      text,
+  category_id   uuid references public.categories(id) on delete set null,
   -- Published products are world-readable; everything else is admin-only.
   published_at  timestamptz,
   created_at    timestamptz not null default now(),
@@ -669,6 +686,10 @@ drop trigger if exists validate_review_trigger on public.reviews;
 create trigger validate_review_trigger before insert on public.reviews
   for each row execute function public.validate_review();
 
+drop trigger if exists touch_categories on public.categories;
+create trigger touch_categories before update on public.categories
+  for each row execute function public.touch_updated_at();
+
 drop trigger if exists touch_size_guides on public.size_guides;
 create trigger touch_size_guides before update on public.size_guides
   for each row execute function public.touch_updated_at();
@@ -694,6 +715,9 @@ alter table public.pack_items        enable row level security;
 alter table public.orders            enable row level security;
 alter table public.order_items       enable row level security;
 alter table public.reviews           enable row level security;
+alter table public.categories        enable row level security;
+alter table public.size_guides       enable row level security;
+alter table public.delivery_zones    enable row level security;
 
 -- Supabase grants anon and authenticated broad privileges on new tables in the
 -- public schema. Policies do NOT remove grants. Revoke first, then re-grant
@@ -730,6 +754,42 @@ create policy "Public reads published products"
 drop policy if exists "Admins manage products" on public.products;
 create policy "Admins manage products"
   on public.products for all to authenticated
+  using      ((select public.has_admin_role((select auth.uid()), array['owner','staff']::public.admin_role[])) is true)
+  with check ((select public.has_admin_role((select auth.uid()), array['owner','staff']::public.admin_role[])) is true);
+
+-- --- categories, size guides, delivery zones: public read, admin write.
+-- All three are what the storefront shows before a buyer commits, so reading
+-- them needs no session. Hidden categories and paused zones stay admin-only.
+drop policy if exists "Public reads active categories" on public.categories;
+create policy "Public reads active categories"
+  on public.categories for select to anon, authenticated
+  using (is_active);
+
+drop policy if exists "Admins manage categories" on public.categories;
+create policy "Admins manage categories"
+  on public.categories for all to authenticated
+  using      ((select public.has_admin_role((select auth.uid()), array['owner','staff']::public.admin_role[])) is true)
+  with check ((select public.has_admin_role((select auth.uid()), array['owner','staff']::public.admin_role[])) is true);
+
+drop policy if exists "Public reads size guides" on public.size_guides;
+create policy "Public reads size guides"
+  on public.size_guides for select to anon, authenticated
+  using (true);
+
+drop policy if exists "Admins manage size guides" on public.size_guides;
+create policy "Admins manage size guides"
+  on public.size_guides for all to authenticated
+  using      ((select public.has_admin_role((select auth.uid()), array['owner','staff']::public.admin_role[])) is true)
+  with check ((select public.has_admin_role((select auth.uid()), array['owner','staff']::public.admin_role[])) is true);
+
+drop policy if exists "Public reads active delivery zones" on public.delivery_zones;
+create policy "Public reads active delivery zones"
+  on public.delivery_zones for select to anon, authenticated
+  using (is_active);
+
+drop policy if exists "Admins manage delivery zones" on public.delivery_zones;
+create policy "Admins manage delivery zones"
+  on public.delivery_zones for all to authenticated
   using      ((select public.has_admin_role((select auth.uid()), array['owner','staff']::public.admin_role[])) is true)
   with check ((select public.has_admin_role((select auth.uid()), array['owner','staff']::public.admin_role[])) is true);
 
@@ -851,6 +911,9 @@ grant select on public.product_variants to anon, authenticated;
 grant select on public.variant_images   to anon, authenticated;
 grant select on public.pack_items       to anon, authenticated;
 grant select on public.reviews          to anon, authenticated;
+grant select on public.categories       to anon, authenticated;
+grant select on public.size_guides      to anon, authenticated;
+grant select on public.delivery_zones   to anon, authenticated;
 
 -- Buyers do not get table-level INSERT on orders or order_items. place_order()
 -- is their only route in and it is granted as a function, not as a table
@@ -863,7 +926,8 @@ grant insert on public.reviews to anon, authenticated;
 grant select, insert, update, delete on
   public.products, public.product_variants, public.variant_images,
   public.pack_items, public.order_items, public.reviews,
-  public.store_settings
+  public.store_settings, public.categories, public.size_guides,
+  public.delivery_zones
   to authenticated;
 
 grant select on public.admin_users to authenticated;
@@ -969,10 +1033,16 @@ on conflict (id) do nothing;
 
 -- Two products: one single item, one pack. Prices and stock are the numbers the
 -- storefront and the seed-verification query in the README expect.
-insert into public.products (id, slug, name, name_fr, description, kind, status, category, published_at)
+insert into public.categories (slug, name, name_fr, sort_order)
 values
-  ('11111111-1111-4111-8111-111111111111', 'shirt-demo',  'قميص قطني كلاسيكي',  'Chemise coton classique',  'قميص قطني 100% بقصة مريحة، مناسب للعمل والمناسبات اليومية.', 'single', 'published', 'قمصان', now()),
-  ('22222222-2222-4222-8222-222222222222', 'pack-demo',    'باك القميص + البنطال', 'Pack chemise + pantalon', 'باقة موفرة تجمع قميصاً وبنطالاً بسعر أقل من شرائهما منفصلين.', 'pack', 'published', 'other',   now())
+  ('shirts', 'قمصان', 'Chemises', 1),
+  ('packs',  'باقات', 'Packs',    2)
+on conflict (slug) do nothing;
+
+insert into public.products (id, slug, name, name_fr, description, kind, status, category_id, published_at)
+values
+  ('11111111-1111-4111-8111-111111111111', 'shirt-demo',  'قميص قطني كلاسيكي',  'Chemise coton classique',  'قميص قطني 100% بقصة مريحة، مناسب للعمل والمناسبات اليومية.', 'single', 'published', (select id from public.categories where slug = 'shirts'), now()),
+  ('22222222-2222-4222-8222-222222222222', 'pack-demo',    'باك القميص + البنطال', 'Pack chemise + pantalon', 'باقة موفرة تجمع قميصاً وبنطالاً بسعر أقل من شرائهما منفصلين.', 'pack', 'published', (select id from public.categories where slug = 'packs'), now())
 on conflict (id) do nothing;
 
 insert into public.product_variants (id, product_id, size, color_name, color_hex, sku, price, stock, weight_grams, sort_order)
@@ -1216,6 +1286,176 @@ create trigger restock_on_negative_status_trigger
   for each row execute function public.restock_on_negative_status();
 
 revoke all on function public.restock_on_negative_status() from public, anon, authenticated;
+
+-- ── Delivery fee: the zone, the flat fee, and the free-delivery threshold ──
+-- The checkout shows the buyer the wilaya's zone fee, and the storefront
+-- promises free delivery above the threshold. The totals used to charge the
+-- flat fee regardless, so the order the courier collected on was not the order
+-- the buyer agreed to. src/lib/delivery.ts mirrors this rule for display only.
+alter table public.store_settings
+  add column if not exists free_shipping_threshold int not null default 0
+  check (free_shipping_threshold >= 0);
+
+create or replace function public.delivery_fee_for(p_wilaya text, p_subtotal int)
+returns int
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select case
+    when s.free_shipping_threshold > 0 and p_subtotal >= s.free_shipping_threshold then 0
+    else coalesce(
+      (select dz.fee from public.delivery_zones dz where dz.wilaya = p_wilaya and dz.is_active),
+      s.delivery_fee_flat
+    )
+  end
+  from public.store_settings s
+  where s.id = 1;
+$$;
+
+create or replace function public.recalculate_for_order(p_order_id uuid)
+returns void
+language sql
+security definer
+set search_path = ''
+as $$
+  update public.orders o
+     set subtotal     = s.sub,
+         delivery_fee = coalesce(public.delivery_fee_for(o.wilaya, s.sub), 0),
+         total        = s.sub + coalesce(public.delivery_fee_for(o.wilaya, s.sub), 0)
+    from (select coalesce(sum(quantity * unit_price), 0)::int as sub
+            from public.order_items where order_id = p_order_id) s
+   where o.id = p_order_id;
+$$;
+
+-- The line trigger now defers to the same function, so a dashboard edit and a
+-- new order can never price delivery two different ways.
+create or replace function public.recalculate_order_totals()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if tg_op = 'DELETE' then
+    perform public.recalculate_for_order(old.order_id);
+    return old;
+  end if;
+  perform public.recalculate_for_order(new.order_id);
+  return new;
+end;
+$$;
+
+-- ── Dashboard analytics ─────────────────────────────────────────────────────
+-- One function, one round trip, so the totals are computed over every order
+-- rather than over whatever a capped browser fetch happened to return. The
+-- shape is the `Analytics` type in src/lib/analytics.ts.
+--
+-- "Confirmed value" counts orders the buyer said yes to on the phone and that
+-- have not since failed. A refusal is a refused or returned parcel: both cost
+-- the outbound and the return. Wilayas under three orders are left out, because
+-- one refusal out of one order is noise, not a rate.
+create or replace function public.admin_analytics(p_days int default 30)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  v_since timestamptz;
+  v_days  int := greatest(1, least(coalesce(p_days, 30), 366));
+begin
+  if (select public.has_admin_role((select auth.uid()), array['owner','staff']::public.admin_role[])) is not true then
+    raise exception 'Only the shop''s administrators can read its analytics'
+      using errcode = 'insufficient_privilege';
+  end if;
+
+  v_since := date_trunc('day', now()) - make_interval(days => v_days - 1);
+
+  return (
+    with win as (
+      select * from public.orders where created_at >= v_since
+    )
+    select jsonb_build_object(
+      'days', v_days,
+      'revenue', (
+        select coalesce(jsonb_agg(jsonb_build_object(
+                 'day', to_char(d.day, 'YYYY-MM-DD'),
+                 'orders', coalesce(x.orders, 0),
+                 'value', coalesce(x.value, 0)) order by d.day), '[]'::jsonb)
+        from generate_series(v_since, date_trunc('day', now()), interval '1 day') as d(day)
+        left join (
+          select date_trunc('day', created_at) as day,
+                 count(*) as orders,
+                 sum(total) filter (where status in ('confirmed','shipped','delivered')) as value
+          from win group by 1
+        ) x on x.day = d.day
+      ),
+      'funnel', (
+        select coalesce(jsonb_object_agg(status, n), '{}'::jsonb)
+        from (select status::text as status, count(*) as n from win group by 1) f
+      ),
+      'totals', (
+        select jsonb_build_object(
+          'orders', count(*),
+          'confirmedValue', coalesce(sum(total) filter (where status in ('confirmed','shipped','delivered')), 0),
+          'refused', count(*) filter (where status in ('refused','returned')))
+        from win
+      ),
+      'byWilaya', (
+        select coalesce(jsonb_agg(jsonb_build_object(
+                 'wilaya', wilaya, 'total', total, 'delivered', delivered,
+                 'refused', refused, 'rate', round(refused::numeric / total, 4))
+               order by refused::numeric / total desc, total desc), '[]'::jsonb)
+        from (
+          select wilaya, count(*) as total,
+                 count(*) filter (where status = 'delivered') as delivered,
+                 count(*) filter (where status in ('refused','returned')) as refused
+          from win group by wilaya having count(*) >= 3
+        ) w
+      ),
+      'topProducts', (
+        select coalesce(jsonb_agg(jsonb_build_object('name', name, 'units', units, 'value', value)
+               order by units desc, value desc), '[]'::jsonb)
+        from (
+          select oi.product_name as name, sum(oi.quantity) as units,
+                 sum(oi.quantity * oi.unit_price) as value
+          from public.order_items oi
+          join win o on o.id = oi.order_id
+          where o.status in ('confirmed','shipped','delivered')
+          group by oi.product_name
+          order by units desc, value desc
+          limit 5
+        ) t
+      ),
+      'lowStock', (
+        select coalesce(jsonb_agg(jsonb_build_object(
+                 'id', id, 'product', product, 'label', label, 'stock', stock)
+               order by stock, product), '[]'::jsonb)
+        from (
+          select pv.id, p.name as product,
+                 nullif(concat_ws(' / ', nullif(pv.size, ''), nullif(pv.color_name, '')), '') as label,
+                 pv.stock
+          from public.product_variants pv
+          join public.products p on p.id = pv.product_id
+          where pv.is_active and p.status = 'published' and pv.stock <= 3
+          order by pv.stock, p.name
+          limit 10
+        ) l
+      )
+    )
+  );
+end;
+$$;
+
+revoke all on function public.admin_analytics(int) from public, anon;
+grant execute on function public.admin_analytics(int) to authenticated;
+
+revoke all on function public.delivery_fee_for(text, int)     from public, anon, authenticated;
+revoke all on function public.recalculate_for_order(uuid)     from public, anon, authenticated;
+revoke all on function public.recalculate_order_totals()      from public, anon, authenticated;
 
 -- ── Admin bootstrap ────────────────────────────────────────────────────────
 -- `admin_users` deliberately has no INSERT policy, or any signed-in user could

@@ -1,4 +1,4 @@
-# PROJECT.md ÔÇö OpenStore DZ
+# PROJECT.md — OpenStore DZ
 
 Project-specific rules and adaptations. These narrow the universal rules in the owner's
 master files; they never weaken a `[HARD]` rule.
@@ -10,30 +10,35 @@ Last updated 2026-10-15. Everything in this section was run, not assumed.
 ### Verified
 
 - `npm run check` green: typecheck, lint, test, knip, build.
-- Full Playwright suite against the live production URL: 51 passed, 0 failed,
-  0 skipped. This includes the admin dashboard spec, which needs credentials and had
-  been skipped in every local run.
-- The production URL returns 200 to an anonymous request, with no login wall.
-- The storefront catalogue filters, sorts, searches, pages and facets entirely in the
-  database, through `normalize_arabic()` and `catalogue_page()`. Twelve products a page.
-- Admin lists use real numbered pages, 15 rows per page, every page directly reachable.
-  The order queue is a server-side filter, so confirming an order does not make it vanish.
+- Full Playwright suite against the live production URL: 49 passed, 1 skipped, and
+  the one failure was a test asserting against a category that no longer exists.
+  Fixed, and the catalogue spec passes.
+- The catalogue is the shop's own photography: 10 products, 83 colour sets,
+  397 variants, 1505 images, real Arabic copy, prices, size guides and reviews.
+  316 web images, 28 MB, 91 KB each, served from the product-media bucket.
+- The product grid renders in the server HTML. It did not before: when filtering
+  moved into the database the grid started fetching in the browser, so the server
+  sent an empty grid.
 - Live at https://openstore-dz.vercel.app
 
 ### Blockers and known issues
 
 - Pushes to the repository do not deploy. Vercel blocks them with `BLOCKED` and
-  `troubleshoot-project-collaboration#account-configuration`, because the commits are
-  authored as `sifeddine.mebarki@gmail.com` and Vercel cannot match that to the account
-  owning the project. The build never starts, so this is not a code problem. Deploy from
-  the CLI, verify that email on the Vercel account, or make the repository public.
-- LCP budget missed: 4.4 to 8.9s against a 2.5s budget. The fix is planned in ROADMAP E2
-  and not attempted.
-- The suite leaves an order behind on every run. Documented in docs/DEMO.md, not
-  automated, because the browser cannot delete orders under RLS.
-- The `test` product is the only reason the facets show both `S` and `s`. It is the
-  owner's own data and was left untouched.
-- Demo imagery is external picsum.photos placeholders.
+  `troubleshoot-project-collaboration#account-configuration`, because the commits
+  are authored as `sifeddine.mebarki@gmail.com` and Vercel cannot match that to the
+  account owning the project. The build never starts, so this is not a code
+  problem. Deploy from the CLI, verify that email on the Vercel account, or make
+  the repository public.
+- The locale follows the browser. The server renders Arabic and the client switches
+  on hydration, so an English or French browser sees the layout mirror once on
+  first load. The fix is to carry the locale in a cookie so the server can render
+  the same language, which is a real piece of work and is not done.
+- LCP is 5.9s against a 2.5s budget on a throttled connection. The 229 KB entry
+  chunk dominates. Payload is 418 KB against a 1.5 MB budget, so that one passes.
+- The product page serialises every variant's images, which is 626 URLs and 212 KB
+  of HTML for the polo. It compresses well but it is heavier than it needs to be.
+- The owner's `test` product is published and appears in the catalogue as the
+  eleventh product. It is their data and was left alone.
 - The Guepex webhook returns 503 by design: `GUEPEX_WEBHOOK_SECRET` is unset and no
   carrier API key exists, so carrier sync cannot be verified.
 
@@ -42,34 +47,29 @@ Last updated 2026-10-15. Everything in this section was run, not assumed.
 ```bash
 npm run check                       # the one gate: typecheck, lint, test, knip, build
 npm run test:e2e                    # Playwright against the dev server
-E2E_BASE_URL=http://127.0.0.1:3000 npm run test:e2e   # against the built output
-npx supabase db advisors            # ran both classes; findings fixed
-npx supabase gen types typescript --project-id <project-ref> \
-  > src/lib/supabase/types.ts       # regenerate after any schema change
+E2E_BASE_URL=https://openstore-dz.vercel.app npm run test:e2e   # against production
+node scripts/catalogue/build-manifest.mjs   # choose source images
+node scripts/catalogue/process-images.mjs   # crop to 4:5 and encode webp
+node scripts/catalogue/upload.mjs           # upload to product-media
+node scripts/catalogue/build-seed.mjs       # generate supabase/seed-catalogue.sql
 ```
 
-**Run the browser suite against the built output, not the dev server.** In `vite dev`
-the stylesheet is injected by JavaScript during hydration, so for a window the page is
-unstyled. Any layout measurement taken there is a measurement of the loader. This is the
-same reason no performance number may come from the dev server.
+**Run the browser suite against the built output or production, not the dev server.**
+In `vite dev` the stylesheet is injected by JavaScript during hydration, so for a
+window the page is unstyled and any layout measurement is a measurement of the
+loader.
 
 The authenticated layout audit is skipped unless `E2E_ADMIN_EMAIL` and
 `E2E_ADMIN_PASSWORD` are set. Use a throwaway account, never your own.
 
 ### Database
 
-Project ref: it lives in `.env` as `VITE_SUPABASE_PROJECT_ID` and is deliberately not
-written down here, because this repository will be forked. Credentials live in `.env`,
-which is gitignored and never committed. The schema is one file, `supabase/schema.sql`,
-with no migrations by design, see `docs/DECISIONS.md` entry 4. It has been applied to the
-live project through the MCP `apply_migration` tool and verified by hand;
-`supabase/verify.sql` is the regression net.
-
-Four defects were found during verification, two of which compiled cleanly and would have
-surfaced as a mysterious checkout failure on the first real order. They are itemised in
-`docs/DATABASE.md`.
-
-### Recent work
+Project ref: it lives in `.env` as `VITE_SUPABASE_PROJECT_ID` and is deliberately
+not written down here, because this repository will be forked. Credentials live in
+`.env`, which is gitignored and never committed. The schema is one file,
+`supabase/schema.sql`, with no migrations by design, see `docs/DECISIONS.md` entry
+4. The catalogue seed is `supabase/seed-catalogue.sql`, generated by
+`scripts/catalogue/build-seed.mjs`.
 
 ## What this project is
 
@@ -92,29 +92,29 @@ and the platform never holds a shop owner's money.
 These two features are the business, not polish. Both numbers come from
 2026 research on the Algerian market:
 
-- COD refusal runs 15ÔÇô20% in the big cities and over 30% in the south. One
-  refusal costs 600ÔÇô1,000 DZD plus 7ÔÇô15 days of locked stock. A
-  pre-dispatch confirmation call cuts refusals by 25ÔÇô35%. It is also the
+- COD refusal runs 15–20% in the big cities and over 30% in the south. One
+  refusal costs 600–1,000 DZD plus 7–15 days of locked stock. A
+  pre-dispatch confirmation call cuts refusals by 25–35%. It is also the
   single most requested feature by Algerian merchants.
-- Fashion returns run **35ÔÇô50% without a size guide** and **8ÔÇô15% with one**.
+- Fashion returns run **35–50% without a size guide** and **8–15% with one**.
   The size guide builder ships with product management, not later.
 
 ## Stack
 
-React 19 ┬À TypeScript ┬À Vite 7 ┬À TanStack Start (SSR via Nitro, Vercel preset) ┬À
-Tailwind CSS v4 (CSS-first, tokens in `src/styles.css`) ┬À shadcn-style primitives ┬À
-TanStack Query ┬À Supabase (Postgres + Auth + Storage + Edge Functions) ┬À AGPL-3.0.
+React 19 · TypeScript · Vite 7 · TanStack Start (SSR via Nitro, Vercel preset) ·
+Tailwind CSS v4 (CSS-first, tokens in `src/styles.css`) · shadcn-style primitives ·
+TanStack Query · Supabase (Postgres + Auth + Storage + Edge Functions) · AGPL-3.0.
 
 ## Project-specific adaptations
 
-| Master rule                                                     | Adaptation                                                                                                  | Reason                                                                                                                                                                                     |
-| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `RULES.md` 7.1 ÔÇö every schema change is a versioned migration | **One `supabase/schema.sql`, no migrations**                                                                | A shop owner installs this with an agent pasting one file. Twenty migration files is the single biggest setup failure mode. The schema file is the source of truth and is edited directly. |
-| `RULES.md` 5.1 ÔÇö max 250 lines per file                       | Exempt: `supabase/schema.sql`, `src/styles.css`                                                             | Each is one addressable unit whose integrity depends on not being split. The exemption is a closed list; a new file is not exempt for being similar.                                       |
-| `System Instructions` Tier 1 gate ÔÇö `pnpm check`              | **`npm run check`**                                                                                         | Node/npm toolchain. Same contents.                                                                                                                                                         |
-| `System Instructions` ÔÇö ESLint `max-lines`                    | Local rule in `eslint-rules/index.mjs`                                                                      | No maintained npm package exists for ESLint 9 flat config. Owning it means the 250-line rule cannot drift with a dependency update.                                                        |
-| RTL                                                             | **Arabic is the primary language**, French is a translation. `dir="rtl"` is the default, not an option.     | Algeria.                                                                                                                                                                                   |
-| `RULES.md` 6.5 ÔÇö rate limit public and abuse-prone operations | **Not implemented.** The order route has input validation and database-level constraints but no rate limit. | Recorded as a real gap rather than assumed away. See `docs/LATER.md`.                                                                                                                      |
+| Master rule                                                   | Adaptation                                                                                                  | Reason                                                                                                                                                                                     |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `RULES.md` 7.1 — every schema change is a versioned migration | **One `supabase/schema.sql`, no migrations**                                                                | A shop owner installs this with an agent pasting one file. Twenty migration files is the single biggest setup failure mode. The schema file is the source of truth and is edited directly. |
+| `RULES.md` 5.1 — max 250 lines per file                       | Exempt: `supabase/schema.sql`, `src/styles.css`                                                             | Each is one addressable unit whose integrity depends on not being split. The exemption is a closed list; a new file is not exempt for being similar.                                       |
+| `System Instructions` Tier 1 gate — `pnpm check`              | **`npm run check`**                                                                                         | Node/npm toolchain. Same contents.                                                                                                                                                         |
+| `System Instructions` — ESLint `max-lines`                    | Local rule in `eslint-rules/index.mjs`                                                                      | No maintained npm package exists for ESLint 9 flat config. Owning it means the 250-line rule cannot drift with a dependency update.                                                        |
+| RTL                                                           | **Arabic is the primary language**, French is a translation. `dir="rtl"` is the default, not an option.     | Algeria.                                                                                                                                                                                   |
+| `RULES.md` 6.5 — rate limit public and abuse-prone operations | **Not implemented.** The order route has input validation and database-level constraints but no rate limit. | Recorded as a real gap rather than assumed away. See `docs/LATER.md`.                                                                                                                      |
 
 ## Money
 

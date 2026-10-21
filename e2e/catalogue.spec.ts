@@ -64,7 +64,10 @@ test("a search narrows the reported total, not just the visible rows", async ({ 
 });
 
 test("a category page shows only that category, and still pages", async ({ page }) => {
-  await page.goto("/category/shirts", { waitUntil: "networkidle" });
+  // `tshirts` is one of the real catalogue's categories. It was `shirts`, which
+  // belonged to the placeholder catalogue and no longer exists, so this test was
+  // asserting against an empty page.
+  await page.goto("/category/tshirts", { waitUntil: "networkidle" });
 
   const products = await visibleProducts(page);
   expect(products.length).toBeGreaterThan(0);

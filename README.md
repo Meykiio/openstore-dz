@@ -12,45 +12,36 @@ Arabic (RTL) first. French. Cash on delivery. No subscription, no setup fee, no 
 
 ---
 
-## Status: foundation, not yet a shop
+## Status: v0.1.0, first public release
 
-**This is v0.1.0 and it is not usable as a shop yet.** The foundation is built and
-verified: the app runs, the quality gate is green, and the design system is in place. The
-catalogue, checkout, dashboard and delivery integration are built and verified. The sprint
-table below covers the original ten sprints; the work after them is grouped into phases in
-`docs/ROADMAP.md`, and `docs/CHANGELOG.md` records what was actually run.
+**Live demo: [openstore-dz.vercel.app](https://openstore-dz.vercel.app)**, a real
+clothing catalogue running on this exact code.
 
-| Sprint | What it delivers                                           | State                         |
-| ------ | ---------------------------------------------------------- | ----------------------------- |
-| 0      | Project foundation, quality gate, design system            | **Done**                      |
-| 1      | Skill library, design reference, governance docs           | **Done**                      |
-| 2      | `supabase/schema.sql`: tables, RLS, grants, seed demo shop | **Done, verified on live DB** |
-| 3      | Admin sign-in and store profile                            | **Done**                      |
-| 4      | Products, packs, size guide builder                        | **Done**                      |
-| 5      | Orders and the confirmation call queue                     | **Done**                      |
-| 6      | Storefront, product pages, installable PWA                 | **Done**                      |
-| 7      | Cart and cash-on-delivery checkout                         | **Done**                      |
-| 8      | Guepex delivery, tracking, webhook                         | **Done**                      |
-| 9      | Accessibility gates                                        | **Done**                      |
-| 10     | Launch readiness                                           | Partial                       |
+A shop owner can install this today and take cash-on-delivery orders. What is verified
+and working, in `docs/FEATURES.md`:
 
-> **Sprints 0-9 are implemented.** Sprint 10 is partial: the app has a three-language UI,
-> SEO titles and route error boundaries, but no measurement of performance against the
-> built output has been taken yet, and nothing has been deployed.
->
-> Accessibility is done and enforced rather than audited once: axe-core runs against WCAG
-> 2.1 A and AA on every visitor page in desktop and mobile projects, on every run. Layout
-> is measured the same way, with no page-level horizontal overflow at any width from 320 to
-> 1280, and a minimum tap-target size, checked against the built output rather than the dev
-> server.
->
-> **Two things need a human before this is a real shop.** The Guepex webhook
-> returns `503` until `GUEPEX_WEBHOOK_SECRET` is set on the Supabase project, and
-> the demo catalogue ships with external placeholder images that should be
-> replaced with real media.
+- **Buyers:** catalogue, category pages, Arabic-tolerant search, filters, product pages
+  with colour and size variants, size guide and reviews, cart, cash-on-delivery
+  checkout with the delivery fee shown first, WhatsApp ordering, order tracking.
+  Arabic, French and English. Installable on a phone.
+- **Owners:** first-run claim, a dashboard that opens on the confirmation call queue,
+  refusal rate by wilaya, products and packs with photo upload from a phone, size
+  guide builder, review moderation, delivery zones per wilaya, Guepex parcel creation,
+  order export to Google Sheets.
+- **Safety:** prices are recomputed in the database, never trusted from the browser.
+  Row-level security on every table. Secrets stay on the server.
 
-`docs/CHANGELOG.md` records verified state. If it is not in the changelog, it does not
-work yet.
+What it does **not** do yet, so nobody finds out the hard way:
+
+- **One carrier.** Guepex (Yalidine) only. Stopdesk pickup, a commune picker and sale
+  prices are next, in that order. See `docs/ROADMAP.md`.
+- **Delivery status sync needs your Guepex webhook secret.** Until you set
+  `GUEPEX_WEBHOOK_SECRET`, parcels are created but their status is updated by hand.
+- **On a French or English phone the page flips direction once on first load**, because
+  the server renders Arabic and the browser then switches language.
+
+`docs/CHANGELOG.md` records what was actually run and verified. If it is not there, it
+does not work yet.
 
 ---
 
@@ -82,7 +73,9 @@ That is not a design decision anyone made. It is the gap.
 - **Confirmation call queue** — the feature Algerian merchants ask for by name, because a
   pre-dispatch phone call cuts refused deliveries by 25–35%
 - **Guepex (Yalidine) delivery** with parcel creation, fee preview and live tracking
+- **WhatsApp ordering**, a prefilled message for the buyer who will not fill a form
 - **Reviews**, which are absent from essentially every Algerian storefront today
+- **Dashboard** with refusal rate by wilaya, and order export to Google Sheets
 - **Nothing the platform sells.** No subscription, no commission, no "pro tier".
 
 ---
@@ -104,13 +97,13 @@ That is not a design decision anyone made. It is the gap.
 
 ### Prerequisites
 
-| Tool             | Why                                                          |
-| ---------------- | ------------------------------------------------------------ |
-| **Git**          | to clone the repository                                      |
-| **Node.js 20+**  | to build and run the app                                     |
-| **npm**          | comes with Node.js                                           |
-| **Docker**       | to run Supabase locally, or use a free cloud project instead |
-| **Supabase CLI** | run `npx supabase --version` to check                        |
+| Tool               | Why                                                          |
+| ------------------ | ------------------------------------------------------------ |
+| **Git**            | to clone the repository                                      |
+| **Node.js 20.19+** | to build and run the app                                     |
+| **npm**            | comes with Node.js                                           |
+| **Docker**         | to run Supabase locally, or use a free cloud project instead |
+| **Supabase CLI**   | run `npx supabase --version` to check                        |
 
 ### Quick start
 
@@ -160,7 +153,7 @@ STEPS:
    needed.
    - Git: `git --version`
        Windows: winget install Git.Git  |  macOS: brew install git  |  Linux: apt install git
-   - Node.js 20+: `node -v`
+   - Node.js 20.19 or newer: `node -v`
        Windows: winget install OpenJS.NodeJS.LTS  |  macOS: brew install node  |  Linux: apt install nodejs npm  (or use nvm)
    - npm: `npm -v`
    - Docker (must be RUNNING, not just installed): `docker version`
@@ -233,11 +226,16 @@ B4. ENVIRONMENT. Create `.env` (never commit it) with:
    "Database not configured yet" or "Could not reach the database", stop and fix the
    problem before continuing. Do not report success while that check is failing.
 
-5. RUN THE QUALITY GATE. Run `npm run check`. Report the result honestly.
+5. CREATE THE OWNER ACCOUNT. Tell the user to open http://localhost:8080/setup and
+   create their account there. The first account created becomes the shop owner, and
+   the page closes for everyone else afterwards. Do this before the shop is shared
+   with anyone. Verify: http://localhost:8080/admin opens the dashboard after sign-in.
+
+6. RUN THE QUALITY GATE. Run `npm run check`. Report the result honestly.
    It runs typecheck, lint, tests, a dead-code scan and a production build. If any step
    fails, fix the cause and re-run. Do not claim it passed unless it exited 0.
 
-6. FINAL REPORT. Print a clear summary:
+7. FINAL REPORT. Print a clear summary:
    - What is running and where (app URL; Studio URL on PATH A, or the Supabase dashboard
      on PATH B)
    - The daily commands: PATH A - start Docker, `npx supabase start`, `npm run dev`.
@@ -257,7 +255,7 @@ HARD RULES:
 ### After setup: Guepex delivery credentials
 
 No AI agent can generate these. They exist only inside your own Guepex Developer
-Dashboard. When Sprint 8 lands, the full walkthrough is in
+Dashboard. The full walkthrough is in
 `docs/skills/yalidine-integration/references/human-only-steps.md`. Do not paste these
 values into a chat with an agent; put them straight into `.env`:
 

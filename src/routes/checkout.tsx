@@ -73,7 +73,12 @@ function CheckoutPage() {
     );
   }
 
-  const delivery = resolveDelivery(settings ?? null, zones ?? [], form.wilaya || null);
+  const delivery = resolveDelivery(
+    settings ?? null,
+    zones ?? [],
+    form.wilaya || null,
+    cart.subtotal,
+  );
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();

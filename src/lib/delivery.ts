@@ -36,21 +36,25 @@ export function useDeliveryZones() {
 }
 
 /**
- * Fee and ETA for a wilaya, matched on either script. Falls back to the store's
- * flat fee when no zone row exists.
+ * Fee and ETA for a wilaya. Falls back to the store's flat fee when no zone row
+ * exists, and is free once the subtotal reaches the store's threshold.
+ *
+ * Display only. The order's real fee is set by `delivery_fee_for()` in
+ * `supabase/schema.sql`, and this must stay the same rule or the buyer is shown
+ * one number and charged another.
  */
 export function resolveDelivery(
   settings: StoreSettings | null,
   zones: DeliveryZone[],
   wilaya: string | null,
-): { fee: number; etaDays: number; source: "zone" | "flat" } {
+  subtotal: number,
+): { fee: number; etaDays: number; source: "zone" | "flat" | "free" } {
   const zone = wilaya ? zones.find((z) => z.wilaya === wilaya) : undefined;
-  if (zone) return { fee: zone.fee, etaDays: zone.eta_days, source: "zone" };
-  return {
-    fee: settings?.delivery_fee_flat ?? 0,
-    etaDays: settings?.delivery_eta_days ?? 3,
-    source: "flat",
-  };
+  const etaDays = zone?.eta_days ?? settings?.delivery_eta_days ?? 3;
+  const threshold = settings?.free_shipping_threshold ?? 0;
+  if (threshold > 0 && subtotal >= threshold) return { fee: 0, etaDays, source: "free" };
+  if (zone) return { fee: zone.fee, etaDays, source: "zone" };
+  return { fee: settings?.delivery_fee_flat ?? 0, etaDays, source: "flat" };
 }
 
 export async function upsertZone(zone: {

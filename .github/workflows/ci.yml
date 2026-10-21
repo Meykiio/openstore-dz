@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -53,7 +54,10 @@ jobs:
           fetch-depth: 0
 
       - name: Trivy scan
-        uses: aquasecurity/trivy-action@v0.33.1
+        # v0.36.0, pinned to a commit rather than a tag: every tag of this
+        # action was re-published on 2026-03-20, and v0.33.1's setup step has
+        # failed on every run since.
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
           scan-type: fs
           scan-ref: .
@@ -80,6 +84,11 @@ jobs:
 
   accessibility:
     name: End-to-end and accessibility (Playwright + axe)
+    # Manual only. The buyer journey places real orders in whatever project the
+    # secrets point at, and pull requests from forks get no secrets at all, so
+    # on every push it either wrote to a live shop or failed for every
+    # contributor. Run it from the Actions tab against a disposable project.
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
