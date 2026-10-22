@@ -29,6 +29,7 @@ const DEFAULTS: StoreSettings = {
   description: null,
   logo_url: null,
   banner_url: null,
+  brand_color: null,
   legal_name: null,
   nif: null,
   rc_number: null,

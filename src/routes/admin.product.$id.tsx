@@ -5,6 +5,7 @@ import { ArrowLeft, Save } from "lucide-react";
 import { toast } from "sonner";
 import { VariantEditor } from "@/components/admin/variant-editor";
 import { VariantGenerator } from "@/components/admin/variant-generator";
+import { ColourPhotos } from "@/components/admin/colour-photos";
 import { ProductFieldsCard, type ProductDraft } from "@/components/admin/product-fields";
 import { PackBuilder } from "@/components/admin/pack-builder";
 import { SizeGuideEditor } from "@/components/admin/size-guide-editor";
@@ -115,6 +116,17 @@ function ProductEditPage() {
         status={product.status}
         onStatusChange={(status) => save.mutate({ status })}
       />
+
+      {product.product_variants.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("admin.photos.title")}</CardTitle>
+          </CardHeader>
+          <CardBody>
+            <ColourPhotos productId={id} variants={product.product_variants} />
+          </CardBody>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

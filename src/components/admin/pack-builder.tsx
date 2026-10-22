@@ -65,9 +65,7 @@ export function PackBuilder({
   return (
     <div className="flex flex-col gap-4">
       {listed.length === 0 ? (
-        <p className="text-sm text-on-surface-muted">
-          لم تُضف أي مكوّنات بعد. أضف المنتجات التي يتضمنها هذا الباك.
-        </p>
+        <p className="text-sm text-on-surface-muted">{t("admin.pack.empty")}</p>
       ) : (
         <ul className="divide-y divide-outline rounded-[16px] border border-outline">
           {listed.map((item: PackItem) => {

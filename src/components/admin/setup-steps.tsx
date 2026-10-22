@@ -1,4 +1,5 @@
 import { Field, Input, Switch } from "@/components/ui/form";
+import { ColorField, LogoField } from "./brand-fields";
 import { useI18n } from "@/lib/i18n-context";
 
 /**
@@ -8,6 +9,8 @@ import { useI18n } from "@/lib/i18n-context";
 export type SetupDraft = {
   name: string;
   tagline: string;
+  logo_url: string | null;
+  brand_color: string | null;
   phone: string;
   whatsapp: string;
   email: string;
@@ -47,6 +50,8 @@ export function ShopStep({ draft, set }: StepProps) {
           maxLength={120}
         />
       </Field>
+      <LogoField value={draft.logo_url} onChange={(url) => set("logo_url", url)} />
+      <ColorField value={draft.brand_color} onChange={(color) => set("brand_color", color)} />
     </>
   );
 }

@@ -30,7 +30,7 @@ export function CarrierAction({ order }: { order: AdminOrder }) {
     },
     onSuccess: (tracking) => {
       void queryClient.invalidateQueries({ queryKey: ["admin_orders"] });
-      toast.success(`تم إنشاء الطرد: ${tracking}`);
+      toast.success(t("admin.parcel.created", { tracking }));
     },
     onError: (error: Error) => toast.error(error.message),
   });

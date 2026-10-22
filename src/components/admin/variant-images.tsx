@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form";
 import { useI18n } from "@/lib/i18n-context";
-import { deleteProductImage, uploadProductImage } from "@/lib/image";
+import { uploadProductImage } from "@/lib/image";
+import { removeIfUnused } from "@/lib/colour-photos";
 import { addVariantImage, deleteVariantImage, type AdminVariant } from "@/lib/admin-products";
 
 /**
@@ -75,9 +76,9 @@ export function VariantImages({ variant }: { variant: AdminVariant }) {
   const remove = useMutation({
     mutationFn: async (image: { id: string; url: string }) => {
       await deleteVariantImage(image.id);
-      // Remove the stored object too, or every deleted photo leaves bytes
-      // behind forever. Best-effort by design.
-      await deleteProductImage(image.url);
+      // Remove the stored object too, or every deleted photo leaves bytes behind
+      // forever, but only once no other size of this colour still shows it.
+      await removeIfUnused(image.url);
     },
     onSuccess: invalidate,
     onError: (error: Error) => toast.error(error.message),
@@ -96,7 +97,7 @@ export function VariantImages({ variant }: { variant: AdminVariant }) {
     for (const failure of failures) toast.error(failure);
     if (added > 0) {
       invalidate();
-      toast.success(`تمت إضافة ${added} صورة`);
+      toast.success(t("admin.images.addedCount", { count: added }));
     }
   };
 

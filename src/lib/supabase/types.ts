@@ -605,6 +605,7 @@ export type Database = {
           accepts_cod: boolean;
           address: string | null;
           banner_url: string | null;
+          brand_color: string | null;
           created_at: string;
           currency: string;
           delivery_eta_days: number;
@@ -636,6 +637,7 @@ export type Database = {
           accepts_cod?: boolean;
           address?: string | null;
           banner_url?: string | null;
+          brand_color?: string | null;
           created_at?: string;
           currency?: string;
           delivery_eta_days?: number;
@@ -667,6 +669,7 @@ export type Database = {
           accepts_cod?: boolean;
           address?: string | null;
           banner_url?: string | null;
+          brand_color?: string | null;
           created_at?: string;
           currency?: string;
           delivery_eta_days?: number;

@@ -42,6 +42,8 @@ function initialDraft(s: StoreSettings | null, zoneCount: number): SetupDraft {
   return {
     name: ["openstore dz", "my shop"].includes(name.trim().toLowerCase()) ? "" : name,
     tagline: s?.tagline ?? "",
+    logo_url: s?.logo_url ?? null,
+    brand_color: s?.brand_color ?? null,
     phone: real(s?.phone),
     whatsapp: real(s?.whatsapp),
     email: s?.email ?? "",
@@ -162,7 +164,12 @@ function Wizard({ settings, zoneCount }: { settings: StoreSettings | null; zoneC
 async function saveStep(current: number, draft: SetupDraft): Promise<void> {
   const nullable = (value: string) => value.trim() || null;
   if (current === 0) {
-    await saveStoreSettings({ name: draft.name.trim(), tagline: nullable(draft.tagline) });
+    await saveStoreSettings({
+      name: draft.name.trim(),
+      tagline: nullable(draft.tagline),
+      logo_url: draft.logo_url,
+      brand_color: draft.brand_color,
+    });
   } else if (current === 1) {
     await saveStoreSettings({
       phone: draft.phone.trim(),

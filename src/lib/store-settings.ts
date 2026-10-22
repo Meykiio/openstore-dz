@@ -18,6 +18,7 @@ export type StoreSettings = {
   description: string | null;
   logo_url: string | null;
   banner_url: string | null;
+  brand_color: string | null;
   legal_name: string | null;
   nif: string | null;
   rc_number: string | null;

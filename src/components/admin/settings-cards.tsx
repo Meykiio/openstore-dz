@@ -1,6 +1,7 @@
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, Input, Switch, Textarea } from "@/components/ui/form";
 import { useI18n } from "@/lib/i18n-context";
+import { ColorField, LogoField } from "./brand-fields";
 import type { StoreSettings } from "@/lib/queries";
 
 /**
@@ -48,14 +49,8 @@ export function IdentityCard({ form, set }: { form: SettingsDraft; set: Settings
             maxLength={1000}
           />
         </Field>
-        <Field label={t("admin.settings.logoUrl")}>
-          <Input
-            value={form.logo_url ?? ""}
-            onChange={(e) => set("logo_url", e.target.value || null)}
-            dir="ltr"
-            type="url"
-          />
-        </Field>
+        <LogoField value={form.logo_url} onChange={(url) => set("logo_url", url)} />
+        <ColorField value={form.brand_color} onChange={(color) => set("brand_color", color)} />
         <Field label={t("admin.settings.bannerUrl")}>
           <Input
             value={form.banner_url ?? ""}

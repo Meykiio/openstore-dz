@@ -91,4 +91,20 @@ export const frTools = {
   "admin.setup.pickupSouth": "Retrait au bureau : sud (DA, facultatif)",
   "admin.orders.pickup": "Retrait au bureau",
   "admin.orders.pickupMissing": "Bureau non choisi. Choisissez-le avant de créer le colis.",
+  "admin.brand.logo": "Logo (facultatif)",
+  "admin.brand.logoHint":
+    "Sans logo, seul le nom de votre boutique s’affiche. C’est très bien aussi.",
+  "admin.brand.upload": "Téléverser le logo",
+  "admin.brand.replace": "Remplacer",
+  "admin.brand.color": "Couleur de la boutique",
+  "admin.brand.custom": "Autre couleur",
+  "admin.brand.default": "Couleur par défaut",
+  "admin.photos.title": "Photos par couleur",
+  "admin.photos.intro":
+    "Ajoutez les photos une fois par couleur : elles apparaissent sur toutes ses tailles.",
+  "admin.photos.added": "{count} photo(s) ajoutée(s)",
+  "admin.photos.noColour": "Toutes les tailles",
+  "admin.images.addedCount": "{count} photo(s) ajoutée(s)",
+  "admin.parcel.created": "Colis créé : {tracking}",
+  "admin.pack.empty": "Aucun article pour l’instant. Ajoutez les produits que contient ce pack.",
 };

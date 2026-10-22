@@ -35,7 +35,15 @@ export function SiteHeader() {
           to="/"
           className="flex min-h-11 min-w-0 items-center gap-2 font-display text-lg font-semibold"
         >
-          <Store size={20} className="shrink-0 text-primary" aria-hidden="true" />
+          {settings?.logo_url ? (
+            <img
+              src={settings.logo_url}
+              alt=""
+              className="h-9 max-w-[120px] shrink-0 object-contain"
+            />
+          ) : (
+            <Store size={20} className="shrink-0 text-primary" aria-hidden="true" />
+          )}
           <span className="truncate">{storeName}</span>
         </Link>
 
