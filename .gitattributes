@@ -1,0 +1,49 @@
+# Normalize line endings: LF everywhere, in the repo and on checkout.
+# This must stay in sync with "endOfLine": "lf" in .prettierrc. Without the
+# eol=lf on the wildcard, Windows checkouts reintroduce CRLF and the Prettier
+# rule in ESLint fails on every line of every file.
+* text=auto eol=lf
+
+# Explicitly LF for code and docs (avoids CRLF churn on Windows)
+*.ts    text eol=lf
+*.tsx   text eol=lf
+*.js    text eol=lf
+*.jsx   text eol=lf
+*.mjs   text eol=lf
+*.json  text eol=lf
+*.css   text eol=lf
+*.html  text eol=lf
+*.md    text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.toml  text eol=lf
+*.sql   text eol=lf
+*.txt   text eol=lf
+*.svg   text eol=lf
+*.css   text eol=lf
+
+# Extensionless dotfiles and legal text
+.gitattributes        text eol=lf
+.gitignore            text eol=lf
+.prettierrc           text eol=lf
+.prettierignore       text eol=lf
+.editorconfig         text eol=lf
+.env.example          text eol=lf
+CODE_OF_CONDUCT.md    text eol=lf
+LICENSE               text eol=lf
+README*.md            text eol=lf
+
+# Binary files (never touch)
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.webp  binary
+*.gif   binary
+*.avif  binary
+*.ico   binary
+*.woff  binary
+*.woff2 binary
+*.mp4   binary
+*.wasm  binary
+*.gz    binary
+*.zip   binary

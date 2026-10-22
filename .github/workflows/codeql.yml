@@ -1,0 +1,43 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Weekly, Monday 03:20 UTC. Catches newly published advisories against
+    # code that has not changed.
+    - cron: "20 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: CodeQL (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [javascript-typescript]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Initialize CodeQL
+        # v4.38.3, pinned to a commit. v3 is deprecated in December 2026.
+        uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-and-quality
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d
+        with:
+          category: "/language:${{ matrix.language }}"

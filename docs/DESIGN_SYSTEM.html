@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenStore DZ — Design System</title>
+    <meta
+      name="description"
+      content="Palette, typography and component reference for OpenStore DZ. Generated from src/styles.css."
+    />
+    <style>
+      /*
+       * This page documents the design system; it does not implement it. The
+       * tokens below are copied from `src/styles.css` and are the values the
+       * storefront actually ships. If they disagree, styles.css wins.
+       *
+       * It is exempt from the 250-line file rule because it is one addressable
+       * reference whose value is being readable in a single scroll.
+       */
+      :root {
+        --bg: #faf7f4;
+        --bg-dim: #f3efeb;
+        --surface: #ffffff;
+        --surface-mid: #faf7f4;
+        --surface-high: #f0ebe6;
+        --surface-highest: #e6dfd7;
+        --on-surface: #1c1917;
+        --on-surface-muted: #6b6460;
+        --outline: #e7e0d8;
+        --outline-hi: #c9beb2;
+
+        --primary: #c2410c;
+        --on-primary: #ffffff;
+        --brand-orange: #ea580c;
+        --secondary: #e11d48;
+        --secondary-dim: #be123c;
+        --tertiary: #b45309;
+        --quaternary: #0d9488;
+        --positive: #166534;
+        --error: #dc2626;
+
+        --font-display: "Fraunces Variable", "Cairo Variable", Georgia, serif;
+        --font-body: "Outfit Variable", "Cairo Variable", system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+        --radius: 16px;
+        --shadow-sm: 0 1px 3px rgba(28, 25, 23, 0.08);
+        --shadow-md: 0 6px 20px rgba(28, 25, 23, 0.1);
+      }
+
+      [data-theme="dark"] {
+        --bg: #16110c;
+        --bg-dim: #100c08;
+        --surface: #1d1712;
+        --surface-mid: #241d16;
+        --surface-high: #2b231b;
+        --surface-highest: #352b21;
+        --on-surface: #f2ece5;
+        --on-surface-muted: #a8a29e;
+        --outline: #332a21;
+        --outline-hi: #4a3e31;
+
+        --primary: #fb923c;
+        --on-primary: #271204;
+        --brand-orange: #fb923c;
+        --secondary: #fb7185;
+        --secondary-dim: #f43f5e;
+        --tertiary: #fbbf24;
+        --quaternary: #2dd4bf;
+        --positive: #4ade80;
+        --error: #f87171;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--on-surface);
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+
+      .wrap {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 48px 20px 96px;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: var(--font-display);
+        font-weight: 600;
+        line-height: 1.15;
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 2.25rem;
+        letter-spacing: -0.02em;
+      }
+
+      h2 {
+        font-size: 1.4rem;
+        margin-top: 56px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--outline);
+      }
+
+      h3 {
+        font-size: 1.05rem;
+        margin-top: 28px;
+      }
+
+      p,
+      li {
+        color: var(--on-surface-muted);
+        max-width: 70ch;
+      }
+
+      code,
+      .mono {
+        font-family: var(--font-mono);
+        font-size: 0.85em;
+      }
+
+      code {
+        background: var(--surface-high);
+        padding: 1px 5px;
+        border-radius: 5px;
+      }
+
+      .lede {
+        font-size: 1.05rem;
+        margin-top: 12px;
+      }
+
+      .note {
+        background: var(--surface);
+        border: 1px solid var(--outline);
+        border-inline-start: 3px solid var(--primary);
+        border-radius: var(--radius);
+        padding: 14px 18px;
+        margin: 20px 0;
+      }
+
+      .note strong {
+        color: var(--on-surface);
+      }
+
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .swatch {
+        border: 1px solid var(--outline);
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--surface);
+      }
+
+      .swatch .chip {
+        height: 68px;
+      }
+
+      .swatch .meta {
+        padding: 9px 11px;
+        font-size: 0.78rem;
+        line-height: 1.35;
+      }
+
+      .swatch .meta b {
+        display: block;
+        color: var(--on-surface);
+        font-weight: 600;
+      }
+
+      .swatch .meta span {
+        font-family: var(--font-mono);
+        color: var(--on-surface-muted);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+        font-size: 0.9rem;
+      }
+
+      th,
+      td {
+        text-align: start;
+        padding: 9px 12px;
+        border-bottom: 1px solid var(--outline);
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--surface-high);
+        font-weight: 600;
+      }
+
+      td code {
+        font-size: 0.8em;
+      }
+
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        margin-top: 16px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 18px;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        font: 600 14px/1 var(--font-body);
+        cursor: pointer;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: var(--on-primary);
+      }
+
+      .btn-berry {
+        background: var(--secondary);
+        color: #fff;
+      }
+
+      .btn-ghost {
+        border-color: var(--outline-hi);
+        color: var(--on-surface);
+        background: transparent;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        padding: 0 14px;
+        border: 1px solid var(--outline-hi);
+        border-radius: 999px;
+        font: 500 13px/1 var(--font-body);
+        background: var(--surface);
+      }
+
+      .pill.filled {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: var(--on-primary);
+      }
+
+      .type-sample {
+        border: 1px solid var(--outline);
+        border-radius: 12px;
+        padding: 14px 18px;
+        background: var(--surface);
+        margin-top: 12px;
+      }
+
+      .type-sample .label {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        color: var(--on-surface-muted);
+      }
+
+      .rtl-demo {
+        direction: rtl;
+        text-align: start;
+        font-size: 17px;
+        line-height: 1.75;
+      }
+
+      .toggle {
+        border: 1px solid var(--outline-hi);
+        background: var(--surface);
+        color: var(--on-surface);
+        border-radius: 999px;
+        min-height: 36px;
+        padding: 0 16px;
+        font: 600 13px/1 var(--font-body);
+        cursor: pointer;
+      }
+
+      footer {
+        margin-top: 72px;
+        padding-top: 20px;
+        border-top: 1px solid var(--outline);
+        font-size: 0.85rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>OpenStore DZ — Design System</h1>
+        <p class="lede">
+          The palette, type scale and components the storefront ships. Ported value-for-value
+          from the Commerce Storefront reference system (system 02), which is a component-CSS
+          system rather than a utility system.
+        </p>
+        <div class="row">
+          <button class="toggle" id="toggle" type="button">Switch to dark</button>
+        </div>
+        <div class="note">
+          <strong>Two values deviate from the reference, both for WCAG AA.</strong> The
+          reference primary <code>#d9480f</code> measures 4.29:1 white-on-orange and 4.02:1
+          orange-on-cream, under the 4.5:1 floor for text below 18.66px, so it fails on every
+          button label. <code>#c2410c</code> is the same hue one step darker and passes both.
+          Muted text was likewise darkened from <code>#78716c</code> to
+          <code>#6b6460</code>. Both are asserted by <code>e2e/accessibility.spec.ts</code>.
+        </div>
+      </header>
+
+      <h2>Colour</h2>
+      <p>
+        One accent carries the brand: burnt orange. Berry and amber exist for emphasis and
+        for states, not as a second brand colour.
+      </p>
+      <div class="swatches" id="swatches"></div>
+
+      <h2>Typography</h2>
+      <p>
+        Display is Fraunces, body is Outfit, both variable, both self-hosted. Cairo is added
+        to every stack because the reference is Latin-only and would otherwise fall back to
+        whatever Arabic face the operating system happens to have.
+      </p>
+
+      <div class="type-sample">
+        <div class="label">--font-display · Fraunces Variable, Cairo Variable, serif</div>
+        <div style="font-family: var(--font-display); font-size: 1.6rem; font-weight: 600">
+          قميص قطني كلاسيكي
+        </div>
+      </div>
+
+      <div class="type-sample">
+        <div class="label">--font-body · Outfit Variable, Cairo Variable, sans-serif</div>
+        <div style="font-size: 1rem">
+          الدفع عند الاستلام · التوصيل إلى 58 ولاية
+        </div>
+      </div>
+
+      <div class="type-sample">
+        <div class="label">--font-mono · IBM Plex Mono (prices and identifiers stay LTR)</div>
+        <div class="mono" dir="ltr" style="font-size: 1rem">7 500,00 DZD</div>
+      </div>
+
+      <h3>Arabic density override</h3>
+      <p>
+        Arabic is set at 17px / 1.75 against Latin's 15px / 1.5. Arabic has a smaller
+        x-height at the same nominal size, so the Latin value reads cramped. This is
+        legibility, not decoration.
+      </p>
+      <div class="type-sample rtl-demo">
+        هذا نص عربي بالحجم والتباعد المخصصين. يُقرأ أوضح من نسخة لاتينية بالحجم نفسه،
+        ولهذا السبب لا يمكن حذف هذا الاستثناء.
+      </div>
+
+      <h2>Direction</h2>
+      <p>
+        Arabic is the primary language and RTL is the default direction, not a mode. Layout
+        properties are logical (<code>padding-inline</code>, <code>margin-inline</code>,
+        <code>inset-inline</code>) so a single set of rules serves both directions.
+        <strong>Prices and identifiers stay LTR inside RTL text.</strong>
+      </p>
+
+      <h2>Components</h2>
+      <p>
+        These are ported classes, not utilities rebuilt to look similar. The storefront
+        renders them directly.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Class</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>.btn</code>, <code>.btn-primary</code></td><td>Primary action. One per screen.</td></tr>
+          <tr><td><code>.btn-secondary</code>, <code>.btn-ghost</code></td><td>Lower-emphasis actions beside a primary.</td></tr>
+          <tr><td><code>.btn-berry</code></td><td>Emphasis variant using the crimson accent.</td></tr>
+          <tr><td><code>.btn-danger</code></td><td>Destructive. Never the default focus.</td></tr>
+          <tr><td><code>.chip</code></td><td>Filter and selectable token, with a <code>.filled</code> state.</td></tr>
+          <tr><td><code>.product-card</code></td><td>Full-bleed media with a small text block. Photography sells; chrome yields.</td></tr>
+          <tr><td><code>.pc-media</code>, <code>.pc-body</code>, <code>.pc-price</code></td><td>Product card parts, including <code>.pc-price-old</code> for sale prices.</td></tr>
+          <tr><td><code>.pc-flag</code></td><td>Corner badge: <code>.sale</code>, <code>.new</code>, <code>.out</code>.</td></tr>
+          <tr><td><code>.gallery</code></td><td>Product image gallery with thumbnails.</td></tr>
+          <tr><td><code>.cart-*</code></td><td>Cart drawer rows, quantity steppers and totals.</td></tr>
+          <tr><td><code>.review-card</code></td><td>Customer review, with a rating and moderation state.</td></tr>
+          <tr><td><code>.ds-table</code></td><td>Dense data table for the dashboard.</td></tr>
+          <tr><td><code>.form-*</code></td><td>Input, label, hint and error states.</td></tr>
+          <tr><td><code>.bottom-nav</code></td><td>Mobile tab bar, pinned to the viewport.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="row">
+        <button class="btn btn-primary" type="button">أضف إلى السلة</button>
+        <button class="btn btn-berry" type="button">Berry</button>
+        <button class="btn btn-ghost" type="button">Ghost</button>
+        <span class="pill filled">مقاس M</span>
+        <span class="pill">أحمر</span>
+      </div>
+
+      <h2>Rules that are not style preferences</h2>
+      <ul>
+        <li><strong>Light is the default and it is enforced.</strong> A dark-mode phone must not turn the shop dark before the buyer chooses; it would misrepresent the seller's photography.</li>
+        <li><strong>Tap targets are at least 32px, and 44px for primary controls.</strong> Measured against the built output, not assumed.</li>
+        <li><strong>Contrast passes AA on every page.</strong> axe-core runs against the visitor pages in CI, including the contrast rule.</li>
+        <li><strong>Reduced motion is respected.</strong> Every animation collapses under <code>prefers-reduced-motion</code>.</li>
+        <li><strong>No horizontal overflow at 320px.</strong> A page that can be dragged sideways reads as broken on a phone.</li>
+      </ul>
+
+      <footer>
+        <p>
+          Source of truth: <code>src/styles.css</code>. If this page and that file disagree,
+          the file wins and this page is wrong.
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      // The palette is rendered from data so the swatch list cannot drift from the
+      // token list next to it in this file.
+      const LIGHT = {
+        primary: "#c2410c",
+        "brand-orange": "#ea580c",
+        secondary: "#e11d48",
+        "secondary-dim": "#be123c",
+        tertiary: "#b45309",
+        quaternary: "#0d9488",
+        "on-surface": "#1c1917",
+        "on-surface-muted": "#6b6460",
+        outline: "#e7e0d8",
+        "outline-hi": "#c9beb2",
+        "surface-high": "#f0ebe6",
+        positive: "#166534",
+        error: "#dc2626",
+      };
+      const DARK = {
+        primary: "#fb923c",
+        "brand-orange": "#fb923c",
+        secondary: "#fb7185",
+        "secondary-dim": "#f43f5e",
+        tertiary: "#fbbf24",
+        quaternary: "#2dd4bf",
+        "on-surface": "#f2ece5",
+        "on-surface-muted": "#a8a29e",
+        outline: "#332a21",
+        "outline-hi": "#4a3e31",
+        "surface-high": "#2b231b",
+        positive: "#4ade80",
+        error: "#f87171",
+      };
+
+      const host = document.getElementById("swatches");
+
+      function render() {
+        const dark = document.documentElement.getAttribute("data-theme") === "dark";
+        const tokens = dark ? DARK : LIGHT;
+        host.innerHTML = Object.entries(tokens)
+          .map(
+            ([name, value]) => `
+              <div class="swatch">
+                <div class="chip" style="background:${value}"></div>
+                <div class="meta">
+                  <b>--${name}</b>
+                  <span>${value}</span>
+                </div>
+              </div>`,
+          )
+          .join("");
+      }
+
+      document.getElementById("toggle").addEventListener("click", (event) => {
+        const dark = document.documentElement.getAttribute("data-theme") === "dark";
+        document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
+        event.currentTarget.textContent = dark ? "Switch to dark" : "Switch to light";
+        render();
+      });
+
+      render();
+    </script>
+  </body>
+</html>

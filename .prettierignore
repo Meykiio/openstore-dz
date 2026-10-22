@@ -1,0 +1,15 @@
+node_modules
+dist
+.output
+.vinxi
+.vercel
+coverage
+playwright-report
+test-results
+bun.lock
+bun.lockb
+package-lock.json
+LICENSE
+src/routeTree.gen.ts
+src/integrations/supabase/types.ts
+docs/DESIGN_SYSTEM.html
