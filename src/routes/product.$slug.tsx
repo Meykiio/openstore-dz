@@ -6,6 +6,7 @@ import { ReviewForm, ReviewList } from "@/components/storefront/reviews";
 import { ErrorState } from "@/components/ui/feedback";
 import { productQuery, reviewsQuery, useProduct } from "@/lib/queries";
 import { sizeGuidesQuery } from "@/lib/size-guides";
+import { RelatedProducts } from "@/components/storefront/related-products";
 import { useT } from "@/lib/i18n-context";
 
 export const Route = createFileRoute("/product/$slug")({
@@ -58,6 +59,8 @@ function ProductPage() {
         )}
 
         <SizeGuide productId={current.id} />
+
+        <RelatedProducts product={current} />
 
         <section className="flex flex-col gap-5" aria-labelledby="reviews-title">
           <h2 id="reviews-title" className="font-display text-xl font-semibold">

@@ -42,7 +42,7 @@ const DICTS: Record<Locale, Record<TranslationKey, string>> = { ar, fr, en };
 
 const STORAGE_KEY = "openstore-locale";
 
-function isLocale(value: unknown): value is Locale {
+export function isLocale(value: unknown): value is Locale {
   return typeof value === "string" && (LOCALES as readonly string[]).includes(value);
 }
 
@@ -74,6 +74,13 @@ export function readStoredLocale(): Locale | null {
 export function persistLocale(locale: Locale): void {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(STORAGE_KEY, locale);
+  // The cookie is what lets the server render the next page in this language,
+  // instead of rendering Arabic and switching after load.
+  document.cookie = `${STORAGE_KEY}=${locale}; path=/; max-age=31536000; samesite=lax`;
+}
+
+export function hasLocaleCookie(): boolean {
+  return typeof document !== "undefined" && document.cookie.includes(`${STORAGE_KEY}=`);
 }
 
 /**
@@ -83,8 +90,17 @@ export function persistLocale(locale: Locale): void {
  */
 export function detectLocale(): Locale {
   if (typeof navigator === "undefined") return DEFAULT_LOCALE;
-  const languages = navigator.languages ?? [navigator.language];
-  for (const tag of languages) {
+  return pickLocale(navigator.languages ?? [navigator.language]);
+}
+
+/**
+ * The first supported language in a preference list, as a browser sends it
+ * (`navigator.languages`) or as a header carries it (`Accept-Language`, split
+ * and stripped of `;q=` weights). The server and the browser use this same rule,
+ * so a first visit renders in the language the browser would have picked.
+ */
+export function pickLocale(tags: readonly string[]): Locale {
+  for (const tag of tags) {
     if (!tag) continue;
     const base = tag.toLowerCase().split("-")[0];
     if (base === "ar") return "ar";

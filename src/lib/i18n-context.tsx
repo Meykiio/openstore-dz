@@ -3,6 +3,7 @@ import {
   applyLocaleToDocument,
   DEFAULT_LOCALE,
   detectLocale,
+  hasLocaleCookie,
   persistLocale,
   readStoredLocale,
   translate,
@@ -22,18 +23,27 @@ const I18nContext = createContext<I18nValue | null>(null);
 /**
  * Locale provider.
  *
- * Initial state is always the default locale so server and first client render
- * agree. The stored preference is applied in an effect, after hydration.
+ * Starts from the locale the server rendered with, read from the same cookie, so
+ * server and first client render agree and nothing flips after hydration. Only
+ * a first visit has no cookie; then the browser's language is detected once and
+ * remembered, so every later page is rendered right from the start.
  */
-export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
+export function I18nProvider({
+  initialLocale = DEFAULT_LOCALE,
+  children,
+}: {
+  initialLocale?: Locale;
+  children: React.ReactNode;
+}) {
+  const [locale, setLocaleState] = useState<Locale>(initialLocale);
 
   useEffect(() => {
-    const stored = readStoredLocale();
-    const next = stored ?? detectLocale();
-    if (next !== DEFAULT_LOCALE) setLocaleState(next);
+    if (hasLocaleCookie()) return;
+    const next = readStoredLocale() ?? detectLocale();
+    persistLocale(next);
+    if (next !== initialLocale) setLocaleState(next);
     applyLocaleToDocument(next);
-  }, []);
+  }, [initialLocale]);
 
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next);

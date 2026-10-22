@@ -107,4 +107,6 @@ export const frTools = {
   "admin.images.addedCount": "{count} photo(s) ajoutée(s)",
   "admin.parcel.created": "Colis créé : {tracking}",
   "admin.pack.empty": "Aucun article pour l’instant. Ajoutez les produits que contient ce pack.",
+  "admin.delivery.flatNote":
+    "Les wilayas sans prix propre ci-dessous utilisent le prix unique de {fee} DA.",
 };

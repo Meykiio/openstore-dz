@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { ImageOff } from "lucide-react";
+import { ImageLightbox } from "./image-lightbox";
 import { useI18n } from "@/lib/i18n-context";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +24,7 @@ export function ProductGallery({
   onSelect: (index: number) => void;
 }) {
   const { t } = useI18n();
+  const [open, setOpen] = useState<number | null>(null);
 
   if (images.length === 0) {
     return (
@@ -33,9 +36,24 @@ export function ProductGallery({
 
   return (
     <div className="gallery">
-      <div className="gallery-main">
+      <button
+        type="button"
+        className="gallery-main cursor-zoom-in"
+        onClick={() => setOpen(active)}
+        aria-label={t("store.zoom")}
+      >
         <img src={images[active] ?? images[0]} alt={alt} decoding="async" />
-      </div>
+      </button>
+      <ImageLightbox
+        images={images}
+        index={open}
+        alt={alt}
+        onIndex={(index) => {
+          setOpen(index);
+          onSelect(index);
+        }}
+        onClose={() => setOpen(null)}
+      />
 
       {images.length > 1 && (
         <div className="gallery-thumbs">

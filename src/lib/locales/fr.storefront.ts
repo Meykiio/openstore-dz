@@ -47,6 +47,14 @@ export const frStorefront = {
   "checkout.error.stopdesk_unavailable":
     "Le retrait au bureau n’est pas proposé dans cette wilaya. Choisissez la livraison à domicile.",
   "checkout.communeHint": "Commencez à taper pour voir les communes",
+  "store.related": "Vous aimerez aussi",
+  "store.zoom": "Agrandir la photo",
+  "error.title": "Une erreur s’est produite",
+  "error.loadFailed": "Impossible de charger cette page.",
+  "error.retry": "Réessayer",
+  "notFound.title": "Page introuvable",
+  "notFound.body": "Le lien est incorrect ou la page a été supprimée.",
+  "notFound.back": "Retour à la boutique",
   "demo.banner": "Boutique de démonstration : les commandes ne sont pas expédiées.",
   "demo.cta": "Ouvrez votre boutique gratuite",
   "demo.checkout":

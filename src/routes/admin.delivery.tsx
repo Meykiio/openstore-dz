@@ -81,11 +81,7 @@ function CarrierCard({ origin, flatFee }: { origin: string; flatFee: number }) {
           </Select>
         </Field>
         <p className="text-xs text-on-surface-muted">
-          سيتم ربط Guepex في خطوة لاحقة. حالياً يعتمد المتجر على السعر الموحد{" "}
-          <span className="font-mono" dir="ltr">
-            {flatFee}
-          </span>{" "}
-          دج مع استثناءات الولايات أدناه.
+          {t("admin.delivery.flatNote", { fee: flatFee })}
         </p>
       </CardBody>
     </Card>

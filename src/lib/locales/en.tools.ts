@@ -105,4 +105,5 @@ export const enTools = {
   "admin.images.addedCount": "{count} photos added",
   "admin.parcel.created": "Parcel created: {tracking}",
   "admin.pack.empty": "Nothing in this pack yet. Add the products it contains.",
+  "admin.delivery.flatNote": "Wilayas without their own price below use the flat fee of {fee} DA.",
 };

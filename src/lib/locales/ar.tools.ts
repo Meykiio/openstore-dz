@@ -98,4 +98,5 @@ export const arTools = {
   "admin.images.addedCount": "تمت إضافة {count} صورة",
   "admin.parcel.created": "تم إنشاء الطرد: {tracking}",
   "admin.pack.empty": "لم تُضف أي مكوّنات بعد. أضف المنتجات التي يتضمنها هذا الباك.",
+  "admin.delivery.flatNote": "الولايات التي ليس لها سعر خاص أدناه تستعمل السعر الموحد {fee} دج.",
 };

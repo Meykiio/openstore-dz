@@ -13,13 +13,17 @@ import "../styles.css";
 
 import { themeBootstrapScript } from "@/lib/theme";
 import { localeBootstrapScript } from "@/lib/i18n";
-import { I18nProvider } from "@/lib/i18n-context";
+import { readLocale } from "@/lib/locale-cookie";
+import { I18nProvider, useI18n } from "@/lib/i18n-context";
 import { AuthProvider } from "@/lib/auth";
 import { CartProvider } from "@/lib/cart";
 import { ServiceWorkerRegistrar } from "@/components/service-worker";
 import { Button } from "@/components/ui/button";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  // Runs on the server for the first request and in the browser after, reading
+  // the same cookie both times.
+  beforeLoad: () => ({ locale: readLocale() }),
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -47,10 +51,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: React.ReactNode }) {
+  const { locale } = Route.useRouteContext();
   return (
-    // Arabic and RTL are the server default; the locale bootstrap script flips
-    // both before paint if the visitor chose another language.
-    <html lang="ar" dir="rtl" data-theme="light" suppressHydrationWarning>
+    // Rendered in the visitor's language from the cookie. The bootstrap script
+    // still covers a first visit, before any cookie exists.
+    <html
+      lang={locale}
+      dir={locale === "ar" ? "rtl" : "ltr"}
+      data-theme="light"
+      suppressHydrationWarning
+    >
       <head>
         <HeadContent />
       </head>
@@ -63,10 +73,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
+  const { queryClient, locale } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <I18nProvider>
+      <I18nProvider initialLocale={locale}>
         <AuthProvider>
           <CartProvider>
             <Outlet />
@@ -91,28 +101,29 @@ function RootComponent() {
  * supertype of the router's, and the router may hand over a non-Error throw.
  */
 function RouteError({ error, reset }: { error: unknown; reset?: () => void }) {
-  const message =
-    error instanceof Error && error.message ? error.message : "تعذّر تحميل هذه الصفحة.";
+  const { t } = useI18n();
+  const message = error instanceof Error && error.message ? error.message : t("error.loadFailed");
   return (
     <main className="container-page flex min-h-dvh flex-col items-center justify-center gap-4 py-20 text-center">
       <AlertTriangle size={32} className="text-error" aria-hidden="true" />
-      <h1 className="text-2xl font-semibold">حدث خطأ</h1>
+      <h1 className="text-2xl font-semibold">{t("error.title")}</h1>
       <p className="max-w-md break-words text-on-surface-muted">{message}</p>
-      <Button onClick={() => (reset ? reset() : window.location.reload())}>إعادة المحاولة</Button>
+      <Button onClick={() => (reset ? reset() : window.location.reload())}>
+        {t("error.retry")}
+      </Button>
     </main>
   );
 }
 
 function NotFound() {
+  const { t } = useI18n();
   return (
     <main className="container-page flex min-h-dvh flex-col items-center justify-center gap-4 py-20 text-center">
       <p className="font-mono text-5xl font-semibold text-on-surface-muted">404</p>
-      <h1 className="text-2xl font-semibold">الصفحة غير موجودة</h1>
-      <p className="max-w-md text-on-surface-muted">
-        الرابط الذي فتحته غير صحيح أو أن الصفحة تم حذفها.
-      </p>
+      <h1 className="text-2xl font-semibold">{t("notFound.title")}</h1>
+      <p className="max-w-md text-on-surface-muted">{t("notFound.body")}</p>
       <Button asChild>
-        <a href="/">العودة إلى المتجر</a>
+        <a href="/">{t("notFound.back")}</a>
       </Button>
     </main>
   );
