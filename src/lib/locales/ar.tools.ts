@@ -62,4 +62,9 @@ export const arTools = {
   "admin.setup.whatsappHint": "اتركه فارغاً إن كان نفس رقم الهاتف.",
   "admin.variants.compareAt": "السعر قبل التخفيض",
   "admin.variants.compareAtHint": "اتركه فارغاً إن لم يكن في تخفيض.",
+  "admin.phones.refused": "رفض {refused} من {orders}",
+  "admin.phones.blocked": "رقم محظور",
+  "admin.phones.block": "حظر هذا الرقم",
+  "admin.phones.unblock": "إلغاء الحظر",
+  "admin.phones.blockConfirm": "حظر {phone}؟ ستُرفض الطلبات من هذا الرقم عند الدفع.",
 };

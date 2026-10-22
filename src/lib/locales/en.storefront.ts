@@ -34,6 +34,10 @@ export const enStorefront = {
   "common.draft": "Draft",
   "common.archived": "Archived",
   "common.somethingWrong": "Something went wrong. Please try again.",
+  "checkout.error.phone_blocked":
+    "Orders from this number cannot be accepted. Please contact the shop directly.",
+  "checkout.error.too_many_pending":
+    "You already have orders waiting for confirmation. The shop will call you soon, so there is no need to order again.",
   "demo.banner": "Demo shop: orders here are not shipped.",
   "demo.cta": "Open your own free shop",
   "demo.checkout": "This is a demo shop. Your order will be recorded but never delivered.",

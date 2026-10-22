@@ -34,6 +34,9 @@ export const arStorefront = {
   "common.draft": "مسودة",
   "common.archived": "مؤرشف",
   "common.somethingWrong": "حدث خطأ. حاول مرة أخرى.",
+  "checkout.error.phone_blocked": "لا يمكن قبول الطلبات من هذا الرقم. تواصل مع المتجر مباشرة.",
+  "checkout.error.too_many_pending":
+    "لديك طلبات تنتظر التأكيد. سيتصل بك المتجر قريباً، ولا داعي لطلب جديد.",
   "demo.banner": "هذا متجر تجريبي: الطلبات هنا لا تُرسل.",
   "demo.cta": "افتح متجرك المجاني",
   "demo.checkout": "هذا متجر تجريبي. سيُسجَّل طلبك لكنه لن يُرسل أبداً.",

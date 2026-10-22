@@ -7,6 +7,8 @@ import { formatDateTime, formatDzd } from "@/lib/format";
 import { wilayaLabel } from "@/lib/wilayas";
 import type { AdminOrder } from "@/lib/admin";
 import { OrderDetail } from "./order-detail";
+import { PhoneBadge } from "./phone-guard";
+import { canonicalPhone, usePhoneHistory, type PhoneHistory } from "@/lib/admin-phones";
 import { cn } from "@/lib/utils";
 
 /**
@@ -20,17 +22,22 @@ import { cn } from "@/lib/utils";
  */
 export function AdminOrderList({ orders }: { orders: AdminOrder[] }) {
   const { t } = useI18n();
+  const history = usePhoneHistory(orders.map((order) => order.phone));
   if (orders.length === 0) return <EmptyState title={t("admin.orders.empty")} />;
   return (
     <ul className="flex flex-col gap-3" data-testid="order-list">
       {orders.map((order) => (
-        <OrderRow key={order.id} order={order} />
+        <OrderRow
+          key={order.id}
+          order={order}
+          history={history.data?.get(canonicalPhone(order.phone))}
+        />
       ))}
     </ul>
   );
 }
 
-function OrderRow({ order }: { order: AdminOrder }) {
+function OrderRow({ order, history }: { order: AdminOrder; history: PhoneHistory | undefined }) {
   const { t, locale } = useI18n();
   const [expanded, setExpanded] = useState(false);
   const itemCount = order.order_items.reduce((sum, item) => sum + item.quantity, 0);
@@ -48,6 +55,7 @@ function OrderRow({ order }: { order: AdminOrder }) {
           <div className="flex flex-wrap items-center gap-2">
             <p className="font-medium">{order.customer_name}</p>
             <StatusBadge status={order.status} />
+            <PhoneBadge history={history} />
             {pending && (
               <span className="text-xs font-medium text-tertiary">
                 {t("admin.orders.needsCall")}
@@ -97,7 +105,7 @@ function OrderRow({ order }: { order: AdminOrder }) {
         </div>
       </div>
 
-      {expanded && <OrderDetail order={order} />}
+      {expanded && <OrderDetail order={order} history={history} />}
     </li>
   );
 }

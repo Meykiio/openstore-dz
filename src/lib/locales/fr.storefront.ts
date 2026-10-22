@@ -34,6 +34,10 @@ export const frStorefront = {
   "common.draft": "Brouillon",
   "common.archived": "Archivé",
   "common.somethingWrong": "Une erreur est survenue. Réessayez.",
+  "checkout.error.phone_blocked":
+    "Les commandes depuis ce numéro ne peuvent pas être acceptées. Contactez directement la boutique.",
+  "checkout.error.too_many_pending":
+    "Vous avez déjà des commandes en attente de confirmation. La boutique va vous appeler, inutile de recommander.",
   "demo.banner": "Boutique de démonstration : les commandes ne sont pas expédiées.",
   "demo.cta": "Ouvrez votre boutique gratuite",
   "demo.checkout":

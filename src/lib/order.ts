@@ -56,6 +56,10 @@ export function isTokenShaped(token: string): boolean {
   return UUID_RE.test(token.trim());
 }
 
+/** Refusals raised by `validate_order()` with a `hint`, translated at checkout. */
+const ORDER_ERROR_CODES = ["phone_blocked", "too_many_pending"] as const;
+export type OrderErrorCode = (typeof ORDER_ERROR_CODES)[number];
+
 /**
  * Place an order and return its tracking token.
  *
@@ -65,7 +69,7 @@ export function isTokenShaped(token: string): boolean {
 export async function placeOrder(
   customer: OrderCustomer,
   lines: OrderLine[],
-): Promise<{ token: string | null; error: string | null }> {
+): Promise<{ token: string | null; error: string | null; code?: OrderErrorCode }> {
   if (lines.length === 0) {
     return { token: null, error: "Your cart is empty." };
   }
@@ -73,7 +77,13 @@ export async function placeOrder(
     p_customer: customer as unknown as Json,
     p_items: lines as unknown as Json,
   });
-  if (error) return { token: null, error: error.message };
+  if (error) {
+    // A known hint is a stable code the checkout can say in the buyer's language.
+    const code = (ORDER_ERROR_CODES as readonly string[]).includes(error.hint ?? "")
+      ? (error.hint as OrderErrorCode)
+      : undefined;
+    return { token: null, error: error.message, code };
+  }
   return { token: typeof data === "string" ? data : null, error: null };
 }
 

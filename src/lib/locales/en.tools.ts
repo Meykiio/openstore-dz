@@ -67,4 +67,10 @@ export const enTools = {
   "admin.setup.whatsappHint": "Leave empty if it is the same number as your phone.",
   "admin.variants.compareAt": "Price before sale",
   "admin.variants.compareAtHint": "Leave empty when it is not on sale.",
+  "admin.phones.refused": "Refused {refused} of {orders}",
+  "admin.phones.blocked": "Blocked number",
+  "admin.phones.block": "Block this number",
+  "admin.phones.unblock": "Unblock",
+  "admin.phones.blockConfirm":
+    "Block {phone}? Orders from this number will be refused at checkout.",
 };

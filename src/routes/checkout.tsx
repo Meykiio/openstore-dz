@@ -98,8 +98,13 @@ function CheckoutPage() {
     );
     setSubmitting(false);
     if (result.error || !result.token) {
-      // The database message is already written for a human — surface it as-is.
-      setError(result.error ?? t("common.somethingWrong"));
+      // Known refusals are translated; anything else is the database's own message,
+      // which is written for a human.
+      setError(
+        result.code
+          ? t(`checkout.error.${result.code}`)
+          : (result.error ?? t("common.somethingWrong")),
+      );
       return;
     }
     cart.clear();

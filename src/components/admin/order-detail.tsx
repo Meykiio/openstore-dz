@@ -10,9 +10,17 @@ import { wilayaLabel } from "@/lib/wilayas";
 import { setOrderStatus, type AdminOrder, type OrderStatus } from "@/lib/admin";
 import { getSupabase } from "@/lib/supabase/client";
 import { createParcelForOrder } from "@/lib/server/guepex-actions";
+import type { PhoneHistory } from "@/lib/admin-phones";
+import { BlockPhoneButton } from "./phone-guard";
 
 /** Expanded order: lines, money, recipient, and the status transitions. */
-export function OrderDetail({ order }: { order: AdminOrder }) {
+export function OrderDetail({
+  order,
+  history,
+}: {
+  order: AdminOrder;
+  history: PhoneHistory | undefined;
+}) {
   const { t, locale } = useI18n();
   return (
     <div className="flex flex-col gap-4 border-t border-outline px-4 py-4">
@@ -72,6 +80,7 @@ export function OrderDetail({ order }: { order: AdminOrder }) {
 
       <OrderActions order={order} />
       <CarrierAction order={order} />
+      <BlockPhoneButton phone={order.phone} history={history} />
     </div>
   );
 }

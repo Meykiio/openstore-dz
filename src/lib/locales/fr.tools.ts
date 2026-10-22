@@ -68,4 +68,9 @@ export const frTools = {
   "admin.setup.whatsappHint": "Laissez vide si c’est le même numéro.",
   "admin.variants.compareAt": "Prix avant remise",
   "admin.variants.compareAtHint": "Laissez vide s’il n’est pas en promotion.",
+  "admin.phones.refused": "{refused} refus sur {orders}",
+  "admin.phones.blocked": "Numéro bloqué",
+  "admin.phones.block": "Bloquer ce numéro",
+  "admin.phones.unblock": "Débloquer",
+  "admin.phones.blockConfirm": "Bloquer {phone} ? Les commandes de ce numéro seront refusées.",
 };

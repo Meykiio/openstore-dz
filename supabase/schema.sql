@@ -1211,6 +1211,64 @@ begin
 end;
 $$;
 
+-- ── Fake-order protection ──────────────────────────────────────────────────
+-- Fake cash-on-delivery orders cost a shop the outbound and return shipping of
+-- a parcel nobody collects. Two controls, enforced here so a script cannot skip
+-- them: a number may hold at most three unconfirmed orders a day, and an owner
+-- can block a number outright. Numbers are compared in one canonical form, so
+-- "+213 555..." and "0555..." are the same buyer.
+create or replace function public.canonical_dz_phone(raw text)
+returns text
+language sql
+immutable
+set search_path = ''
+as $$
+  select case when p ~ '^\+?213' then '0' || regexp_replace(p, '^\+?213', '') else p end
+  from (select regexp_replace(coalesce(raw, ''), '[^0-9+]', '', 'g') as p) cleaned;
+$$;
+
+create table if not exists public.blocked_phones (
+  phone       text primary key,
+  reason      text,
+  created_at  timestamptz not null default now()
+);
+
+alter table public.blocked_phones enable row level security;
+
+drop policy if exists "Admins manage blocked phones" on public.blocked_phones;
+create policy "Admins manage blocked phones"
+  on public.blocked_phones for all to authenticated
+  using      ((select public.has_admin_role((select auth.uid()), array['owner','staff']::public.admin_role[])) is true)
+  with check ((select public.has_admin_role((select auth.uid()), array['owner','staff']::public.admin_role[])) is true);
+
+revoke all on public.blocked_phones from anon, authenticated;
+grant select, insert, delete on public.blocked_phones to authenticated;
+
+create index if not exists orders_phone_canon_idx
+  on public.orders (public.canonical_dz_phone(phone), created_at desc);
+
+-- What the dashboard shows next to an order: how this number has behaved before.
+create or replace function public.admin_phone_history(p_phones text[])
+returns table (phone text, orders bigint, refused bigint, delivered bigint, blocked boolean)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select c.phone,
+         count(o.id),
+         count(o.id) filter (where o.status in ('refused', 'returned')),
+         count(o.id) filter (where o.status = 'delivered'),
+         exists (select 1 from public.blocked_phones b where b.phone = c.phone)
+  from (select distinct public.canonical_dz_phone(x) as phone from unnest(p_phones) as x) c
+  left join public.orders o on public.canonical_dz_phone(o.phone) = c.phone
+  where (select public.has_admin_role((select auth.uid()), array['owner','staff']::public.admin_role[])) is true
+  group by c.phone;
+$$;
+
+revoke all on function public.admin_phone_history(text[]) from public, anon;
+grant execute on function public.admin_phone_history(text[]) to authenticated;
+
 -- ── Order: field checks plus the owner's selling rules ─────────────────────
 create or replace function public.validate_order()
 returns trigger
@@ -1250,6 +1308,24 @@ begin
   -- An empty list means everywhere. A populated list is a hard restriction.
   if coalesce(array_length(v_allowed, 1), 0) > 0 and not (new.wilaya = any(v_allowed)) then
     raise exception 'We do not deliver to % yet', new.wilaya using errcode = 'check_violation';
+  end if;
+
+  -- The hint is a stable code the checkout translates; the message is for logs.
+  if exists (
+    select 1 from public.blocked_phones b where b.phone = public.canonical_dz_phone(new.phone)
+  ) then
+    raise exception 'This phone number cannot place orders'
+      using errcode = 'check_violation', hint = 'phone_blocked';
+  end if;
+
+  if (
+    select count(*) from public.orders o
+    where public.canonical_dz_phone(o.phone) = public.canonical_dz_phone(new.phone)
+      and o.status = 'pending'
+      and o.created_at > now() - interval '24 hours'
+  ) >= 3 then
+    raise exception 'Too many unconfirmed orders for this phone number'
+      using errcode = 'check_violation', hint = 'too_many_pending';
   end if;
 
   new.status := 'pending';

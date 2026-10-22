@@ -59,6 +59,24 @@ export type Database = {
         };
         Relationships: [];
       };
+      blocked_phones: {
+        Row: {
+          created_at: string;
+          phone: string;
+          reason: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          phone: string;
+          reason?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          phone?: string;
+          reason?: string | null;
+        };
+        Relationships: [];
+      };
       categories: {
         Row: {
           created_at: string;
@@ -709,6 +727,16 @@ export type Database = {
       admin_analytics: {
         Args: { p_days?: number };
         Returns: Json;
+      };
+      admin_phone_history: {
+        Args: { p_phones: string[] };
+        Returns: {
+          blocked: boolean;
+          delivered: number;
+          orders: number;
+          phone: string;
+          refused: number;
+        }[];
       };
       admin_exists: {
         Args: Record<PropertyKey, never>;
