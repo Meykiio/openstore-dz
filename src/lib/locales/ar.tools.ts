@@ -67,4 +67,13 @@ export const arTools = {
   "admin.phones.block": "حظر هذا الرقم",
   "admin.phones.unblock": "إلغاء الحظر",
   "admin.phones.blockConfirm": "حظر {phone}؟ ستُرفض الطلبات من هذا الرقم عند الدفع.",
+  "admin.slip.title": "بطاقات التغليف",
+  "admin.slip.print": "طباعة",
+  "admin.slip.printOne": "طباعة بطاقة التغليف",
+  "admin.slip.printConfirmed": "طباعة الطلبات المؤكدة",
+  "admin.slip.none": "لا توجد طلبات مؤكدة جاهزة للشحن",
+  "admin.slip.collect": "المبلغ المطلوب عند الاستلام",
+  "admin.slip.to": "إلى",
+  "admin.slip.from": "من",
+  "admin.orders.exportCsv": "تصدير CSV",
 };

@@ -1403,3 +1403,32 @@ html[dir="rtl"] {
     overflow: hidden;
   }
 }
+
+/* Packing slips: one per printed page, nothing of the dashboard around them. */
+.slip {
+  break-after: page;
+  page-break-after: always;
+  border: 1px dashed var(--outline-hi);
+  border-radius: var(--r-md);
+  padding: var(--s-lg);
+  background: var(--surface);
+}
+@media print {
+  .admin-sidebar,
+  .admin-backdrop,
+  .admin-topbar,
+  .no-print {
+    display: none !important;
+  }
+  .admin-page {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  body {
+    background: #fff !important;
+  }
+  .slip {
+    border: none;
+    padding: 0;
+  }
+}

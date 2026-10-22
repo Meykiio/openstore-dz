@@ -73,4 +73,13 @@ export const enTools = {
   "admin.phones.unblock": "Unblock",
   "admin.phones.blockConfirm":
     "Block {phone}? Orders from this number will be refused at checkout.",
+  "admin.slip.title": "Packing slips",
+  "admin.slip.print": "Print",
+  "admin.slip.printOne": "Print packing slip",
+  "admin.slip.printConfirmed": "Print confirmed orders",
+  "admin.slip.none": "No confirmed orders waiting to ship",
+  "admin.slip.collect": "Collect on delivery",
+  "admin.slip.to": "Ship to",
+  "admin.slip.from": "From",
+  "admin.orders.exportCsv": "Export CSV",
 };

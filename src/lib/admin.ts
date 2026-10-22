@@ -45,7 +45,7 @@ export type AdminOrder = {
   order_items: AdminOrderItem[];
 };
 
-const ORDER_SELECT = `
+export const ORDER_SELECT = `
   id, public_token, customer_name, phone, wilaya, commune, address, note,
   subtotal, delivery_fee, total, status, confirmed_at, refused_at, refused_reason,
   carrier, tracking_number, tracking_url, created_at,

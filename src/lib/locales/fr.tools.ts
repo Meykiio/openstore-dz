@@ -73,4 +73,13 @@ export const frTools = {
   "admin.phones.block": "Bloquer ce numéro",
   "admin.phones.unblock": "Débloquer",
   "admin.phones.blockConfirm": "Bloquer {phone} ? Les commandes de ce numéro seront refusées.",
+  "admin.slip.title": "Bordereaux de colis",
+  "admin.slip.print": "Imprimer",
+  "admin.slip.printOne": "Imprimer le bordereau",
+  "admin.slip.printConfirmed": "Imprimer les commandes confirmées",
+  "admin.slip.none": "Aucune commande confirmée à expédier",
+  "admin.slip.collect": "À encaisser à la livraison",
+  "admin.slip.to": "Destinataire",
+  "admin.slip.from": "Expéditeur",
+  "admin.orders.exportCsv": "Exporter en CSV",
 };

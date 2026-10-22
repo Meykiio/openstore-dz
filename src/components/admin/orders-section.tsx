@@ -1,9 +1,13 @@
-import { PhoneCall } from "lucide-react";
+import { useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { Download, PhoneCall, Printer } from "lucide-react";
+import { toast } from "sonner";
 import { AdminOrderList } from "./order-list";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
 import { useI18n } from "@/lib/i18n-context";
 import type { AdminOrder } from "@/lib/admin";
+import { downloadText, fetchOrders, ordersToCsv } from "@/lib/orders-file";
 
 /**
  * The orders section of the dashboard.
@@ -55,6 +59,11 @@ export function OrdersSection({
           <span className="font-mono text-xs text-on-surface-muted" data-testid="orders-total">
             {total}
           </span>
+          <Link to="/admin/slips" className="btn btn-ghost btn-sm">
+            <Printer size={15} aria-hidden="true" />
+            {t("admin.slip.printConfirmed")}
+          </Link>
+          <ExportButton />
           <Button
             variant={queueOnly ? "primary" : "ghost"}
             size="sm"
@@ -75,5 +84,28 @@ export function OrdersSection({
         testId="orders-pagination"
       />
     </section>
+  );
+}
+
+/** Every order, not the page on screen: an export that silently stops at 15 is worse than none. */
+function ExportButton() {
+  const { t } = useI18n();
+  const [busy, setBusy] = useState(false);
+  const exportAll = async () => {
+    setBusy(true);
+    try {
+      const csv = ordersToCsv(await fetchOrders({}));
+      downloadText(`orders-${new Date().toISOString().slice(0, 10)}.csv`, csv);
+    } catch (error) {
+      toast.error((error as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <Button variant="ghost" size="sm" disabled={busy} onClick={() => void exportAll()}>
+      <Download size={15} aria-hidden="true" />
+      {t("admin.orders.exportCsv")}
+    </Button>
   );
 }

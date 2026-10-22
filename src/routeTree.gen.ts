@@ -23,6 +23,7 @@ import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminSlipsRouteImport } from './routes/admin.slips'
 import { Route as AdminWelcomeRouteImport } from './routes/admin.welcome'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as OrderTokenRouteImport } from './routes/order.$token'
@@ -99,6 +100,11 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSlipsRoute = AdminSlipsRouteImport.update({
+  id: '/slips',
+  path: '/slips',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminWelcomeRoute = AdminWelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
@@ -139,6 +145,7 @@ export interface FileRoutesByFullPath {
   '/admin/products': typeof AdminProductsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/slips': typeof AdminSlipsRoute
   '/admin/welcome': typeof AdminWelcomeRoute
   '/category/$slug': typeof CategorySlugRoute
   '/order/$token': typeof OrderTokenRoute
@@ -159,6 +166,7 @@ export interface FileRoutesByTo {
   '/admin/products': typeof AdminProductsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/slips': typeof AdminSlipsRoute
   '/admin/welcome': typeof AdminWelcomeRoute
   '/category/$slug': typeof CategorySlugRoute
   '/order/$token': typeof OrderTokenRoute
@@ -181,6 +189,7 @@ export interface FileRoutesById {
   '/admin/products': typeof AdminProductsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/slips': typeof AdminSlipsRoute
   '/admin/welcome': typeof AdminWelcomeRoute
   '/category/$slug': typeof CategorySlugRoute
   '/order/$token': typeof OrderTokenRoute
@@ -204,6 +213,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/reviews'
     | '/admin/settings'
+    | '/admin/slips'
     | '/admin/welcome'
     | '/category/$slug'
     | '/order/$token'
@@ -224,6 +234,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/reviews'
     | '/admin/settings'
+    | '/admin/slips'
     | '/admin/welcome'
     | '/category/$slug'
     | '/order/$token'
@@ -245,6 +256,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/reviews'
     | '/admin/settings'
+    | '/admin/slips'
     | '/admin/welcome'
     | '/category/$slug'
     | '/order/$token'
@@ -367,6 +379,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/slips': {
+      id: '/admin/slips'
+      path: '/slips'
+      fullPath: '/admin/slips'
+      preLoaderRoute: typeof AdminSlipsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/welcome': {
       id: '/admin/welcome'
       path: '/welcome'
@@ -411,6 +430,7 @@ interface AdminRouteChildren {
   AdminProductsRoute: typeof AdminProductsRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSlipsRoute: typeof AdminSlipsRoute
   AdminWelcomeRoute: typeof AdminWelcomeRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminProductIdRoute: typeof AdminProductIdRoute
@@ -422,6 +442,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminProductsRoute: AdminProductsRoute,
   AdminReviewsRoute: AdminReviewsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminSlipsRoute: AdminSlipsRoute,
   AdminWelcomeRoute: AdminWelcomeRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminProductIdRoute: AdminProductIdRoute,
