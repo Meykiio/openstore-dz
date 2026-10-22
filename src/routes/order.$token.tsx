@@ -114,6 +114,12 @@ function OrderPage() {
                 {data.commune ? ` — ${data.commune}` : ""}
               </p>
               <p className="text-on-surface-muted">{data.address}</p>
+              {data.delivery_method === "stopdesk" && (
+                <p className="mt-1 font-medium">
+                  {t("checkout.method.stopdesk")}
+                  {data.stopdesk_name ? `: ${data.stopdesk_name}` : ""}
+                </p>
+              )}
               {(data.carrier || data.tracking_number) && (
                 <p className="flex items-center gap-2 text-on-surface-muted">
                   <Truck size={14} aria-hidden="true" />

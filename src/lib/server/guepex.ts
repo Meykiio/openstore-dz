@@ -48,6 +48,8 @@ export type ParcelInput = {
   weight?: number;
   freeshipping?: boolean;
   is_stopdesk?: boolean;
+  /** Required by the carrier when `is_stopdesk` is true. */
+  stopdesk_id?: number;
   has_exchange?: boolean;
 };
 
@@ -126,6 +128,8 @@ export function createGuepexClient(config: GuepexConfig) {
     listWilayas: () => request<ListResponse<Record<string, unknown>>>("wilayas/"),
     listCommunes: (params: Record<string, unknown> = {}) =>
       request<ListResponse<Record<string, unknown>>>(`communes/${qs(params)}`),
+    listCenters: (params: Record<string, unknown> = {}) =>
+      request<ListResponse<Record<string, unknown>>>(`centers/${qs(params)}`),
     getFees: (fromWilayaId: number, toWilayaId: number) =>
       request<Record<string, unknown>>(
         `fees/?from_wilaya_id=${fromWilayaId}&to_wilaya_id=${toWilayaId}`,

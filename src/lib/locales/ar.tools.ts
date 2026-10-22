@@ -76,4 +76,12 @@ export const arTools = {
   "admin.slip.to": "إلى",
   "admin.slip.from": "من",
   "admin.orders.exportCsv": "تصدير CSV",
+  "admin.delivery.zones": "أسعار الولايات",
+  "admin.delivery.noZones": "لا توجد ولايات مخصصة. جميع الطلبات تستعمل السعر الموحد.",
+  "admin.delivery.pickupFee": "سعر الاستلام من المكتب",
+  "admin.delivery.pickupHint": "اتركه فارغاً إن لم يكن متوفراً",
+  "admin.setup.pickupNorth": "الاستلام من المكتب: الشمال (دج، اختياري)",
+  "admin.setup.pickupSouth": "الاستلام من المكتب: الجنوب (دج، اختياري)",
+  "admin.orders.pickup": "استلام من المكتب",
+  "admin.orders.pickupMissing": "لم يُحدَّد المكتب بعد. اختره قبل إنشاء الطرد.",
 };

@@ -38,6 +38,15 @@ export const frStorefront = {
     "Les commandes depuis ce numéro ne peuvent pas être acceptées. Contactez directement la boutique.",
   "checkout.error.too_many_pending":
     "Vous avez déjà des commandes en attente de confirmation. La boutique va vous appeler, inutile de recommander.",
+  "checkout.method.title": "Mode de livraison",
+  "checkout.method.home": "Livraison à domicile",
+  "checkout.method.stopdesk": "Retrait au bureau du transporteur",
+  "checkout.stopdesk.choose": "Choisissez le bureau",
+  "checkout.stopdesk.later":
+    "La boutique vous indiquera le bureau le plus proche lors de l’appel de confirmation.",
+  "checkout.error.stopdesk_unavailable":
+    "Le retrait au bureau n’est pas proposé dans cette wilaya. Choisissez la livraison à domicile.",
+  "checkout.communeHint": "Commencez à taper pour voir les communes",
   "demo.banner": "Boutique de démonstration : les commandes ne sont pas expédiées.",
   "demo.cta": "Ouvrez votre boutique gratuite",
   "demo.checkout":

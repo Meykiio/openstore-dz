@@ -6,6 +6,8 @@ import { useI18n } from "@/lib/i18n-context";
 import { formatDzd } from "@/lib/format";
 import { WILAYAS } from "@/lib/wilayas";
 import { useStoreSettings } from "@/lib/queries";
+import { useCommunes } from "@/lib/communes";
+import type { DeliveryMethod } from "@/lib/delivery";
 
 /** The address form shape, shared by the page and its panels. */
 export type CheckoutForm = {
@@ -15,6 +17,9 @@ export type CheckoutForm = {
   commune: string;
   address: string;
   note: string;
+  delivery_method: DeliveryMethod;
+  stopdesk_id: string;
+  stopdesk_name: string;
 };
 
 export const EMPTY_CHECKOUT_FORM: CheckoutForm = {
@@ -24,6 +29,9 @@ export const EMPTY_CHECKOUT_FORM: CheckoutForm = {
   commune: "",
   address: "",
   note: "",
+  delivery_method: "home",
+  stopdesk_id: "",
+  stopdesk_name: "",
 };
 
 export function AddressFields({
@@ -35,6 +43,7 @@ export function AddressFields({
 }) {
   const { t, locale } = useI18n();
   const { data: settings } = useStoreSettings();
+  const communes = useCommunes(form.wilaya);
   const set = <K extends keyof CheckoutForm>(key: K, value: CheckoutForm[K]) =>
     onChange({ ...form, [key]: value });
 
@@ -77,7 +86,22 @@ export function AddressFields({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={t("checkout.wilaya")} required>
-          <Select value={form.wilaya} onChange={(e) => set("wilaya", e.target.value)} required>
+          <Select
+            value={form.wilaya}
+            // A new wilaya invalidates the commune and the pickup office chosen
+            // for the old one.
+            onChange={(e) =>
+              onChange({
+                ...form,
+                wilaya: e.target.value,
+                commune: "",
+                delivery_method: "home",
+                stopdesk_id: "",
+                stopdesk_name: "",
+              })
+            }
+            required
+          >
             <option value="">{t("checkout.selectWilaya")}</option>
             {deliverable.map((w) => (
               <option key={w.code} value={w.fr}>
@@ -87,12 +111,25 @@ export function AddressFields({
           </Select>
         </Field>
 
-        <Field label={t("checkout.commune")}>
+        <Field
+          label={t("checkout.commune")}
+          hint={communes.length > 0 ? t("checkout.communeHint") : undefined}
+        >
           <Input
             value={form.commune}
             onChange={(e) => set("commune", e.target.value)}
             maxLength={80}
+            list="commune-options"
+            autoComplete="address-level2"
           />
+          {/* Suggestions, not a lock: a commune missing from the list can still be typed. */}
+          <datalist id="commune-options">
+            {communes.map(([latin, arabic]) => (
+              <option key={latin} value={latin}>
+                {arabic}
+              </option>
+            ))}
+          </datalist>
         </Field>
       </div>
 

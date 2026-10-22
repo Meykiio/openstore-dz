@@ -122,6 +122,7 @@ export type Database = {
           eta_days: number;
           fee: number;
           is_active: boolean;
+          stopdesk_fee: number | null;
           updated_at: string;
           wilaya: string;
         };
@@ -130,6 +131,7 @@ export type Database = {
           eta_days?: number;
           fee?: number;
           is_active?: boolean;
+          stopdesk_fee?: number | null;
           updated_at?: string;
           wilaya: string;
         };
@@ -138,6 +140,7 @@ export type Database = {
           eta_days?: number;
           fee?: number;
           is_active?: boolean;
+          stopdesk_fee?: number | null;
           updated_at?: string;
           wilaya?: string;
         };
@@ -276,6 +279,7 @@ export type Database = {
           created_at: string;
           customer_name: string;
           delivered_at: string | null;
+          delivery_method: string;
           delivery_fee: number;
           id: string;
           note: string | null;
@@ -285,6 +289,8 @@ export type Database = {
           refused_reason: string | null;
           shipped_at: string | null;
           status: Database["public"]["Enums"]["order_status"];
+          stopdesk_id: number | null;
+          stopdesk_name: string | null;
           subtotal: number;
           total: number;
           tracking_number: string | null;
@@ -301,6 +307,7 @@ export type Database = {
           created_at?: string;
           customer_name: string;
           delivered_at?: string | null;
+          delivery_method?: string;
           delivery_fee?: number;
           id?: string;
           note?: string | null;
@@ -310,6 +317,8 @@ export type Database = {
           refused_reason?: string | null;
           shipped_at?: string | null;
           status?: Database["public"]["Enums"]["order_status"];
+          stopdesk_id?: number | null;
+          stopdesk_name?: string | null;
           subtotal?: number;
           total?: number;
           tracking_number?: string | null;
@@ -326,6 +335,7 @@ export type Database = {
           created_at?: string;
           customer_name?: string;
           delivered_at?: string | null;
+          delivery_method?: string;
           delivery_fee?: number;
           id?: string;
           note?: string | null;
@@ -335,6 +345,8 @@ export type Database = {
           refused_reason?: string | null;
           shipped_at?: string | null;
           status?: Database["public"]["Enums"]["order_status"];
+          stopdesk_id?: number | null;
+          stopdesk_name?: string | null;
           subtotal?: number;
           total?: number;
           tracking_number?: string | null;

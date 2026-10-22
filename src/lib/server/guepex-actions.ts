@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import type { CreateParcelResult } from "./guepex-server";
+import type { CreateParcelResult, PickupOffice } from "./guepex-server";
 
 /**
  * Client-callable carrier actions.
@@ -19,4 +19,11 @@ export const createParcelForOrder = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<CreateParcelResult> => {
     const { runCreateParcel } = await import("./guepex-server");
     return runCreateParcel(data);
+  });
+
+export const listPickupOffices = createServerFn({ method: "GET" })
+  .validator((input: { wilaya: string }) => input)
+  .handler(async ({ data }): Promise<PickupOffice[]> => {
+    const { runListOffices } = await import("./guepex-server");
+    return runListOffices(data.wilaya);
   });

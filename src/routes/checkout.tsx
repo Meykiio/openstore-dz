@@ -14,7 +14,8 @@ import { EmptyState } from "@/components/ui/feedback";
 import { useCart } from "@/lib/cart";
 import { useI18n } from "@/lib/i18n-context";
 import { useStoreSettings } from "@/lib/queries";
-import { resolveDelivery, useDeliveryZones } from "@/lib/delivery";
+import { pickupFee, resolveDelivery, useDeliveryZones } from "@/lib/delivery";
+import { DeliveryChoice } from "@/components/storefront/delivery-choice";
 import { isDemoShop } from "@/components/storefront/demo-banner";
 import { placeOrder } from "@/lib/order";
 
@@ -40,60 +41,32 @@ function CheckoutPage() {
   // only payment method, so `accepts_cod = false` means no orders at all. The
   // database refuses them too, via validate_order.
   if (settings && !settings.accepts_cod) {
-    return (
-      <StoreLayout>
-        <div className="container-page py-16">
-          <EmptyState
-            title={t("shop.closed")}
-            body={t("shop.closedBody")}
-            action={
-              <Button asChild variant="secondary">
-                <Link to="/">{t("cart.emptyAction")}</Link>
-              </Button>
-            }
-          />
-        </div>
-      </StoreLayout>
-    );
+    return <NothingToCheckOut title={t("shop.closed")} body={t("shop.closedBody")} />;
   }
-
-  if (cart.items.length === 0) {
-    return (
-      <StoreLayout>
-        <div className="container-page py-16">
-          <EmptyState
-            title={t("cart.empty")}
-            action={
-              <Button asChild variant="secondary">
-                <Link to="/">{t("cart.emptyAction")}</Link>
-              </Button>
-            }
-          />
-        </div>
-      </StoreLayout>
-    );
-  }
+  if (cart.items.length === 0) return <NothingToCheckOut title={t("cart.empty")} />;
 
   const delivery = resolveDelivery(
     settings ?? null,
     zones ?? [],
     form.wilaya || null,
     cart.subtotal,
+    form.delivery_method,
   );
+  // The home price is shown next to the pickup price, whichever is chosen.
+  const homeFee = resolveDelivery(
+    settings ?? null,
+    zones ?? [],
+    form.wilaya || null,
+    cart.subtotal,
+  ).fee;
+  const pickup = pickupFee(zones ?? [], form.wilaya || null);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     setSubmitting(true);
     setError(null);
     const result = await placeOrder(
-      {
-        customer_name: form.customer_name,
-        phone: form.phone,
-        wilaya: form.wilaya,
-        commune: form.commune || null,
-        address: form.address,
-        note: form.note || null,
-      },
+      toCustomer(form),
       cart.items.map((line) => ({ variant_id: line.variantId, quantity: line.quantity })),
     );
     setSubmitting(false);
@@ -137,6 +110,22 @@ function CheckoutPage() {
               </p>
             )}
             <AddressFields form={form} onChange={setForm} />
+            <DeliveryChoice
+              wilaya={form.wilaya}
+              homeFee={homeFee}
+              // Free delivery covers pickup too, so both options show the same 0.
+              pickupFee={pickup === null ? null : delivery.source === "free" ? 0 : pickup}
+              method={form.delivery_method}
+              officeId={form.stopdesk_id}
+              onChange={({ method, officeId, officeName }) =>
+                setForm({
+                  ...form,
+                  delivery_method: method,
+                  stopdesk_id: officeId,
+                  stopdesk_name: officeName,
+                })
+              }
+            />
             <CodNotice />
           </div>
 
@@ -168,6 +157,40 @@ function OrderPlaced({ token, phone }: { token: string; phone: string }) {
             {t("checkout.trackNow")}
           </Link>
         </Button>
+      </div>
+    </StoreLayout>
+  );
+}
+
+function toCustomer(form: CheckoutForm) {
+  return {
+    customer_name: form.customer_name,
+    phone: form.phone,
+    wilaya: form.wilaya,
+    commune: form.commune || null,
+    address: form.address,
+    note: form.note || null,
+    delivery_method: form.delivery_method,
+    stopdesk_id: form.stopdesk_id || null,
+    stopdesk_name: form.stopdesk_name || null,
+  };
+}
+
+/** An empty cart, or a shop that is not taking orders: say so and point back. */
+function NothingToCheckOut({ title, body }: { title: string; body?: string }) {
+  const { t } = useI18n();
+  return (
+    <StoreLayout>
+      <div className="container-page py-16">
+        <EmptyState
+          title={title}
+          body={body}
+          action={
+            <Button asChild variant="secondary">
+              <Link to="/">{t("cart.emptyAction")}</Link>
+            </Button>
+          }
+        />
       </div>
     </StoreLayout>
   );

@@ -31,6 +31,9 @@ export type AdminOrder = {
   commune: string | null;
   address: string;
   note: string | null;
+  delivery_method: "home" | "stopdesk";
+  stopdesk_id: number | null;
+  stopdesk_name: string | null;
   subtotal: number;
   delivery_fee: number;
   total: number;
@@ -47,6 +50,7 @@ export type AdminOrder = {
 
 export const ORDER_SELECT = `
   id, public_token, customer_name, phone, wilaya, commune, address, note,
+  delivery_method, stopdesk_id, stopdesk_name,
   subtotal, delivery_fee, total, status, confirmed_at, refused_at, refused_reason,
   carrier, tracking_number, tracking_url, created_at,
   order_items ( id, product_name, variant_label, quantity, unit_price )

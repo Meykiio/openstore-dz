@@ -10,7 +10,7 @@ import { wilayaLabel } from "@/lib/wilayas";
 import { setOrderStatus, type AdminOrder, type OrderStatus } from "@/lib/admin";
 import type { PhoneHistory } from "@/lib/admin-phones";
 import { BlockPhoneButton } from "./phone-guard";
-import { CarrierAction } from "./carrier-action";
+import { CarrierAction, PickupOffice } from "./carrier-action";
 
 /** Expanded order: lines, money, recipient, and the status transitions. */
 export function OrderDetail({
@@ -66,6 +66,9 @@ export function OrderDetail({
           {order.commune ? ` — ${order.commune}` : ""}
         </p>
         <p>{order.address}</p>
+        <div className="mt-2">
+          <PickupOffice order={order} />
+        </div>
         {order.note && (
           <p className="mt-2 rounded-[10px] bg-surface-mid px-3 py-2 text-xs">{order.note}</p>
         )}

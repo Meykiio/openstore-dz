@@ -54,19 +54,28 @@ export function setupGaps(settings: StoreSettings | null, zoneCount: number): Se
  */
 const SOUTH = new Set([1, 3, 7, 8, 11, 30, 33, 37, 39, 47, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58]);
 
-export function zonesFor(north: number, south: number) {
+export function zonesFor(
+  north: number,
+  south: number,
+  pickup: { north: number | null; south: number | null } = { north: null, south: null },
+) {
   return WILAYAS.map((w) => ({
     // Latin names: the carrier matches on them, and so does the checkout.
     wilaya: w.fr,
     fee: SOUTH.has(w.code) ? south : north,
+    stopdesk_fee: SOUTH.has(w.code) ? pickup.south : pickup.north,
     eta_days: SOUTH.has(w.code) ? 5 : 3,
     is_active: true,
   }));
 }
 
-export async function saveAllZones(north: number, south: number): Promise<void> {
+export async function saveAllZones(
+  north: number,
+  south: number,
+  pickup: { north: number | null; south: number | null },
+): Promise<void> {
   const { error } = await getSupabase()
     .from("delivery_zones")
-    .upsert(zonesFor(north, south), { onConflict: "wilaya" });
+    .upsert(zonesFor(north, south, pickup), { onConflict: "wilaya" });
   if (error) throw new Error(error.message);
 }

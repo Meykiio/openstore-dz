@@ -39,6 +39,7 @@ const COLUMNS = [
   "wilaya",
   "commune",
   "address",
+  "delivery",
   "items",
   "subtotal",
   "delivery_fee",
@@ -69,6 +70,9 @@ export function ordersToCsv(orders: AdminOrder[]): string {
       o.wilaya,
       o.commune,
       o.address,
+      o.delivery_method === "stopdesk"
+        ? `stopdesk${o.stopdesk_name ? `: ${o.stopdesk_name}` : ""}`
+        : "home",
       o.order_items
         .map(
           (i) =>

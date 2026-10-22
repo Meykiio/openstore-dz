@@ -82,4 +82,12 @@ export const enTools = {
   "admin.slip.to": "Ship to",
   "admin.slip.from": "From",
   "admin.orders.exportCsv": "Export CSV",
+  "admin.delivery.zones": "Prices per wilaya",
+  "admin.delivery.noZones": "No wilaya prices yet. Every order uses the flat fee.",
+  "admin.delivery.pickupFee": "Pickup price",
+  "admin.delivery.pickupHint": "Empty = not offered",
+  "admin.setup.pickupNorth": "Office pickup: north (DA, optional)",
+  "admin.setup.pickupSouth": "Office pickup: south (DA, optional)",
+  "admin.orders.pickup": "Pickup at office",
+  "admin.orders.pickupMissing": "No office chosen yet. Choose one before creating the parcel.",
 };

@@ -48,6 +48,8 @@ function initialDraft(s: StoreSettings | null, zoneCount: number): SetupDraft {
     address: s?.address ?? "",
     north: String(s?.delivery_fee_flat ?? 600),
     south: "1200",
+    pickupNorth: "",
+    pickupSouth: "",
     freeAbove: String(s?.free_shipping_threshold ?? 0),
     applyZones: zoneCount === 0,
     legal_name: s?.legal_name ?? "",
@@ -74,33 +76,7 @@ function Wizard({ settings, zoneCount }: { settings: StoreSettings | null; zoneC
     setDraft((current) => ({ ...current, [key]: value }));
 
   const save = useMutation({
-    mutationFn: async (current: number) => {
-      const nullable = (value: string) => value.trim() || null;
-      if (current === 0) {
-        await saveStoreSettings({ name: draft.name.trim(), tagline: nullable(draft.tagline) });
-      } else if (current === 1) {
-        await saveStoreSettings({
-          phone: draft.phone.trim(),
-          whatsapp: draft.whatsapp.trim() || draft.phone.trim(),
-          email: nullable(draft.email),
-          address: nullable(draft.address),
-        });
-      } else if (current === 2) {
-        const north = Math.max(0, Number(draft.north) || 0);
-        const south = Math.max(0, Number(draft.south) || north);
-        await saveStoreSettings({
-          delivery_fee_flat: north,
-          free_shipping_threshold: Math.max(0, Number(draft.freeAbove) || 0),
-        });
-        if (draft.applyZones) await saveAllZones(north, south);
-      } else {
-        await saveStoreSettings({
-          legal_name: nullable(draft.legal_name),
-          nif: nullable(draft.nif),
-          rc_number: nullable(draft.rc_number),
-        });
-      }
-    },
+    mutationFn: (current: number) => saveStep(current, draft),
     onSuccess: (_, current) => {
       void queryClient.invalidateQueries({ queryKey: ["store_settings"] });
       void queryClient.invalidateQueries({ queryKey: ["delivery_zones"] });
@@ -180,4 +156,41 @@ function Wizard({ settings, zoneCount }: { settings: StoreSettings | null; zoneC
       </form>
     </div>
   );
+}
+
+/** Each step saves on Continue, so closing the tab halfway loses nothing. */
+async function saveStep(current: number, draft: SetupDraft): Promise<void> {
+  const nullable = (value: string) => value.trim() || null;
+  if (current === 0) {
+    await saveStoreSettings({ name: draft.name.trim(), tagline: nullable(draft.tagline) });
+  } else if (current === 1) {
+    await saveStoreSettings({
+      phone: draft.phone.trim(),
+      whatsapp: draft.whatsapp.trim() || draft.phone.trim(),
+      email: nullable(draft.email),
+      address: nullable(draft.address),
+    });
+  } else if (current === 2) {
+    const north = Math.max(0, Number(draft.north) || 0);
+    const south = Math.max(0, Number(draft.south) || north);
+    await saveStoreSettings({
+      delivery_fee_flat: north,
+      free_shipping_threshold: Math.max(0, Number(draft.freeAbove) || 0),
+    });
+    // Empty pickup prices mean pickup is not offered, not that it is free.
+    const optional = (value: string) =>
+      value.trim() === "" ? null : Math.max(0, Number(value) || 0);
+    if (draft.applyZones) {
+      await saveAllZones(north, south, {
+        north: optional(draft.pickupNorth),
+        south: optional(draft.pickupSouth),
+      });
+    }
+  } else {
+    await saveStoreSettings({
+      legal_name: nullable(draft.legal_name),
+      nif: nullable(draft.nif),
+      rc_number: nullable(draft.rc_number),
+    });
+  }
 }

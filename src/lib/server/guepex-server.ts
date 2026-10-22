@@ -68,7 +68,7 @@ export async function runCreateParcel(input: {
   const { data: order, error } = await admin
     .from("orders")
     .select(
-      "id, customer_name, phone, wilaya, commune, address, total, tracking_number, order_items ( product_name, variant_label, quantity )",
+      "id, customer_name, phone, wilaya, commune, address, total, tracking_number, delivery_method, stopdesk_id, order_items ( product_name, variant_label, quantity )",
     )
     .eq("id", input.orderId)
     .maybeSingle();
@@ -76,6 +76,13 @@ export async function runCreateParcel(input: {
   if (error || !order) return { ok: false, error: error?.message ?? "Order not found." };
   if (order.tracking_number) {
     return { ok: false, error: `Already has tracking ${order.tracking_number}.` };
+  }
+  const pickup = order.delivery_method === "stopdesk";
+  if (pickup && !order.stopdesk_id) {
+    return {
+      ok: false,
+      error: "This is a pickup order with no office chosen. Choose the office first.",
+    };
   }
 
   const [firstname, ...rest] = String(order.customer_name).trim().split(/\s+/);
@@ -97,6 +104,7 @@ export async function runCreateParcel(input: {
     price: Number(order.total),
     do_insurance: false,
     declared_value: Number(order.total),
+    ...(pickup ? { is_stopdesk: true, stopdesk_id: Number(order.stopdesk_id) } : {}),
   };
 
   try {
@@ -122,5 +130,38 @@ export async function runCreateParcel(input: {
     return { ok: true, tracking: result.tracking };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "Carrier call failed." };
+  }
+}
+
+export type PickupOffice = { id: number; name: string; address: string; commune: string };
+
+// Offices change rarely and every lookup spends carrier quota, so each server
+// instance keeps a wilaya's list for an hour.
+const officeCache = new Map<string, { at: number; offices: PickupOffice[] }>();
+
+/**
+ * The carrier's pickup offices in a wilaya. Public information, so no admin
+ * check: a buyer needs it at checkout. Empty when the carrier is not connected,
+ * and the checkout then says the shop will confirm the office by phone.
+ */
+export async function runListOffices(wilaya: string): Promise<PickupOffice[]> {
+  const config = readGuepexConfig();
+  if (!config || !wilaya) return [];
+  const cached = officeCache.get(wilaya);
+  if (cached && Date.now() - cached.at < 3_600_000) return cached.offices;
+  try {
+    const client = createGuepexClient(config);
+    const list = await client.listCenters({ wilaya_name: wilaya, page_size: 100 });
+    const offices = list.data.map((row) => ({
+      id: Number(row.center_id),
+      name: String(row.name ?? ""),
+      address: String(row.address ?? ""),
+      commune: String(row.commune_name ?? ""),
+    }));
+    officeCache.set(wilaya, { at: Date.now(), offices });
+    return offices;
+  } catch {
+    // A carrier outage must not block checkout; the buyer can still order.
+    return [];
   }
 }

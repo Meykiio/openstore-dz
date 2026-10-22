@@ -200,6 +200,11 @@ create table if not exists public.orders (
   wilaya         text not null,
   commune        text,
   address        text not null,
+  -- Home delivery, or pickup at the carrier's office (stopdesk), which costs the
+  -- buyer less. The office is the carrier's own id, never free text.
+  delivery_method text not null default 'home' check (delivery_method in ('home', 'stopdesk')),
+  stopdesk_id    int,
+  stopdesk_name  text,
   note           text,
 
   -- Recomputed by trigger from the catalogue. Any value supplied by the
@@ -276,12 +281,24 @@ create table if not exists public.size_guides (
 create table if not exists public.delivery_zones (
   wilaya      text primary key,
   fee         int not null default 0 check (fee >= 0),
+  -- Price for pickup at the carrier's office. Null means pickup is not offered here.
+  stopdesk_fee int check (stopdesk_fee >= 0),
   eta_days    int not null default 3 check (eta_days >= 1),
   is_active   boolean not null default true,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );
 
+
+-- Columns added after the first release. Declared above for a fresh install;
+-- added here for an existing one, before section 7's grants name them.
+alter table public.delivery_zones
+  add column if not exists stopdesk_fee int check (stopdesk_fee >= 0);
+alter table public.orders
+  add column if not exists delivery_method text not null default 'home'
+    check (delivery_method in ('home', 'stopdesk')),
+  add column if not exists stopdesk_id int,
+  add column if not exists stopdesk_name text;
 
 -- =============================================================================
 -- 3. Indexes
@@ -519,14 +536,18 @@ begin
 
   -- validate_order() still runs as the BEFORE INSERT trigger and does the field
   -- checks. This function only decides the rows.
-  insert into public.orders (customer_name, phone, wilaya, commune, address, note)
+  insert into public.orders (customer_name, phone, wilaya, commune, address, note,
+                             delivery_method, stopdesk_id, stopdesk_name)
   values (
     coalesce(p_customer->>'customer_name', ''),
     coalesce(p_customer->>'phone', ''),
     coalesce(p_customer->>'wilaya', ''),
     nullif(p_customer->>'commune', ''),
     coalesce(p_customer->>'address', ''),
-    nullif(p_customer->>'note', '')
+    nullif(p_customer->>'note', ''),
+    coalesce(nullif(p_customer->>'delivery_method', ''), 'home'),
+    nullif(p_customer->>'stopdesk_id', '')::int,
+    nullif(p_customer->>'stopdesk_name', '')
   )
   returning id, public_token into v_order_id, v_token;
 
@@ -606,6 +627,8 @@ begin
     'wilaya',       v_order.wilaya,
     'commune',      v_order.commune,
     'address',      v_order.address,
+    'delivery_method', v_order.delivery_method,
+    'stopdesk_name', v_order.stopdesk_name,
     'subtotal',     v_order.subtotal,
     'delivery_fee', v_order.delivery_fee,
     'total',        v_order.total,
@@ -944,7 +967,8 @@ grant select, insert, delete on public.orders to authenticated;
 
 grant update (id, public_token, customer_name, phone, wilaya, commune, address,
               note, status, confirmed_at, confirmed_by, refused_at, refused_reason,
-              carrier, tracking_number, tracking_url, shipped_at, delivered_at)
+              carrier, tracking_number, tracking_url, shipped_at, delivered_at,
+              stopdesk_id, stopdesk_name)
   on public.orders to authenticated;
 
 -- Keep future tables consistent with the pattern above.
@@ -1310,6 +1334,20 @@ begin
     raise exception 'We do not deliver to % yet', new.wilaya using errcode = 'check_violation';
   end if;
 
+  -- Pickup only where the owner priced it, so a buyer is never charged a
+  -- pickup fee the shop never agreed to.
+  if new.delivery_method = 'stopdesk' and not exists (
+    select 1 from public.delivery_zones dz
+    where dz.wilaya = new.wilaya and dz.is_active and dz.stopdesk_fee is not null
+  ) then
+    raise exception 'Pickup is not offered in %', new.wilaya
+      using errcode = 'check_violation', hint = 'stopdesk_unavailable';
+  end if;
+  if new.delivery_method = 'home' then
+    new.stopdesk_id := null;
+    new.stopdesk_name := null;
+  end if;
+
   -- The hint is a stable code the checkout translates; the message is for logs.
   if exists (
     select 1 from public.blocked_phones b where b.phone = public.canonical_dz_phone(new.phone)
@@ -1374,7 +1412,15 @@ alter table public.store_settings
   add column if not exists free_shipping_threshold int not null default 0
   check (free_shipping_threshold >= 0);
 
-create or replace function public.delivery_fee_for(p_wilaya text, p_subtotal int)
+-- The two-argument version predates pickup. Left in place it would make every
+-- two-argument call ambiguous against the defaulted three-argument one.
+drop function if exists public.delivery_fee_for(text, int);
+
+create or replace function public.delivery_fee_for(
+  p_wilaya text,
+  p_subtotal int,
+  p_method text default 'home'
+)
 returns int
 language sql
 stable
@@ -1383,6 +1429,8 @@ set search_path = ''
 as $$
   select case
     when s.free_shipping_threshold > 0 and p_subtotal >= s.free_shipping_threshold then 0
+    when p_method = 'stopdesk' then
+      (select dz.stopdesk_fee from public.delivery_zones dz where dz.wilaya = p_wilaya and dz.is_active)
     else coalesce(
       (select dz.fee from public.delivery_zones dz where dz.wilaya = p_wilaya and dz.is_active),
       s.delivery_fee_flat
@@ -1400,8 +1448,8 @@ set search_path = ''
 as $$
   update public.orders o
      set subtotal     = s.sub,
-         delivery_fee = coalesce(public.delivery_fee_for(o.wilaya, s.sub), 0),
-         total        = s.sub + coalesce(public.delivery_fee_for(o.wilaya, s.sub), 0)
+         delivery_fee = coalesce(public.delivery_fee_for(o.wilaya, s.sub, o.delivery_method), 0),
+         total        = s.sub + coalesce(public.delivery_fee_for(o.wilaya, s.sub, o.delivery_method), 0)
     from (select coalesce(sum(quantity * unit_price), 0)::int as sub
             from public.order_items where order_id = p_order_id) s
    where o.id = p_order_id;
@@ -1531,7 +1579,7 @@ $$;
 revoke all on function public.admin_analytics(int) from public, anon;
 grant execute on function public.admin_analytics(int) to authenticated;
 
-revoke all on function public.delivery_fee_for(text, int)     from public, anon, authenticated;
+revoke all on function public.delivery_fee_for(text, int, text) from public, anon, authenticated;
 revoke all on function public.recalculate_for_order(uuid)     from public, anon, authenticated;
 revoke all on function public.recalculate_order_totals()      from public, anon, authenticated;
 

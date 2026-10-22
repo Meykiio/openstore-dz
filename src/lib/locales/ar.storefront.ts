@@ -37,6 +37,14 @@ export const arStorefront = {
   "checkout.error.phone_blocked": "لا يمكن قبول الطلبات من هذا الرقم. تواصل مع المتجر مباشرة.",
   "checkout.error.too_many_pending":
     "لديك طلبات تنتظر التأكيد. سيتصل بك المتجر قريباً، ولا داعي لطلب جديد.",
+  "checkout.method.title": "طريقة الاستلام",
+  "checkout.method.home": "توصيل إلى المنزل",
+  "checkout.method.stopdesk": "استلام من مكتب شركة التوصيل",
+  "checkout.stopdesk.choose": "اختر المكتب",
+  "checkout.stopdesk.later": "سيخبرك المتجر بأقرب مكتب عند الاتصال لتأكيد طلبك.",
+  "checkout.error.stopdesk_unavailable":
+    "الاستلام من المكتب غير متوفر في هذه الولاية. اختر التوصيل إلى المنزل.",
+  "checkout.communeHint": "ابدأ الكتابة لترى البلديات",
   "demo.banner": "هذا متجر تجريبي: الطلبات هنا لا تُرسل.",
   "demo.cta": "افتح متجرك المجاني",
   "demo.checkout": "هذا متجر تجريبي. سيُسجَّل طلبك لكنه لن يُرسل أبداً.",

@@ -38,6 +38,15 @@ export const enStorefront = {
     "Orders from this number cannot be accepted. Please contact the shop directly.",
   "checkout.error.too_many_pending":
     "You already have orders waiting for confirmation. The shop will call you soon, so there is no need to order again.",
+  "checkout.method.title": "How you receive it",
+  "checkout.method.home": "Home delivery",
+  "checkout.method.stopdesk": "Pick up at the carrier’s office",
+  "checkout.stopdesk.choose": "Choose the office",
+  "checkout.stopdesk.later":
+    "The shop will tell you the nearest office when they call to confirm your order.",
+  "checkout.error.stopdesk_unavailable":
+    "Pickup is not offered in this wilaya. Choose home delivery.",
+  "checkout.communeHint": "Start typing to see the communes",
   "demo.banner": "Demo shop: orders here are not shipped.",
   "demo.cta": "Open your own free shop",
   "demo.checkout": "This is a demo shop. Your order will be recorded but never delivered.",

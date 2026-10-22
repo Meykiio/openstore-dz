@@ -93,20 +93,19 @@ function CarrierCard({ origin, flatFee }: { origin: string; flatFee: number }) {
 }
 
 function ZonesCard() {
+  const { t } = useI18n();
   const { data: zones } = useDeliveryZones();
   const configured = zones ?? [];
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>أسعار الولايات</CardTitle>
+        <CardTitle>{t("admin.delivery.zones")}</CardTitle>
       </CardHeader>
       <CardBody className="flex flex-col gap-5">
         <ZoneForm />
         {configured.length === 0 ? (
-          <p className="text-sm text-on-surface-muted">
-            لا توجد ولايات مخصصة. جميع الطلبات تستعمل السعر الموحد.
-          </p>
+          <p className="text-sm text-on-surface-muted">{t("admin.delivery.noZones")}</p>
         ) : (
           <ul className="divide-y divide-outline rounded-[16px] border border-outline">
             {configured.map((zone) => (
@@ -124,10 +123,18 @@ function ZoneForm() {
   const invalidate = useDeliveryInvalidation();
   const [wilaya, setWilaya] = useState("");
   const [fee, setFee] = useState("600");
+  const [pickup, setPickup] = useState("");
   const [eta, setEta] = useState("3");
 
   const save = useMutation({
-    mutationFn: () => upsertZone({ wilaya, fee: Number(fee) || 0, eta_days: Number(eta) || 1 }),
+    mutationFn: () =>
+      upsertZone({
+        wilaya,
+        fee: Number(fee) || 0,
+        // Empty means pickup is not offered here, which is different from free.
+        stopdesk_fee: pickup.trim() === "" ? null : Math.max(0, Number(pickup) || 0),
+        eta_days: Number(eta) || 1,
+      }),
     onSuccess: () => {
       invalidate();
       setWilaya("");
@@ -136,7 +143,7 @@ function ZoneForm() {
   });
 
   return (
-    <div className="grid gap-3 sm:grid-cols-[2fr_1fr_1fr_auto] sm:items-end">
+    <div className="grid gap-3 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:items-end">
       <Field label={t("checkout.wilaya")}>
         <Select value={wilaya} onChange={(event) => setWilaya(event.target.value)}>
           <option value="">{t("checkout.selectWilaya")}</option>
@@ -153,6 +160,16 @@ function ZoneForm() {
           min={0}
           value={fee}
           onChange={(event) => setFee(event.target.value)}
+          dir="ltr"
+          className="font-mono"
+        />
+      </Field>
+      <Field label={t("admin.delivery.pickupFee")} hint={t("admin.delivery.pickupHint")}>
+        <Input
+          type="number"
+          min={0}
+          value={pickup}
+          onChange={(event) => setPickup(event.target.value)}
           dir="ltr"
           className="font-mono"
         />
@@ -193,6 +210,13 @@ function ZoneRow({ zone }: { zone: DeliveryZone }) {
       <span className="flex items-center gap-4 text-sm">
         <span className="font-mono" dir="ltr">
           {zone.fee}
+        </span>
+        <span
+          className="font-mono text-xs text-on-surface-muted"
+          dir="ltr"
+          title={t("admin.delivery.pickupFee")}
+        >
+          {zone.stopdesk_fee === null ? "—" : `⌂ ${zone.stopdesk_fee}`}
         </span>
         <span className="font-mono text-xs text-on-surface-muted" dir="ltr">
           {zone.eta_days}d

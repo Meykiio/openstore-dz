@@ -82,4 +82,13 @@ export const frTools = {
   "admin.slip.to": "Destinataire",
   "admin.slip.from": "Expéditeur",
   "admin.orders.exportCsv": "Exporter en CSV",
+  "admin.delivery.zones": "Prix par wilaya",
+  "admin.delivery.noZones":
+    "Aucune wilaya personnalisée. Toutes les commandes utilisent le prix unique.",
+  "admin.delivery.pickupFee": "Prix retrait au bureau",
+  "admin.delivery.pickupHint": "Vide = non proposé",
+  "admin.setup.pickupNorth": "Retrait au bureau : nord (DA, facultatif)",
+  "admin.setup.pickupSouth": "Retrait au bureau : sud (DA, facultatif)",
+  "admin.orders.pickup": "Retrait au bureau",
+  "admin.orders.pickupMissing": "Bureau non choisi. Choisissez-le avant de créer le colis.",
 };

@@ -93,6 +93,12 @@ function Slip({ order }: { order: AdminOrder }) {
           {order.commune ? ` — ${order.commune}` : ""}
         </p>
         <p>{order.address}</p>
+        {order.delivery_method === "stopdesk" && (
+          <p className="mt-1 font-semibold">
+            {t("admin.orders.pickup")}
+            {order.stopdesk_name ? `: ${order.stopdesk_name}` : ""}
+          </p>
+        )}
       </section>
 
       <ul className="flex flex-col gap-1 border-y border-outline py-3">

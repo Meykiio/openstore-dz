@@ -17,6 +17,9 @@ export type OrderCustomer = {
   commune?: string | null;
   address: string;
   note?: string | null;
+  delivery_method?: "home" | "stopdesk";
+  stopdesk_id?: string | null;
+  stopdesk_name?: string | null;
 };
 
 /** Deliberately has no price field. The database would ignore one. */
@@ -39,6 +42,8 @@ export type TrackedOrder = {
   wilaya: string;
   commune: string | null;
   address: string;
+  delivery_method?: "home" | "stopdesk";
+  stopdesk_name?: string | null;
   subtotal: number;
   delivery_fee: number;
   total: number;

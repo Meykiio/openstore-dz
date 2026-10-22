@@ -14,6 +14,8 @@ export type SetupDraft = {
   address: string;
   north: string;
   south: string;
+  pickupNorth: string;
+  pickupSouth: string;
   freeAbove: string;
   applyZones: boolean;
   legal_name: string;
@@ -92,7 +94,10 @@ export function ContactStep({ draft, set, phoneError }: StepProps & { phoneError
 
 export function DeliveryStep({ draft, set, zoneCount }: StepProps & { zoneCount: number }) {
   const { t } = useI18n();
-  const number = (key: "north" | "south" | "freeAbove", label: string) => (
+  const number = (
+    key: "north" | "south" | "pickupNorth" | "pickupSouth" | "freeAbove",
+    label: string,
+  ) => (
     <Field label={label}>
       <Input
         type="number"
@@ -110,6 +115,8 @@ export function DeliveryStep({ draft, set, zoneCount }: StepProps & { zoneCount:
       <div className="grid gap-4 sm:grid-cols-2">
         {number("north", t("admin.setup.north"))}
         {number("south", t("admin.setup.south"))}
+        {number("pickupNorth", t("admin.setup.pickupNorth"))}
+        {number("pickupSouth", t("admin.setup.pickupSouth"))}
       </div>
       {number("freeAbove", t("admin.setup.freeAbove"))}
       <Switch
