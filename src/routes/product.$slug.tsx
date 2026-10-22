@@ -7,6 +7,7 @@ import { ErrorState } from "@/components/ui/feedback";
 import { productQuery, reviewsQuery, useProduct } from "@/lib/queries";
 import { sizeGuidesQuery } from "@/lib/size-guides";
 import { RelatedProducts } from "@/components/storefront/related-products";
+import { localized } from "@/lib/i18n";
 import { useT } from "@/lib/i18n-context";
 
 export const Route = createFileRoute("/product/$slug")({
@@ -23,17 +24,20 @@ export const Route = createFileRoute("/product/$slug")({
     ]);
     return { product };
   },
-  head: ({ loaderData }) => {
+  head: ({ loaderData, match }) => {
     const product = loaderData?.product;
-    if (!product) return { meta: [{ title: "المنتج غير موجود" }] };
+    if (!product) return { meta: [{ title: "OpenStore DZ" }] };
+    const locale = match.context.locale;
+    const name = localized(locale, product.name, product.name_fr);
     const description =
-      product.description?.trim().slice(0, 155) ??
-      `اطلب ${product.name} مع الدفع عند الاستلام والتوصيل إلى ولايتك.`;
+      localized(locale, product.description ?? "", product.description_fr)
+        .trim()
+        .slice(0, 155) || name;
     return {
       meta: [
-        { title: product.name },
+        { title: name },
         { name: "description", content: description },
-        { property: "og:title", content: product.name },
+        { property: "og:title", content: name },
         { property: "og:description", content: description },
         { property: "og:type", content: "product" },
       ],

@@ -17,13 +17,12 @@ export const Route = createFileRoute("/category/$slug")({
       .catch(() => null);
     return { category };
   },
-  head: ({ loaderData }) => {
+  head: ({ loaderData, match }) => {
     const category = loaderData?.category;
-    if (!category) return { meta: [{ title: "الفئة غير موجودة" }] };
-    const title = `${category.name} | OpenStore DZ`;
-    const description =
-      category.description?.trim() ||
-      `تصفح ${category.name} مع الدفع عند الاستلام والتوصيل إلى ولايتك.`;
+    if (!category) return { meta: [{ title: "OpenStore DZ" }] };
+    const name = localized(match.context.locale, category.name, category.name_fr);
+    const title = `${name} | OpenStore DZ`;
+    const description = category.description?.trim() || title;
     return {
       meta: [
         { title },

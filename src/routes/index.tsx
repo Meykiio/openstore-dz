@@ -33,13 +33,17 @@ export const Route = createFileRoute("/")({
     ]);
     return { settings };
   },
-  head: ({ loaderData }) => {
-    const name = loaderData?.settings?.name?.trim();
-    const tagline = loaderData?.settings?.tagline?.trim();
-    const title = name ? `${name}${tagline ? ` — ${tagline}` : ""}` : "متجر إلكتروني";
+  head: ({ loaderData, match }) => {
+    const s = loaderData?.settings;
+    const ar = match.context.locale === "ar";
+    const name = s?.name?.trim();
+    const tagline = (ar ? s?.tagline : s?.tagline_fr)?.trim();
+    const title = name ? `${name}${tagline ? ` — ${tagline}` : ""}` : "OpenStore DZ";
     const description =
-      loaderData?.settings?.description?.trim() ||
-      "تسوق أونلاين مع الدفع عند الاستلام والتوصيل إلى 58 ولاية.";
+      (ar ? s?.description : s?.description_fr)?.trim() ||
+      (ar
+        ? "تسوق أونلاين مع الدفع عند الاستلام والتوصيل إلى 58 ولاية."
+        : "Shop online, pay cash on delivery.");
     return {
       meta: [
         { title },

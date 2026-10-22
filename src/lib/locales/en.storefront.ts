@@ -55,6 +55,7 @@ export const enStorefront = {
   "notFound.title": "Page not found",
   "notFound.body": "The link is wrong, or the page was removed.",
   "notFound.back": "Back to the shop",
+  "footer.contact": "Contact",
   "demo.banner": "Demo shop: orders here are not shipped.",
   "demo.cta": "Open your own free shop",
   "demo.checkout": "This is a demo shop. Your order will be recorded but never delivered.",

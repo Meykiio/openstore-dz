@@ -68,7 +68,7 @@ export function SiteFooter() {
         )}
 
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium">{t("order.customer")}</p>
+          <p className="text-sm font-medium">{t("footer.contact")}</p>
           {settings?.phone && (
             <a
               href={`tel:${settings.phone.replace(/\s/g, "")}`}
