@@ -5,11 +5,9 @@
  * derived from it, so every other locale is forced by the compiler to cover the
  * same keys — a missing translation becomes a build failure, not a blank label.
  *
- * Locale lives in `localStorage`, which the server cannot read. The server
- * therefore always renders Arabic, and a client effect switches to the stored
- * choice after hydration. That ordering avoids a hydration mismatch; the cost is
- * one paint in Arabic for a returning French visitor, which is acceptable for an
- * Arabic-first platform.
+ * The choice lives in a cookie (mirrored in `localStorage`), so the server renders
+ * the visitor's language from the first byte. A first visit has no cookie yet:
+ * the server picks from `Accept-Language` and sets it in the same response.
  */
 
 import { ar } from "./locales/ar";
@@ -118,8 +116,14 @@ export function applyLocaleToDocument(locale: Locale): void {
   html.setAttribute("dir", LOCALE_DIR[locale]);
 }
 
-/** Inline script so the first paint is already in the right direction. */
-export const localeBootstrapScript = `(function(){try{var s=localStorage.getItem("${STORAGE_KEY}");var l=(s==="ar"||s==="fr"||s==="en")?s:"ar";var d=l==="ar"?"rtl":"ltr";document.documentElement.setAttribute("lang",l);document.documentElement.setAttribute("dir",d);}catch(e){}})();`;
+/**
+ * Inline script so the first paint is already in the right direction. The cookie
+ * is the server's own decision, so it wins; the stored choice is the fallback.
+ * With neither it leaves `<html>` alone: the server already set `lang` and `dir`
+ * from the browser's language, and forcing Arabic here is what made a first
+ * English visit render left-to-right text right-to-left.
+ */
+export const localeBootstrapScript = `(function(){try{var m=document.cookie.match(/(?:^|; )${STORAGE_KEY}=(ar|fr|en)/);var l=m?m[1]:localStorage.getItem("${STORAGE_KEY}");if(l==="ar"||l==="fr"||l==="en"){document.documentElement.setAttribute("lang",l);document.documentElement.setAttribute("dir",l==="ar"?"rtl":"ltr");}}catch(e){}})();`;
 
 /**
  * Pick the owner's text for a locale. Catalogue rows carry Arabic and a Latin
