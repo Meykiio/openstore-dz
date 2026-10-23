@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { StoreLayout } from "@/components/storefront/store-layout";
 import { CatalogueView } from "@/components/storefront/catalogue-view";
 import { EMPTY_FILTERS, cataloguePageQuery } from "@/lib/catalogue";
+import { translate } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-context";
 
 export const Route = createFileRoute("/catalogue")({
@@ -11,12 +12,12 @@ export const Route = createFileRoute("/catalogue")({
       .ensureQueryData(cataloguePageQuery(EMPTY_FILTERS, 1))
       .catch(() => null);
   },
-  head: () => ({
+  head: ({ match }) => ({
     meta: [
-      { title: "المنتجات" },
+      { title: translate(match.context.locale, "nav.products") },
       {
         name: "description",
-        content: "تصفح كل منتجات المتجر مع الفرز والتصفية.",
+        content: translate(match.context.locale, "catalogue.description"),
       },
     ],
   }),

@@ -5,6 +5,7 @@ import { StoreLayout } from "@/components/storefront/store-layout";
 import { CatalogueView } from "@/components/storefront/catalogue-view";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form";
+import { translate } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-context";
 import { EMPTY_FILTERS, cataloguePageQuery } from "@/lib/catalogue";
 
@@ -20,7 +21,12 @@ export const Route = createFileRoute("/search")({
       .ensureQueryData(cataloguePageQuery({ ...EMPTY_FILTERS, query: deps.q }, 1))
       .catch(() => null);
   },
-  head: () => ({ meta: [{ title: "البحث" }, { name: "robots", content: "noindex" }] }),
+  head: ({ match }) => ({
+    meta: [
+      { title: translate(match.context.locale, "search.title") },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: SearchPage,
 });
 

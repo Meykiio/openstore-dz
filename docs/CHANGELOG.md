@@ -19,6 +19,11 @@ right to left on the first visit. The inline locale script forced Arabic wheneve
 `Accept-Language`. It now reads the server's cookie first and leaves `<html>` alone
 when there is nothing to override. Covered by three regression tests.
 
+The catalogue, checkout, track, order and search pages still set an Arabic browser
+tab title (and the catalogue an Arabic description) whatever the visitor's language.
+They now use the visitor's locale, and a test fails if any storefront route
+hardcodes Arabic in a `title` or `content` again.
+
 ### 2026-10-22 (later) — labels, moderation at scale, every language
 
 **Added:** shipping labels modelled on the carriers' own, as one 100 x 150 mm page per

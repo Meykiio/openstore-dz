@@ -199,6 +199,7 @@ export const arStorefront = {
   "catalogue.results": "نتيجة",
   "catalogue.noResults": "لا توجد نتائج مطابقة",
   "catalogue.noResultsBody": "جرّب تغيير التصفية أو البحث بكلمة أخرى.",
+  "catalogue.description": "تصفح كل منتجات المتجر مع الفرز والتصفية.",
   "catalogue.sort": "الترتيب",
   "catalogue.sortNewest": "الأحدث",
   "catalogue.sortPriceAsc": "الأرخص أولاً",

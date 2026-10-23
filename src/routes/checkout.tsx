@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/feedback";
 import { useCart } from "@/lib/cart";
+import { translate } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-context";
 import { useStoreSettings } from "@/lib/queries";
 import { pickupFee, resolveDelivery, useDeliveryZones } from "@/lib/delivery";
@@ -20,7 +21,7 @@ import { isDemoShop } from "@/components/storefront/demo-banner";
 import { placeOrder } from "@/lib/order";
 
 export const Route = createFileRoute("/checkout")({
-  head: () => ({ meta: [{ title: "إتمام الطلب" }] }),
+  head: ({ match }) => ({ meta: [{ title: translate(match.context.locale, "checkout.title") }] }),
   component: CheckoutPage,
 });
 

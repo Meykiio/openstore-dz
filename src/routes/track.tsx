@@ -4,11 +4,12 @@ import { Search } from "lucide-react";
 import { StoreLayout } from "@/components/storefront/store-layout";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form";
+import { translate } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-context";
 import { isTokenShaped } from "@/lib/order";
 
 export const Route = createFileRoute("/track")({
-  head: () => ({ meta: [{ title: "تتبع الطلب" }] }),
+  head: ({ match }) => ({ meta: [{ title: translate(match.context.locale, "order.title") }] }),
   component: TrackPage,
 });
 

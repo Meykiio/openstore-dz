@@ -207,6 +207,7 @@ export const frStorefront = {
   "catalogue.results": "résultat(s)",
   "catalogue.noResults": "Aucun résultat",
   "catalogue.noResultsBody": "Essayez d'ajuster les filtres ou de chercher un autre mot.",
+  "catalogue.description": "Parcourez tous les produits, avec tri et filtres.",
   "catalogue.sort": "Trier par",
   "catalogue.sortNewest": "Nouveautés",
   "catalogue.sortPriceAsc": "Prix croissant",

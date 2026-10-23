@@ -203,6 +203,7 @@ export const enStorefront = {
   "catalogue.results": "result(s)",
   "catalogue.noResults": "No matching products",
   "catalogue.noResultsBody": "Try adjusting the filters or searching for another word.",
+  "catalogue.description": "Browse every product, with sorting and filters.",
   "catalogue.sort": "Sort by",
   "catalogue.sortNewest": "Newest",
   "catalogue.sortPriceAsc": "Price low to high",

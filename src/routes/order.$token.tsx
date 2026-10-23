@@ -5,6 +5,7 @@ import { StoreLayout } from "@/components/storefront/store-layout";
 import { StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/feedback";
+import { translate } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-context";
 import { formatDateTime, formatDzd } from "@/lib/format";
 import { ORDER_FLOW, isTerminal, trackOrder } from "@/lib/order";
@@ -12,7 +13,12 @@ import { wilayaLabel } from "@/lib/wilayas";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/order/$token")({
-  head: () => ({ meta: [{ title: "تتبع الطلب" }, { name: "robots", content: "noindex" }] }),
+  head: ({ match }) => ({
+    meta: [
+      { title: translate(match.context.locale, "order.title") },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: OrderPage,
 });
 
