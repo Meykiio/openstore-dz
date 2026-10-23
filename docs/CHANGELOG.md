@@ -6,6 +6,19 @@ All notable changes to OpenStore DZ. Format follows
 
 ## [Unreleased]
 
+### 2026-10-23 — a first English visit reads left to right; a real demo catalogue
+
+**Added:** `supabase/demo-catalogue.sql`, an optional, idempotent demo shop of 20
+different products with 4 colours each, sizes, size guides and approved reviews, and
+its 80 photos in `public/demo/` (WebP, 3.4 MB in all). Rerunning it adds only what is
+missing and never overwrites an edit.
+
+**Fixed:** a visitor whose browser asked for English got the English page laid out
+right to left on the first visit. The inline locale script forced Arabic whenever
+`localStorage` was empty, overriding the `lang` and `dir` the server had set from
+`Accept-Language`. It now reads the server's cookie first and leaves `<html>` alone
+when there is nothing to override. Covered by three regression tests.
+
 ### 2026-10-22 (later) — labels, moderation at scale, every language
 
 **Added:** shipping labels modelled on the carriers' own, as one 100 x 150 mm page per
