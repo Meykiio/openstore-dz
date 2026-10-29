@@ -7,13 +7,15 @@ import { LoadingState } from "@/components/ui/feedback";
 import { useI18n } from "@/lib/i18n-context";
 import { useAuth } from "@/lib/auth";
 import { getSupabase } from "@/lib/supabase/client";
+import { isEmptyDatabaseError } from "@/lib/supabase/health";
+import { SetupCheck } from "@/components/setup-check";
 
 export const Route = createFileRoute("/setup")({
   head: () => ({ meta: [{ title: "إعداد المتجر" }, { name: "robots", content: "noindex" }] }),
   component: SetupPage,
 });
 
-type Phase = "checking" | "claimable" | "taken" | "awaitEmail";
+type Phase = "checking" | "claimable" | "taken" | "awaitEmail" | "noDatabase";
 
 /**
  * First-run admin creation.
@@ -33,12 +35,24 @@ function SetupPage() {
     void getSupabase()
       .rpc("admin_exists")
       .then(
-        ({ data }) => setPhase(data === true ? "taken" : "claimable"),
+        ({ data, error }) =>
+          setPhase(
+            isEmptyDatabaseError(error) ? "noDatabase" : data === true ? "taken" : "claimable",
+          ),
         () => setPhase("claimable"),
       );
   }, []);
 
   if (phase === "checking") return <LoadingState className="min-h-dvh" />;
+  // An owner who deployed before running schema.sql: an account made now could
+  // not be claimed, so finish the database first.
+  if (phase === "noDatabase") {
+    return (
+      <main className="container-page flex min-h-dvh flex-col items-center justify-center gap-6 py-16">
+        <SetupCheck />
+      </main>
+    );
+  }
   if (phase !== "claimable") return <Settled phase={phase} />;
 
   return (
@@ -53,7 +67,7 @@ function SetupPage() {
 }
 
 /** What the owner sees when there is nothing left for them to do here. */
-function Settled({ phase }: { phase: Exclude<Phase, "checking" | "claimable"> }) {
+function Settled({ phase }: { phase: Exclude<Phase, "checking" | "claimable" | "noDatabase"> }) {
   const { t } = useI18n();
   const taken = phase === "taken";
   return (

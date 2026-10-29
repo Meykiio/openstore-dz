@@ -2180,3 +2180,7 @@ comment on function public.catalogue_page(text, text, text[], text[], int, int, 
 revoke all on function public.catalogue_page(text, text, text[], text[], int, int, boolean, text, int, int) from public;
 grant execute on function public.catalogue_page(text, text, text[], text[], int, int, boolean, text, int, int) to anon, authenticated;
 grant execute on function public.normalize_arabic(text) to anon, authenticated;
+
+-- Ask the API to pick up the new tables and functions straight away, so a shop
+-- set up from the SQL Editor works on the very next page refresh.
+notify pgrst, 'reload schema';

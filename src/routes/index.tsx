@@ -10,6 +10,7 @@ import {
 } from "@/components/storefront/home-sections";
 import { ErrorState, NoProducts, ProductSkeleton } from "@/components/ui/feedback";
 import { SetupCheck } from "@/components/setup-check";
+import { isEmptyDatabaseError } from "@/lib/supabase/health";
 import { supabaseConfigProblem } from "@/lib/supabase/client";
 import { reviewsQuery, storeSettingsQuery } from "@/lib/queries";
 import { EMPTY_FILTERS, cataloguePageQuery, useCataloguePage } from "@/lib/catalogue";
@@ -63,10 +64,10 @@ function Home() {
   const catalogue = useCataloguePage(EMPTY_FILTERS, 1);
   const configProblem = supabaseConfigProblem();
 
-  // A shop that has not been connected to a database yet must see the setup
-  // instructions, not an error boundary. This is the first screen a new owner
-  // ever loads, so it has to be the most forgiving one.
-  if (configProblem) {
+  // A shop that has not been connected to a database yet, or whose database is
+  // still empty, must see the setup instructions, not an error boundary. This is
+  // the first screen a new owner ever loads, so it has to be the most forgiving one.
+  if (configProblem || (catalogue.isError && isEmptyDatabaseError(catalogue.error))) {
     return (
       <main className="container-page flex min-h-dvh flex-col items-center justify-center gap-6 py-20 text-center">
         <h1 className="font-display text-3xl font-semibold">{settings?.name ?? "OpenStore DZ"}</h1>

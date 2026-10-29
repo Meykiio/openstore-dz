@@ -7,6 +7,8 @@ import { EmptyState, ErrorState, ProductSkeleton } from "@/components/ui/feedbac
 import { useI18n } from "@/lib/i18n-context";
 import { EMPTY_FILTERS, useCataloguePage, type CatalogueFilters } from "@/lib/catalogue";
 import { useDebouncedValue } from "@/lib/use-debounced";
+import { isEmptyDatabaseError } from "@/lib/supabase/health";
+import { SetupCheck } from "@/components/setup-check";
 
 /**
  * A browsable catalogue: heading, filters, grid, pages.
@@ -123,5 +125,7 @@ function CatalogueLoading() {
 }
 
 function CatalogueError({ message, onRetry }: { message: string; onRetry: () => void }) {
+  // A database that was never set up is not a glitch to retry: say what to do.
+  if (isEmptyDatabaseError({ message })) return <SetupCheck className="mx-auto" />;
   return <ErrorState message={message} onRetry={onRetry} />;
 }

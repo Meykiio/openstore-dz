@@ -109,18 +109,24 @@ That is not a design decision anyone made. It is the gap.
 
 ## Deploy your own shop (no computer setup)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FMeykiio%2Fopenstore-dz&env=VITE_SUPABASE_URL,VITE_SUPABASE_PUBLISHABLE_KEY,VITE_SUPABASE_PROJECT_ID&envDescription=From%20your%20Supabase%20project%3A%20Project%20Settings%20%E2%86%92%20API&project-name=my-shop&repository-name=my-shop)
+OpenStore goes into **your own** GitHub, Vercel and Supabase accounts. The shop, its
+database and its orders belong to you; nobody else can see them. About ten minutes, all
+free tiers, in this order:
 
-The button copies OpenStore into **your own** GitHub and Vercel accounts. The shop,
-its database and its orders belong to you; nobody else can see them. About ten
-minutes, all free tiers:
+1. **Create the database first.** Make a free project at
+   [supabase.com](https://supabase.com). In its **SQL Editor**, paste the whole of
+   [`supabase/schema.sql`](supabase/schema.sql) and click **Run**. It ends with
+   "Success". Skipped this? The deployed site notices the empty database and walks you
+   through it, with a link to your SQL Editor and a button that copies the script.
+2. **Deploy.** Click the button and, when Vercel asks, paste three values from Supabase
+   → **Project Settings → API**: the Project URL, the publishable (anon) key, and the
+   project ref. Never paste the `service_role` key here.
 
-1. **Create a database.** Make a free project at [supabase.com](https://supabase.com).
-   In its **SQL Editor**, paste the whole of [`supabase/schema.sql`](supabase/schema.sql)
-   and click **Run**.
-2. **Deploy.** Click the button above. When Vercel asks, paste three values from
-   Supabase → **Project Settings → API**: the Project URL, the publishable (anon)
-   key, and the project ref. Never paste the `service_role` key here.
+   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FMeykiio%2Fopenstore-dz&env=VITE_SUPABASE_URL,VITE_SUPABASE_PUBLISHABLE_KEY,VITE_SUPABASE_PROJECT_ID&envDescription=From%20your%20Supabase%20project%3A%20Project%20Settings%20%E2%86%92%20API&project-name=my-shop&repository-name=my-shop)
+
+   Changed a key later? Vercel only reads them when it builds, so open **Deployments**
+   and click **Redeploy**.
+
 3. **Claim your shop.** Open `https://<your-site>/setup` straight away and create
    the owner account. Until you do, anyone who finds the address could claim it.
    The setup wizard then asks for your name, phone, delivery prices and legal

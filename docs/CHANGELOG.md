@@ -6,6 +6,22 @@ All notable changes to OpenStore DZ. Format follows
 
 ## [Unreleased]
 
+### 2026-10-29 — a fresh deploy explains its empty database
+
+**Fixed:** a shop deployed with the Vercel button before `supabase/schema.sql` was run
+showed two raw errors ("Could not find the table 'public.store_settings' in the schema
+cache") and told its owner to edit `.env` and run `npm run dev`. The home page,
+catalogue and `/setup` now recognise an empty database and show one card: a link to the
+owner's own Supabase SQL Editor, a button that copies the whole setup script, and what to
+do after. Missing keys on a deployed site now point to Vercel's Environment Variables and
+Redeploy instead of `.env`. `schema.sql` ends by asking the API to reload, so the shop
+works on the next refresh. The README puts the database step before the Deploy button.
+
+**Verified:** against a stand-in server that answers exactly as an empty Supabase project
+does: the card shows on `/`, `/catalogue` and `/setup`, the SQL Editor link carries the
+project ref, and in Chromium the button copies all 93,782 characters of the script. A
+healthy database still renders the catalogue. `npm run check` green, 90 unit tests.
+
 ### 2026-10-23 — a first English visit reads left to right; a real demo catalogue
 
 **Added:** `supabase/demo-catalogue.sql`, an optional, idempotent demo shop of 20
