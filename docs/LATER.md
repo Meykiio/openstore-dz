@@ -10,6 +10,18 @@ request.
 
 ## Ideas with a clear trigger
 
+**A captcha on the order forms (Cloudflare Turnstile).**
+Trigger: fake orders get past the database limits (many phones from many IPs). It needs
+a server check of the token before `place_order`, so orders would go through a server
+function instead of straight to Supabase.
+
+**Two-step sign-in (TOTP) for the admin.**
+Trigger: shops add staff accounts, or an owner's password leaks. Supabase Auth supports
+it; the policies would require `aal2`.
+
+**The eleven 2026 wilayas at Guepex.**
+Trigger: Guepex's `/wilayas` lists Aflou, Barika and the rest. Drop `carrierWilaya`.
+
 **Add ZR Express as a second carrier.**
 Trigger: a shop owner asks for it, or Yalidine's coverage is refused in a wilaya the shop
 actually sells to. Not before. One carrier done properly beats two done partially, and

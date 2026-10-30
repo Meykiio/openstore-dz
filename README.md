@@ -29,7 +29,7 @@ and working, in `docs/FEATURES.md`:
 - **Buyers:** catalogue with search and filters, product pages with colour and size
   pickers, zoomable photos, size guide, reviews and related products. Home delivery or
   pickup at the carrier's office, with both prices shown before ordering, and commune
-  suggestions for all 58 wilayas. Sale prices, WhatsApp ordering, order tracking.
+  suggestions for all 69 wilayas. Sale prices, WhatsApp ordering, order tracking.
   Arabic, French and English, rendered in the buyer's language from the first byte.
   Installable on a phone.
 - **Owners:** a setup wizard (name, logo, colour, phone, delivery prices for every
@@ -136,6 +136,15 @@ free tiers, in this order:
    owner account keeps working.
 
 Prefer your own machine, or want an AI agent to do it for you? Read on.
+
+---
+
+## Updating your shop
+
+Already running a shop? [UPDATING.md](UPDATING.md) walks you through it in about five
+minutes, without a computer setup: one click in GitHub's Actions tab for the code, one
+paste into the Supabase SQL Editor for the database. Your dashboard tells you when a new
+version is out and when the database needs the update.
 
 ---
 

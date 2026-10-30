@@ -10,6 +10,17 @@ Last verified against the built output, not the dev server.
 
 ### Buying
 
+- **Order on the product page** (0.2.0). The checkout's form (name, phone, wilaya,
+  commune, address, home or pickup) sits under Add to cart, for the chosen variant.
+  The order number appears with a copy button once placed. The cart stays.
+- **Swipeable gallery** (0.2.0). One strip on every screen: dots on phones; arrows, a
+  counter, arrow keys and thumbnails on desktop.
+- **Copy the order number** (0.2.0) after ordering and on the tracking page, with a
+  fallback where the clipboard API is missing.
+- **Cart as a bottom sheet on phones** (0.2.0), a side sheet from 640px, and a fixed
+  sheet on browsers without `<dialog>` (older iOS and Instagram). Fields are 16px on
+  phones so iOS does not zoom.
+- **69 wilayas** (0.2.0, Law 26-06, Décret présidentiel 26-206) with their communes.
 - **Pickup or home delivery.** Both prices shown wherever the owner priced pickup;
   the database charges the one chosen.
 - **Commune suggestions** for the chosen wilaya, still accepting any commune typed.
@@ -41,6 +52,14 @@ Last verified against the built output, not the dev server.
 
 ### Selling
 
+- **Delete an order** (0.2.0), after an inline second tap, for test orders and
+  duplicates. Real orders the owner turns down are refused instead.
+- **Uploads cut to the storefront's 4:5 frame** (0.2.0) in the browser, keeping the
+  top, centre or bottom as the owner picks.
+- **Update notices** (0.2.0). The dashboard says when the database needs the update
+  (with the script ready to copy) and when a new OpenStore version is out.
+- **Update OpenStore workflow** (0.2.0). One click in the Actions tab updates a shop
+  made with the Vercel button; see `UPDATING.md`.
 - **Fake-order protection.** At most three unconfirmed orders per phone number in
   24 hours, enforced in the database; a blocklist; each order shows the number's
   refusal history.
@@ -51,7 +70,7 @@ Last verified against the built output, not the dev server.
 - **Photos by colour.** Uploaded once, shown on every size of that colour.
 
 - **Setup wizard.** Straight after claiming the shop: name, phone and WhatsApp
-  (validated as Algerian), delivery prices for all 58 wilayas from a north and a
+  (validated as Algerian), delivery prices for all 69 wilayas from a north and a
   south price, free-delivery threshold, legal details. Demo values start blank.
   The dashboard keeps a checklist of anything buyers still see as missing or fake.
 - **Categories screen.** Create, rename, hide, reorder and delete categories
@@ -118,6 +137,13 @@ Last verified against the built output, not the dev server.
 
 ### Security
 
+- **Abuse limits** (0.2.0), in the database: 20 of one item and 50 pieces per order, 10
+  orders an hour per connection, 20 reviews waiting for approval an hour.
+- **Formula-safe exports** (0.2.0). CSV and Google Sheets keep text that starts like a
+  formula as text, so a fake order cannot run one when the owner opens the file.
+- **Headers** (0.2.0): CSP (frame-ancestors, base-uri, object-src, form-action),
+  `X-Frame-Options: DENY`, COOP; admin pages are `noindex` and `no-store`, and
+  `robots.txt` no longer names them.
 - **Server-side authorization.** Admin routes check the role from the database, not from
   client state. Hiding a button is not authorization.
 - **Secrets are server-only and verified absent from the client bundle.** The Guepex

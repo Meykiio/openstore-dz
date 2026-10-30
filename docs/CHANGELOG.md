@@ -6,6 +6,33 @@ All notable changes to OpenStore DZ. Format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-30
+
+Ported from JOAT-store, a shop running on this code. Update guide: `UPDATING.md`.
+Needs `schema.sql` re-run (the dashboard says so).
+
+**Security.** Abuse limits in the database: 20 of one item and 50 pieces per order, 10
+orders an hour per connection, 20 reviews waiting for approval an hour. CSV exports and
+the Google Sheets script keep formula-like text as text. `robots.txt` no longer names
+`/admin`; admin pages are `noindex`, `no-store`. CSP, `X-Frame-Options: DENY`, COOP.
+`seroval` updated past two script-injection advisories. Delete an order.
+
+**Buyers.** The checkout form on the product page, for the chosen variant. A swipeable
+gallery on every screen (arrows, counter, keys and thumbnails on desktop). A copy button
+for the order number. The cart as a bottom sheet on phones, with a fallback for browsers
+without `<dialog>`; 16px fields on phones. 69 wilayas (Law 26-06) with their communes;
+each new wilaya starts with its parent's delivery prices, and Guepex gets the parent
+until it lists the new ones.
+
+**Fixed.** Colour dots on cards were grey (`catalogue_page` now returns the hex). The
+service worker cached same-origin images forever; it now caches hashed build files only
+and v2 purges old caches. Uploads are cut to the 4:5 frame, keeping top, centre or bottom. The reviewer initials on a product page failed the colour-contrast check; they are now
+dark on light grey.
+
+**Updating.** The dashboard says when the database needs the update and when a new
+version is out. `Update OpenStore` in the Actions tab updates a shop made with the Vercel
+button: backup branch, latest release, push.
+
 ### 2026-10-29 — a fresh deploy explains its empty database
 
 **Fixed:** a shop deployed with the Vercel button before `supabase/schema.sql` was run
