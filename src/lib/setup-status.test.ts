@@ -25,7 +25,7 @@ describe("setupGaps", () => {
       nif: "001216098765432",
       rc_number: "16/00-1234567B21",
     } as StoreSettings;
-    expect(setupGaps(real, 58)).toEqual([]);
+    expect(setupGaps(real, 69)).toEqual([]);
   });
 });
 
@@ -38,9 +38,9 @@ describe("isValidDzPhone", () => {
 });
 
 describe("zonesFor", () => {
-  it("prices all 58 wilayas in two tiers", () => {
+  it("prices all 69 wilayas in two tiers", () => {
     const zones = zonesFor(600, 1200);
-    expect(zones).toHaveLength(58);
+    expect(zones).toHaveLength(69);
     expect(zones.find((z) => z.wilaya === "Alger")?.fee).toBe(600);
     expect(zones.find((z) => z.wilaya === "Tamanrasset")?.fee).toBe(1200);
   });

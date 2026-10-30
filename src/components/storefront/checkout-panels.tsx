@@ -24,7 +24,7 @@ export function AddressFields({
 
   // Restrict the picker to wilayas the owner actually serves. An empty list
   // means everywhere. The database enforces the same rule, so this is courtesy
-  // rather than control — but offering 58 options when 6 are served is how a
+  // rather than control — but offering 69 options when 6 are served is how a
   // buyer picks one that gets rejected at the last step.
   const allowed = settings?.delivery_wilayas ?? [];
   const deliverable =

@@ -61,7 +61,7 @@ export const enTools = {
   "admin.setup.gap.delivery": "Delivery prices",
   "admin.setup.gap.legal": "Legal details",
   "admin.setup.phoneInvalid": "Enter an Algerian number, for example 0555 12 34 56",
-  "admin.setup.applyAll": "Apply these prices to all 58 wilayas",
+  "admin.setup.applyAll": "Apply these prices to all 69 wilayas",
   "admin.setup.zonesExist":
     "You already have prices for {count} wilayas. Turn this on only to replace them.",
   "admin.setup.whatsappHint": "Leave empty if it is the same number as your phone.",

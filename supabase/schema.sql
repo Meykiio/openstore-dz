@@ -2238,3 +2238,46 @@ grant execute on function public.normalize_arabic(text) to anon, authenticated;
 -- Ask the API to pick up the new tables and functions straight away, so a shop
 -- set up from the SQL Editor works on the very next page refresh.
 notify pgrst, 'reload schema';
+
+-- ── The eleven 2026 wilayas (Law 26-06) ─────────────────────────────────────
+-- Algeria went from 58 to 69 wilayas. A shop that priced its delivery before
+-- then has no row for Aflou, Barika and the rest, so their buyers would see no
+-- price. Each new wilaya starts with the prices of the wilaya it was carved
+-- from, and joins a restricted delivery list wherever its parent is on it. Rows
+-- the owner already set are left alone; edit them in Admin > Delivery.
+insert into public.delivery_zones (wilaya, fee, stopdesk_fee, eta_days, is_active)
+select n.wilaya, p.fee, p.stopdesk_fee, p.eta_days, p.is_active
+  from (values
+    ('Aflou', 'Laghouat'),
+    ('Barika', 'Batna'),
+    ('El Kantara', 'Biskra'),
+    ('Bir El Ater', 'Tebessa'),
+    ('El Aricha', 'Tlemcen'),
+    ('Ksar Chellala', 'Tiaret'),
+    ('Ain Oussara', 'Djelfa'),
+    ('Messaad', 'Djelfa'),
+    ('Ksar El Boukhari', 'Medea'),
+    ('Bou Saada', 'M''Sila'),
+    ('El Abiodh Sidi Cheikh', 'El Bayadh')
+  ) as n (wilaya, parent)
+  join public.delivery_zones p on p.wilaya = n.parent
+on conflict (wilaya) do nothing;
+
+update public.store_settings s
+   set delivery_wilayas = s.delivery_wilayas || array(
+         select n.wilaya from (values
+    ('Aflou', 'Laghouat'),
+    ('Barika', 'Batna'),
+    ('El Kantara', 'Biskra'),
+    ('Bir El Ater', 'Tebessa'),
+    ('El Aricha', 'Tlemcen'),
+    ('Ksar Chellala', 'Tiaret'),
+    ('Ain Oussara', 'Djelfa'),
+    ('Messaad', 'Djelfa'),
+    ('Ksar El Boukhari', 'Medea'),
+    ('Bou Saada', 'M''Sila'),
+    ('El Abiodh Sidi Cheikh', 'El Bayadh')
+         ) as n (wilaya, parent)
+          where n.parent = any(s.delivery_wilayas)
+            and not (n.wilaya = any(s.delivery_wilayas)))
+ where coalesce(array_length(s.delivery_wilayas, 1), 0) > 0;

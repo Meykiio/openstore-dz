@@ -1,6 +1,7 @@
 import "@tanstack/react-start/server-only";
 import { createClient } from "@supabase/supabase-js";
 import { createGuepexClient, readGuepexConfig, type ParcelInput } from "./guepex";
+import { carrierWilaya } from "../wilayas";
 
 /**
  * Carrier work that touches secrets.
@@ -93,7 +94,7 @@ export async function runCreateParcel(input: {
     familyname: rest.join(" ") || "Client",
     contact_phone: String(order.phone),
     address: String(order.address),
-    to_wilaya_name: String(order.wilaya),
+    to_wilaya_name: carrierWilaya(String(order.wilaya)),
     to_commune_name: String(order.commune ?? ""),
     // The carrier prints this on the parcel for the courier.
     product_list: (order.order_items ?? [])
@@ -151,7 +152,7 @@ export async function runListOffices(wilaya: string): Promise<PickupOffice[]> {
   if (cached && Date.now() - cached.at < 3_600_000) return cached.offices;
   try {
     const client = createGuepexClient(config);
-    const list = await client.listCenters({ wilaya_name: wilaya, page_size: 100 });
+    const list = await client.listCenters({ wilaya_name: carrierWilaya(wilaya), page_size: 100 });
     const offices = list.data.map((row) => ({
       id: Number(row.center_id),
       name: String(row.name ?? ""),

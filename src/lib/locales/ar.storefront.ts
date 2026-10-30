@@ -161,7 +161,7 @@ export const arStorefront = {
   "home.hero.body": "اطلب اليوم وادفع نقداً عند الاستلام. بلا بطاقة وبلا حساب.",
   "home.trust.cod.title": "الدفع عند الاستلام",
   "home.trust.cod.body": "تدفع نقداً عند وصول الطلب، بدون بطاقة بنكية.",
-  "home.trust.delivery.title": "توصيل إلى 58 ولاية",
+  "home.trust.delivery.title": "توصيل إلى 69 ولاية",
   "home.trust.delivery.body": "نغطي كامل التراب الوطني عبر شركاء توصيل موثوقين.",
   "home.trust.returns.title": "إرجاع خلال {days} يوماً",
   "home.trust.returns.body": "إن لم يعجبك المنتج يمكنك إرجاعه خلال المدة المحددة.",

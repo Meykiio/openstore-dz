@@ -111,7 +111,7 @@ export function HomeHero({
  * Trust bar.
  *
  * Every claim here is one the platform actually keeps: cash on delivery is the
- * only payment method, coverage is all 58 wilayas, and the return window is a
+ * only payment method, coverage is all 69 wilayas, and the return window is a
  * real setting. Nothing is decorative marketing copy.
  */
 export function TrustBar({ returnsDays }: { returnsDays: number }) {

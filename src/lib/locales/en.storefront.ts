@@ -163,7 +163,7 @@ export const enStorefront = {
   "home.hero.body": "Order today and pay in cash when it arrives. No card, no account.",
   "home.trust.cod.title": "Cash on delivery",
   "home.trust.cod.body": "Pay the courier in cash on arrival. No card needed.",
-  "home.trust.delivery.title": "Delivery to 58 wilayas",
+  "home.trust.delivery.title": "Delivery to 69 wilayas",
   "home.trust.delivery.body": "We cover the whole country through trusted carriers.",
   "home.trust.returns.title": "{days}-day returns",
   "home.trust.returns.body": "If a product is not right, send it back within the window.",

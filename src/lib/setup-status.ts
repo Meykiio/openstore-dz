@@ -52,7 +52,9 @@ export function setupGaps(settings: StoreSettings | null, zoneCount: number): Se
  * The southern wilayas, by official code. Two price tiers are what most owners
  * start with; the delivery screen refines any single wilaya afterwards.
  */
-const SOUTH = new Set([1, 3, 7, 8, 11, 30, 33, 37, 39, 47, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58]);
+const SOUTH = new Set([
+  1, 3, 7, 8, 11, 30, 33, 37, 39, 47, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 61,
+]);
 
 export function zonesFor(
   north: number,

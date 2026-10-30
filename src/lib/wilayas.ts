@@ -1,5 +1,5 @@
 /**
- * The 58 wilayas of Algeria.
+ * The 69 wilayas of Algeria.
  *
  * The carrier matches a wilaya by exact name string, so this list is a data
  * contract, not decoration. `fr` is the name sent to Guepex and `ar` is what the
@@ -7,8 +7,11 @@
  * compare the string here against their /wilayas endpoint before changing
  * anything else — that endpoint is the authority.
  *
- * Codes follow the official 1..58 numbering, including the ten southern wilayas
- * created in 2019 (49-58).
+ * Codes follow the official 1..69 numbering: the ten southern wilayas created in
+ * 2019 (49-58) and the eleven created by Law 26-06 in 2026 (59-69), numbered as in
+ * Décret présidentiel 26-206 (Journal officiel n° 40). Until the carrier lists
+ * the eleven new ones, parcels go under the wilaya each was carved from, which
+ * keeps running them until 31 December 2026: see `carrierWilaya`.
  */
 
 import type { Locale } from "./i18n";
@@ -74,6 +77,17 @@ const RAW: ReadonlyArray<readonly [number, string, string]> = [
   [56, "Djanet", "جانت"],
   [57, "El M'Ghair", "المغير"],
   [58, "El Meniaa", "المنيعة"],
+  [59, "Aflou", "أفلو"],
+  [60, "Barika", "بريكة"],
+  [61, "El Kantara", "القنطرة"],
+  [62, "Bir El Ater", "بئر العاتر"],
+  [63, "El Aricha", "العريشة"],
+  [64, "Ksar Chellala", "قصر الشلالة"],
+  [65, "Ain Oussara", "عين وسارة"],
+  [66, "Messaad", "مسعد"],
+  [67, "Ksar El Boukhari", "قصر البخاري"],
+  [68, "Bou Saada", "بوسعادة"],
+  [69, "El Abiodh Sidi Cheikh", "الأبيض سيدي الشيخ"],
 ];
 
 export const WILAYAS: readonly Wilaya[] = RAW.map(([code, fr, ar]) => ({ code, fr, ar }));
@@ -101,4 +115,28 @@ export function wilayaLabel(name: string | null | undefined, locale: Locale): st
   const w = wilayaByName(name);
   if (!w) return name ?? "";
   return locale === "ar" ? w.ar : w.fr;
+}
+
+/** The eleven 2026 wilayas and the wilaya each was carved from (Latin names). */
+const CARVED_FROM: Readonly<Record<string, string>> = {
+  Aflou: "Laghouat",
+  Barika: "Batna",
+  "El Kantara": "Biskra",
+  "Bir El Ater": "Tebessa",
+  "El Aricha": "Tlemcen",
+  "Ksar Chellala": "Tiaret",
+  "Ain Oussara": "Djelfa",
+  Messaad: "Djelfa",
+  "Ksar El Boukhari": "Medea",
+  "Bou Saada": "M'Sila",
+  "El Abiodh Sidi Cheikh": "El Bayadh",
+};
+
+/**
+ * The wilaya name to send the carrier. Guepex has not published the eleven 2026
+ * wilayas yet, so a parcel to one of them goes under its parent, which delivers
+ * there today. Every other name passes through unchanged.
+ */
+export function carrierWilaya(name: string): string {
+  return CARVED_FROM[name] ?? name;
 }
