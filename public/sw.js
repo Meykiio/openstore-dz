@@ -8,6 +8,10 @@
  *     the cache is only an offline fallback.
  *   - Hashed build assets are CACHE-FIRST. Their names change when their
  *     contents do, so serving them from cache cannot go stale.
+ *   - Everything else same-origin (product photos, the logo, icons) is left to
+ *     the browser's HTTP cache, which revalidates it. Product photos keep their
+ *     names when they are re-shot, so caching them here served old photos until
+ *     a hard refresh (fixed 2026-10-30, with the version bump below).
  *   - Anything cross-origin (Supabase, product images on another host) is never
  *     cached. Prices and stock must not come from a cache we control.
  *
@@ -15,13 +19,14 @@
  * a service worker in front of the dev server causes confusing stale modules.
  */
 
-const VERSION = "openstore-v1";
+// Bumping the version deletes every older cache on activation. Keep the
+// "openstore" prefix; change only the number.
+const VERSION = "openstore-v2";
 const SHELL_CACHE = `${VERSION}-shell`;
 const ASSET_CACHE = `${VERSION}-assets`;
 
 /** Immutable, content-hashed build output. */
 const ASSET_PATTERN = /\/(_build|assets|build)\//;
-const STATIC_PATTERN = /\.(?:js|css|woff2?|ttf|otf|png|jpg|jpeg|webp|avif|svg|ico)$/i;
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -58,7 +63,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (ASSET_PATTERN.test(url.pathname) || STATIC_PATTERN.test(url.pathname)) {
+  if (ASSET_PATTERN.test(url.pathname)) {
     event.respondWith(cacheFirstAsset(request));
   }
 });

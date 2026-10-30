@@ -2166,6 +2166,7 @@ select jsonb_build_object(
               'id', v.id,
               'size', v.size,
               'color_name', v.color_name,
+              'color_hex', v.color_hex,
               'price', v.price,
               'compare_at_price', v.compare_at_price,
               'stock', v.stock,

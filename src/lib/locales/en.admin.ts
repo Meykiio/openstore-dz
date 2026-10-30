@@ -150,4 +150,10 @@ export const enAdmin = {
   "admin.orders.delete": "Delete order",
   "admin.orders.deleteConfirm": "Delete this order for good? This cannot be undone.",
   "admin.orders.deleted": "Order deleted",
+  "admin.frame.keep": "Keep:",
+  "admin.frame.top": "Top",
+  "admin.frame.center": "Centre",
+  "admin.frame.bottom": "Bottom",
+  "admin.frame.hint":
+    "Photos are cropped to the shop's 4:5 frame. Choose the part to keep: top for an item on a model, bottom for shoes or trousers, centre for a flat lay.",
 };

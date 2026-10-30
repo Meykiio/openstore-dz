@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form";
 import { useI18n } from "@/lib/i18n-context";
-import { uploadProductImage } from "@/lib/image";
+import { PRODUCT_ASPECT, uploadProductImage } from "@/lib/image";
 import { removeIfUnused } from "@/lib/colour-photos";
 import { addVariantImage, deleteVariantImage, type AdminVariant } from "@/lib/admin-products";
+import { FramePicker } from "./frame-picker";
 
 /**
  * Upload a batch of files for one variant, returning how many were saved.
@@ -22,12 +23,16 @@ async function uploadBatch(
   files: File[],
   variantId: string,
   productId: string,
+  focus: number,
 ): Promise<{ added: number; failures: string[] }> {
   const failures: string[] = [];
   let added = 0;
 
   for (const file of files) {
-    const { url, error } = await uploadProductImage(file, productId);
+    const { url, error } = await uploadProductImage(file, productId, {
+      aspect: PRODUCT_ASPECT,
+      focus,
+    });
     if (error || !url) {
       failures.push(`${file.name}: ${error ?? "upload failed"}`);
       continue;
@@ -59,6 +64,7 @@ export function VariantImages({ variant }: { variant: AdminVariant }) {
   const queryClient = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [focus, setFocus] = useState(0.5);
   const [url, setUrl] = useState("");
 
   const invalidate = () =>
@@ -91,6 +97,7 @@ export function VariantImages({ variant }: { variant: AdminVariant }) {
       Array.from(files),
       variant.id,
       variant.product_id,
+      focus,
     );
     setUploading(false);
 
@@ -131,6 +138,7 @@ export function VariantImages({ variant }: { variant: AdminVariant }) {
           {uploading ? <Loader2 size={15} className="animate-spin" /> : <Camera size={15} />}
           {uploading ? t("admin.images.uploading") : t("admin.images.add")}
         </Button>
+        <FramePicker value={focus} onChange={setFocus} />
       </div>
 
       {variant.variant_images.length > 0 ? (

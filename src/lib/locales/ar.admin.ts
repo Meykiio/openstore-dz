@@ -146,4 +146,10 @@ export const arAdmin = {
   "admin.orders.delete": "حذف الطلب",
   "admin.orders.deleteConfirm": "حذف هذا الطلب نهائياً؟ لا يمكن التراجع عن ذلك.",
   "admin.orders.deleted": "تم حذف الطلب",
+  "admin.frame.keep": "ما يبقى عند القص:",
+  "admin.frame.top": "الأعلى",
+  "admin.frame.center": "الوسط",
+  "admin.frame.bottom": "الأسفل",
+  "admin.frame.hint":
+    "تُقص الصور تلقائياً بمقاس المتجر 4:5. اختر الجزء الذي يبقى: الأعلى لصورة منتج على شخص، الأسفل للأحذية والسراويل، الوسط لصورة على طاولة أو أرض.",
 };

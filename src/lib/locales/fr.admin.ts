@@ -153,4 +153,10 @@ export const frAdmin = {
   "admin.orders.delete": "Supprimer la commande",
   "admin.orders.deleteConfirm": "Supprimer définitivement cette commande ? C'est irréversible.",
   "admin.orders.deleted": "Commande supprimée",
+  "admin.frame.keep": "Garder :",
+  "admin.frame.top": "Haut",
+  "admin.frame.center": "Centre",
+  "admin.frame.bottom": "Bas",
+  "admin.frame.hint":
+    "Les photos sont recadrées au format 4:5 de la boutique. Choisissez la partie gardée : le haut pour un article porté, le bas pour des chaussures ou un pantalon, le centre pour une photo à plat.",
 };

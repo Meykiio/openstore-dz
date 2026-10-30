@@ -4,9 +4,10 @@ import { Camera, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n-context";
-import { uploadProductImage } from "@/lib/image";
+import { PRODUCT_ASPECT, uploadProductImage } from "@/lib/image";
 import { attachToVariants, detachFromVariants } from "@/lib/colour-photos";
 import type { AdminVariant } from "@/lib/admin-products";
+import { FramePicker } from "./frame-picker";
 
 type Group = {
   colour: string | null;
@@ -57,6 +58,7 @@ export function ColourPhotos({
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-on-surface-muted">{t("admin.photos.intro")}</p>
+      <p className="text-sm text-on-surface-muted">{t("admin.frame.hint")}</p>
       {groups.map((group) => (
         <ColourRow key={group.colour ?? ""} productId={productId} group={group} />
       ))}
@@ -69,6 +71,7 @@ function ColourRow({ productId, group }: { productId: string; group: Group }) {
   const queryClient = useQueryClient();
   const input = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [focus, setFocus] = useState(0.5);
   const ids = group.variants.map((v) => v.id);
   const invalidate = () =>
     void queryClient.invalidateQueries({ queryKey: ["admin_product", productId] });
@@ -79,7 +82,10 @@ function ColourRow({ productId, group }: { productId: string; group: Group }) {
     setUploading(true);
     let added = 0;
     for (const [index, file] of files.entries()) {
-      const { url, error } = await uploadProductImage(file, productId);
+      const { url, error } = await uploadProductImage(file, productId, {
+        aspect: PRODUCT_ASPECT,
+        focus,
+      });
       if (error || !url) {
         toast.error(`${file.name}: ${error ?? t("common.somethingWrong")}`);
         continue;
@@ -143,6 +149,7 @@ function ColourRow({ productId, group }: { productId: string; group: Group }) {
           {uploading ? t("admin.images.uploading") : t("admin.images.add")}
         </Button>
       </div>
+      <FramePicker value={focus} onChange={setFocus} />
       {group.urls.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {group.urls.map((url) => (
