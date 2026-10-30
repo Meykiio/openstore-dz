@@ -228,4 +228,6 @@ export const frStorefront = {
   "copy.copied": "Copié",
   "order.copyHint":
     "Copiez votre numéro de commande et gardez-le : il sert à suivre votre commande.",
+  "quick.title": "Commandez maintenant, payez à la livraison",
+  "quick.submit": "Confirmer la commande",
 };

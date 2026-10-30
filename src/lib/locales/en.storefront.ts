@@ -223,4 +223,6 @@ export const enStorefront = {
   "copy.copy": "Copy",
   "copy.copied": "Copied",
   "order.copyHint": "Copy your order number and keep it: you need it to track your order.",
+  "quick.title": "Order now, pay on delivery",
+  "quick.submit": "Confirm order",
 };

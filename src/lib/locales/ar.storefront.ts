@@ -219,4 +219,6 @@ export const arStorefront = {
   "copy.copy": "نسخ",
   "copy.copied": "تم النسخ",
   "order.copyHint": "انسخ رقم طلبك واحتفظ به: ستحتاجه لتتبع طلبك.",
+  "quick.title": "اطلب الآن، وادفع عند الاستلام",
+  "quick.submit": "تأكيد الطلب",
 };

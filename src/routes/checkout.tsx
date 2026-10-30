@@ -1,15 +1,10 @@
-import { CopyBox } from "@/components/storefront/copy-box";
 import { useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { StoreLayout } from "@/components/storefront/store-layout";
-import {
-  AddressFields,
-  CheckoutSummary,
-  CodNotice,
-  EMPTY_CHECKOUT_FORM,
-  type CheckoutForm,
-} from "@/components/storefront/checkout-panels";
+import { CopyBox } from "@/components/storefront/copy-box";
+import { AddressFields, CheckoutSummary, CodNotice } from "@/components/storefront/checkout-panels";
+import { EMPTY_CHECKOUT_FORM, toCustomer, type CheckoutForm } from "@/lib/checkout-form";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/feedback";
 import { useCart } from "@/lib/cart";
@@ -163,20 +158,6 @@ function OrderPlaced({ token, phone }: { token: string; phone: string }) {
       </div>
     </StoreLayout>
   );
-}
-
-function toCustomer(form: CheckoutForm) {
-  return {
-    customer_name: form.customer_name,
-    phone: form.phone,
-    wilaya: form.wilaya,
-    commune: form.commune || null,
-    address: form.address,
-    note: form.note || null,
-    delivery_method: form.delivery_method,
-    stopdesk_id: form.stopdesk_id || null,
-    stopdesk_name: form.stopdesk_name || null,
-  };
 }
 
 /** An empty cart, or a shop that is not taking orders: say so and point back. */
