@@ -159,4 +159,17 @@ export const frAdmin = {
   "admin.frame.bottom": "Bas",
   "admin.frame.hint":
     "Les photos sont recadrées au format 4:5 de la boutique. Choisissez la partie gardée : le haut pour un article porté, le bas pour des chaussures ou un pantalon, le centre pour une photo à plat.",
+  "update.dbTitle": "Votre base de données doit être mise à jour",
+  "update.dbBody":
+    "Votre boutique a été mise à jour, mais la base de données est restée sur l'ancienne version. Certaines pages peuvent ne pas fonctionner tant que ce n'est pas fait. Cela prend une minute :",
+  "update.copy": "Copier le script de mise à jour",
+  "update.copied": "Copié",
+  "update.copyFailed":
+    "Le navigateur a bloqué la copie. Ouvrez supabase/schema.sql sur GitHub et copiez-le depuis là.",
+  "update.openEditor": "Ouvrir l'éditeur SQL de Supabase",
+  "update.runIt":
+    "Collez le script et cliquez sur Run. Si une fenêtre d'avertissement s'ouvre, choisissez Run without RLS. Attendez « Success », puis actualisez cette page.",
+  "update.newTitle": "Une nouvelle version d'OpenStore est disponible ({version}).",
+  "update.newBody": "Vous avez la {version}.",
+  "update.howTo": "Comment mettre à jour",
 };

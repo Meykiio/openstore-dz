@@ -2235,9 +2235,6 @@ revoke all on function public.catalogue_page(text, text, text[], text[], int, in
 grant execute on function public.catalogue_page(text, text, text[], text[], int, int, boolean, text, int, int) to anon, authenticated;
 grant execute on function public.normalize_arabic(text) to anon, authenticated;
 
--- Ask the API to pick up the new tables and functions straight away, so a shop
--- set up from the SQL Editor works on the very next page refresh.
-notify pgrst, 'reload schema';
 
 -- ── The eleven 2026 wilayas (Law 26-06) ─────────────────────────────────────
 -- Algeria went from 58 to 69 wilayas. A shop that priced its delivery before
@@ -2281,3 +2278,22 @@ update public.store_settings s
           where n.parent = any(s.delivery_wilayas)
             and not (n.wilaya = any(s.delivery_wilayas)))
  where coalesce(array_length(s.delivery_wilayas, 1), 0) > 0;
+
+-- ── Version ────────────────────────────────────────────────────────────────
+-- Which schema.sql this database last ran. The dashboard compares it with the
+-- code (SCHEMA_VERSION in src/lib/version.ts) and asks the owner to run the
+-- update when the code is newer. Bump both together on every schema change.
+create or replace function public.openstore_schema_version()
+returns int
+language sql
+immutable
+set search_path = ''
+as $$
+  select 2;
+$$;
+revoke all on function public.openstore_schema_version() from public;
+grant execute on function public.openstore_schema_version() to anon, authenticated;
+
+-- Ask the API to pick up the new tables and functions straight away, so a shop
+-- set up from the SQL Editor works on the very next page refresh.
+notify pgrst, 'reload schema';

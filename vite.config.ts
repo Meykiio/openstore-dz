@@ -4,9 +4,15 @@ import tailwindcss from "@tailwindcss/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import { nitro } from "nitro/vite";
+import { readFileSync } from "node:fs";
+
+// The version, baked in at build time: the dashboard compares it with the
+// latest release. Read here so package.json itself never reaches the browser.
+const { version } = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8"));
 
 // https://vite.dev/config/
 export default defineConfig({
+  define: { __APP_VERSION__: JSON.stringify(version) },
   plugins: [
     tanstackStart({
       router: { entry: "router.tsx" },
