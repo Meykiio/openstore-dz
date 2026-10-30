@@ -19,6 +19,13 @@ function instead of straight to Supabase.
 Trigger: shops add staff accounts, or an owner's password leaks. Supabase Auth supports
 it; the policies would require `aal2`.
 
+**Dependabot in owners' copies.**
+Trigger: owners ask about pull requests they did not open. A shop made with the Vercel
+button copies `.github/dependabot.yml`, so Dependabot opens dependency pull requests in
+the owner's repository and Vercel builds them (one failed on the 2026-10-30 test copy).
+The `Update OpenStore` workflow already brings checked dependencies; the copies could
+skip Dependabot, for example by moving the config out of `.github/` at install.
+
 **The eleven 2026 wilayas at Guepex.**
 Trigger: Guepex's `/wilayas` lists Aflou, Barika and the rest. Drop `carrierWilaya`.
 
