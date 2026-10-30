@@ -220,4 +220,7 @@ export const enStorefront = {
     "Up to 50 pieces per order. For more, contact the shop directly.",
   "checkout.error.too_many_orders":
     "Too many orders from this connection. Try again later or contact the shop.",
+  "copy.copy": "Copy",
+  "copy.copied": "Copied",
+  "order.copyHint": "Copy your order number and keep it: you need it to track your order.",
 };

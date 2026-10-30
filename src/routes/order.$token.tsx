@@ -11,6 +11,7 @@ import { formatDateTime, formatDzd } from "@/lib/format";
 import { ORDER_FLOW, isTerminal, trackOrder } from "@/lib/order";
 import { wilayaLabel } from "@/lib/wilayas";
 import { cn } from "@/lib/utils";
+import { CopyBox } from "@/components/storefront/copy-box";
 
 export const Route = createFileRoute("/order/$token")({
   head: ({ match }) => ({
@@ -53,11 +54,9 @@ function OrderPage() {
         ) : (
           <>
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-[16px] border border-outline bg-surface p-5">
-              <div>
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
                 <p className="text-xs text-on-surface-muted">{t("order.tokenLabel")}</p>
-                <p className="font-mono text-xs" dir="ltr">
-                  {data.token}
-                </p>
+                <CopyBox value={data.token} />
               </div>
               <StatusBadge status={data.status} />
             </div>

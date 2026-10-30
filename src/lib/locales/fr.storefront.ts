@@ -224,4 +224,8 @@ export const frStorefront = {
     "50 pièces au maximum par commande. Pour plus, contactez la boutique directement.",
   "checkout.error.too_many_orders":
     "Trop de commandes depuis cette connexion. Réessayez plus tard ou contactez la boutique.",
+  "copy.copy": "Copier",
+  "copy.copied": "Copié",
+  "order.copyHint":
+    "Copiez votre numéro de commande et gardez-le : il sert à suivre votre commande.",
 };

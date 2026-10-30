@@ -1,3 +1,4 @@
+import { CopyBox } from "@/components/storefront/copy-box";
 import { useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
@@ -150,9 +151,10 @@ function OrderPlaced({ token, phone }: { token: string; phone: string }) {
         <CheckCircle2 size={40} className="text-positive" aria-hidden="true" />
         <h1 className="font-display text-2xl font-semibold">{t("checkout.orderPlaced")}</h1>
         <p className="max-w-md text-on-surface-muted">{t("checkout.orderPlacedBody", { phone })}</p>
-        <p className="rounded-[10px] border border-outline bg-surface px-4 py-3 font-mono text-xs">
-          {token}
-        </p>
+        <div className="flex w-full max-w-md flex-col gap-2 text-start">
+          <p className="text-sm font-medium">{t("order.copyHint")}</p>
+          <CopyBox value={token} />
+        </div>
         <Button asChild size="lg">
           <Link to="/order/$token" params={{ token }}>
             {t("checkout.trackNow")}

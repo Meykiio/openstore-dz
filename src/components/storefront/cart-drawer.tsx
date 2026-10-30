@@ -26,6 +26,13 @@ export function CartDrawer() {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    // Older iOS (and so older Instagram) has no <dialog>; show it as a fixed sheet.
+    if (typeof el.showModal !== "function") {
+      el.classList.add("no-dialog");
+      if (isOpen) el.setAttribute("open", "");
+      else el.removeAttribute("open");
+      return;
+    }
     if (isOpen && !el.open) el.showModal();
     if (!isOpen && el.open) el.close();
   }, [isOpen]);
@@ -42,9 +49,10 @@ export function CartDrawer() {
       // screen leaves a strip of backdrop that reads as a misaligned element
       // rather than as somewhere to tap, and the cart is where the most
       // information has to fit.
-      className="ms-auto me-0 my-0 h-dvh max-h-dvh w-full rounded-none border-0 border-s border-outline bg-nav-bg p-0 text-on-surface shadow-lg backdrop:bg-black/45 sm:w-[400px]"
+      className="cart-sheet"
     >
-      <div className="flex h-full flex-col">
+      <div className="flex max-h-[92dvh] flex-col sm:h-full sm:max-h-none">
+        <div className="sheet-grip" aria-hidden="true" />
         <div className="cart-head">
           <h2
             id="cart-title"
