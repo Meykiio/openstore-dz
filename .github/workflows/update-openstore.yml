@@ -1,0 +1,85 @@
+# Update OpenStore: one click brings this shop's code to the latest release.
+#
+# A shop made with the "Deploy with Vercel" button is a copy, not a fork, so it
+# cannot pull updates by itself. Run this from the Actions tab: it saves the
+# current code to a backup branch, replaces it with the latest OpenStore
+# release, and pushes, which makes Vercel publish the new version. The shop's
+# keys live in Vercel and its data in Supabase, so neither is touched.
+#
+# Code changed by hand is replaced too (it stays on the backup branch). The
+# .github folder is never replaced, so this file and any of your own workflows
+# stay. After it runs, update the database: see UPDATING.md.
+name: Update OpenStore
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-openstore
+  cancel-in-progress: false
+
+jobs:
+  update:
+    # The original project does not update itself.
+    if: github.repository != 'Meykiio/openstore-dz'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Find the latest OpenStore release
+        id: latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=$(gh release view --repo Meykiio/openstore-dz --json tagName --jq .tagName 2>/dev/null || true)
+          if [ -n "$tag" ]; then
+            echo "ref=refs/tags/$tag" >> "$GITHUB_OUTPUT"
+            echo "name=$tag" >> "$GITHUB_OUTPUT"
+          else
+            echo "ref=refs/heads/main" >> "$GITHUB_OUTPUT"
+            echo "name=main" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Save the current code to a backup branch
+        run: |
+          branch="backup/before-update-$(date -u +%Y%m%d-%H%M%S)"
+          git push origin "HEAD:refs/heads/$branch"
+          echo "Your previous code is saved on the branch \`$branch\`." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Download OpenStore ${{ steps.latest.outputs.name }}
+        env:
+          REF: ${{ steps.latest.outputs.ref }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/openstore"
+          curl -fsSL "https://codeload.github.com/Meykiio/openstore-dz/tar.gz/$REF" \
+            | tar -xz -C "$RUNNER_TEMP/openstore" --strip-components=1
+
+      - name: Replace the code (your .github folder stays)
+        run: rsync -a --delete --exclude '.git/' --exclude '.github/' "$RUNNER_TEMP/openstore/" ./
+
+      - name: Commit and push
+        env:
+          NAME: ${{ steps.latest.outputs.name }}
+          ACTOR: ${{ github.actor }}
+          ACTOR_ID: ${{ github.actor_id }}
+        run: |
+          # Committed as the person who clicked Run: on Vercel's free plan only
+          # the account owner's commits deploy.
+          git config user.name "$ACTOR"
+          git config user.email "$ACTOR_ID+$ACTOR@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Already up to date with OpenStore $NAME. Nothing to do." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git commit -m "chore: update OpenStore to $NAME"
+          git push origin HEAD
+          {
+            echo "Updated to OpenStore $NAME. Vercel is publishing it now."
+            echo ""
+            echo "Next: update the database. Open your dashboard: it shows the script to copy."
+            echo "If Vercel did not start a deployment, open Vercel > Deployments > Redeploy."
+          } >> "$GITHUB_STEP_SUMMARY"
