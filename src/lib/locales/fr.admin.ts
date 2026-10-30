@@ -150,4 +150,7 @@ export const frAdmin = {
   "admin.settings.returnsNote": "Politique de retour",
   "admin.settings.returnsNoteHint":
     "Ce que l'acheteur doit savoir avant de commander. Affiché en pied de page.",
+  "admin.orders.delete": "Supprimer la commande",
+  "admin.orders.deleteConfirm": "Supprimer définitivement cette commande ? C'est irréversible.",
+  "admin.orders.deleted": "Commande supprimée",
 };

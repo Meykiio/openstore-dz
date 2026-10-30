@@ -212,4 +212,8 @@ export const arStorefront = {
   "search.placeholder": "ابحث عن منتج...",
   "search.for": "نتائج البحث عن",
   "nav.search": "بحث",
+  "checkout.error.too_many_items":
+    "الحد الأقصى 50 قطعة في الطلب الواحد. للطلبات الأكبر تواصل مع المتجر مباشرة.",
+  "checkout.error.too_many_orders":
+    "طلبات كثيرة من هذا الاتصال. حاول بعد قليل أو تواصل مع المتجر مباشرة.",
 };

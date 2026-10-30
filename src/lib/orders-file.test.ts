@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AdminOrder } from "./admin";
-import { ordersToCsv } from "./orders-file";
+import { cell, ordersToCsv } from "./orders-file";
 
 const order = {
   id: "1",
@@ -38,5 +38,20 @@ describe("ordersToCsv", () => {
     expect(csv).toContain('"قميص (M / Noir) x2"');
     expect(csv).toContain('"6400"');
     expect(csv.split("\r\n")).toHaveLength(3);
+  });
+});
+
+describe("cell", () => {
+  it("keeps typed text that looks like a formula as text", () => {
+    expect(cell('=HYPERLINK("http://x","y")')).toBe(`"'=HYPERLINK(""http://x"",""y"")"`);
+    expect(cell("+213555")).toBe(`"'+213555"`);
+    expect(cell("@SUM(A1)")).toBe(`"'@SUM(A1)"`);
+    expect(cell("-1")).toBe(`"'-1"`);
+  });
+
+  it("leaves ordinary text and numbers alone", () => {
+    expect(cell("محمد")).toBe('"محمد"');
+    expect(cell(-600)).toBe('"-600"');
+    expect(cell(null)).toBe('""');
   });
 });

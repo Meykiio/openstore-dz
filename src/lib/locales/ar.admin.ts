@@ -143,4 +143,7 @@ export const arAdmin = {
   "admin.settings.announcementEnabled": "إظهار الإعلان",
   "admin.settings.returnsNote": "سياسة الإرجاع",
   "admin.settings.returnsNoteHint": "ما يجب أن يعرفه المشتري قبل الطلب. يظهر في أسفل الصفحة.",
+  "admin.orders.delete": "حذف الطلب",
+  "admin.orders.deleteConfirm": "حذف هذا الطلب نهائياً؟ لا يمكن التراجع عن ذلك.",
+  "admin.orders.deleted": "تم حذف الطلب",
 };

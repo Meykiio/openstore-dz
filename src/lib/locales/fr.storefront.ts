@@ -220,4 +220,8 @@ export const frStorefront = {
   "search.placeholder": "Rechercher un produit...",
   "search.for": "Résultats pour",
   "nav.search": "Recherche",
+  "checkout.error.too_many_items":
+    "50 pièces au maximum par commande. Pour plus, contactez la boutique directement.",
+  "checkout.error.too_many_orders":
+    "Trop de commandes depuis cette connexion. Réessayez plus tard ou contactez la boutique.",
 };

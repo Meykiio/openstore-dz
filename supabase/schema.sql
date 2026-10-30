@@ -309,6 +309,10 @@ alter table public.store_settings
   add column if not exists brand_color text check (brand_color ~ '^#[0-9a-fA-F]{6}$');
 alter table public.delivery_zones
   add column if not exists stopdesk_fee int check (stopdesk_fee >= 0);
+-- Who placed the order, as a hash of the caller's IP address (never the address
+-- itself), so place_order() can cap how many orders one connection places an hour.
+alter table public.orders
+  add column if not exists client_key text;
 alter table public.orders
   add column if not exists delivery_method text not null default 'home'
     check (delivery_method in ('home', 'stopdesk')),
@@ -331,6 +335,7 @@ create index if not exists pack_items_product_idx   on public.pack_items (produc
 -- The admin order list sorts by newest first.
 create index if not exists orders_created_at_idx     on public.orders (created_at desc);
 create index if not exists orders_status_idx        on public.orders (status);
+create index if not exists orders_client_key_idx    on public.orders (client_key, created_at desc);
 create index if not exists order_items_order_idx on public.order_items (order_id);
 create index if not exists reviews_product_idx      on public.reviews (product_id);
 create index if not exists reviews_approved_idx     on public.reviews (created_at desc) where is_approved;
@@ -466,7 +471,7 @@ security definer
 set search_path = ''
 as $$
 begin
-  if new.quantity is null or new.quantity < 1 or new.quantity > 100 then
+  if new.quantity is null or new.quantity < 1 or new.quantity > 20 then
     raise exception 'Invalid quantity';
   end if;
 
@@ -499,9 +504,20 @@ $$;
 create or replace function public.validate_review()
 returns trigger
 language plpgsql
+security definer
 set search_path = ''
 as $$
 begin
+  -- A script could fill the moderation queue with junk. Twenty waiting reviews an
+  -- hour is far above what a small shop receives, and a flood stops there.
+  -- Security definer so the count sees unapproved rows, which RLS hides.
+  if (
+    select count(*) from public.reviews r
+    where not r.is_approved and r.created_at > now() - interval '1 hour'
+  ) >= 20 then
+    raise exception 'Too many reviews right now, please try again later'
+      using errcode = 'check_violation', hint = 'too_many_reviews';
+  end if;
   if length(trim(coalesce(new.customer_name, ''))) < 2 or length(new.customer_name) > 120 then
     raise exception 'Invalid customer_name';
   end if;
@@ -536,6 +552,10 @@ declare
   v_token    uuid;
   v_item     jsonb;
   v_inserted int := 0;
+  v_units    int;
+  v_headers  json;
+  v_ip       text;
+  v_client   text;
 begin
   if p_customer is null or p_items is null then
     raise exception 'Missing order details';
@@ -549,10 +569,42 @@ begin
     raise exception 'Order must contain between 1 and 50 items';
   end if;
 
+  -- Fake orders drain real stock: every line takes stock away until the owner
+  -- refuses it. Fifty pieces is a large retail order; bigger ones go through
+  -- WhatsApp or a phone call.
+  select coalesce(sum(greatest(coalesce((i->>'quantity')::int, 1), 1)), 0)
+    into v_units from jsonb_array_elements(p_items) i;
+  if v_units > 50 then
+    raise exception 'Too many pieces in one order'
+      using errcode = 'check_violation', hint = 'too_many_items';
+  end if;
+
+  -- One connection may place ten orders an hour. The per-phone cap alone does
+  -- not stop a script inventing numbers. The IP is stored only as a salted hash.
+  -- Not the first x-forwarded-for entry: a caller can write that one, and
+  -- Cloudflare appends the real address after it (supabase discussion 34647).
+  -- cf-connecting-ip is Cloudflare's own; the last forwarded entry is the
+  -- fallback. Calls with neither (the SQL editor) are not limited.
+  v_headers := nullif(current_setting('request.headers', true), '')::json;
+  v_ip := coalesce(
+    nullif(trim(v_headers->>'cf-connecting-ip'), ''),
+    nullif(trim(regexp_replace(coalesce(v_headers->>'x-forwarded-for', ''), '^.*,', '')), '')
+  );
+  if v_ip is not null then
+    v_client := md5('openstore-order:' || v_ip);
+    if (
+      select count(*) from public.orders o
+      where o.client_key = v_client and o.created_at > now() - interval '1 hour'
+    ) >= 10 then
+      raise exception 'Too many orders from this connection, please try again later'
+        using errcode = 'check_violation', hint = 'too_many_orders';
+    end if;
+  end if;
+
   -- validate_order() still runs as the BEFORE INSERT trigger and does the field
   -- checks. This function only decides the rows.
   insert into public.orders (customer_name, phone, wilaya, commune, address, note,
-                             delivery_method, stopdesk_id, stopdesk_name)
+                             delivery_method, stopdesk_id, stopdesk_name, client_key)
   values (
     coalesce(p_customer->>'customer_name', ''),
     coalesce(p_customer->>'phone', ''),
@@ -562,7 +614,8 @@ begin
     nullif(p_customer->>'note', ''),
     coalesce(nullif(p_customer->>'delivery_method', ''), 'home'),
     nullif(p_customer->>'stopdesk_id', '')::int,
-    nullif(p_customer->>'stopdesk_name', '')
+    nullif(p_customer->>'stopdesk_name', ''),
+    v_client
   )
   returning id, public_token into v_order_id, v_token;
 
@@ -1214,7 +1267,7 @@ security definer
 set search_path = ''
 as $$
 begin
-  if new.quantity is null or new.quantity < 1 or new.quantity > 100 then
+  if new.quantity is null or new.quantity < 1 or new.quantity > 20 then
     raise exception 'Invalid quantity' using errcode = 'check_violation';
   end if;
 

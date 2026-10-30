@@ -147,4 +147,7 @@ export const enAdmin = {
   "admin.settings.returnsNote": "Returns policy",
   "admin.settings.returnsNoteHint":
     "What a buyer should know before ordering. Shown in the footer.",
+  "admin.orders.delete": "Delete order",
+  "admin.orders.deleteConfirm": "Delete this order for good? This cannot be undone.",
+  "admin.orders.deleted": "Order deleted",
 };

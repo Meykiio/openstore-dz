@@ -216,4 +216,8 @@ export const enStorefront = {
   "search.placeholder": "Search for a product...",
   "search.for": "Results for",
   "nav.search": "Search",
+  "checkout.error.too_many_items":
+    "Up to 50 pieces per order. For more, contact the shop directly.",
+  "checkout.error.too_many_orders":
+    "Too many orders from this connection. Try again later or contact the shop.",
 };

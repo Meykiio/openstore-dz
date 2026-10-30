@@ -62,7 +62,12 @@ export function isTokenShaped(token: string): boolean {
 }
 
 /** Refusals raised by `validate_order()` with a `hint`, translated at checkout. */
-const ORDER_ERROR_CODES = ["phone_blocked", "too_many_pending"] as const;
+const ORDER_ERROR_CODES = [
+  "phone_blocked",
+  "too_many_pending",
+  "too_many_items",
+  "too_many_orders",
+] as const;
 export type OrderErrorCode = (typeof ORDER_ERROR_CODES)[number];
 
 /**

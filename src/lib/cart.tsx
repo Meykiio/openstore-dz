@@ -39,7 +39,8 @@ const CartContext = createContext<CartValue | null>(null);
 
 const STORAGE_KEY = "openstore-cart-v1";
 const MAX_LINES = 50;
-const MAX_PER_LINE = 100;
+/** Matches the database cap in validate_order_item(). */
+export const MAX_PER_LINE = 20;
 
 function readCart(): CartItem[] {
   if (typeof window === "undefined") return [];
