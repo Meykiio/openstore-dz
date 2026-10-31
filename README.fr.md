@@ -30,7 +30,7 @@ OpenStore répond à ça : une vraie boutique, en arabe, qui s'installe en une �
 
 ## État actuel
 
-**Version 0.1.0, première publication.** Un commerçant peut l'installer aujourd'hui et
+**Version 0.2.0.** Un commerçant peut l'installer aujourd'hui et
 recevoir des commandes en paiement à la livraison. Ce qui fonctionne, vérifié, est dans
 `docs/FEATURES.md` :
 

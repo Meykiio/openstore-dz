@@ -11,6 +11,15 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - dependencies
+    # Upgrades that are migrations, not bumps. Each fails to install or build as
+    # a grouped update (PR #8): do them on purpose, then drop the rule.
+    ignore:
+      # 1.169 needs Vite 8 (peer vite >= 8); the project is on Vite 7.
+      - dependency-name: "@tanstack/react-start"
+        versions: [">=1.169.0"]
+      # 1.x is a major version: icons renamed or removed.
+      - dependency-name: "lucide-react"
+        update-types: ["version-update:semver-major"]
     groups:
       # Group the weekly noise so a maintainer reviews one PR, not thirty.
       production-dependencies:
