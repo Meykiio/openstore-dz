@@ -27,7 +27,9 @@ until it lists the new ones.
 **Fixed.** Colour dots on cards were grey (`catalogue_page` now returns the hex). The
 service worker cached same-origin images forever; it now caches hashed build files only
 and v2 purges old caches. Uploads are cut to the 4:5 frame, keeping top, centre or bottom. The reviewer initials on a product page failed the colour-contrast check; they are now
-dark on light grey.
+dark on light grey. Re-running `schema.sql` no longer brings back demo products,
+photos and reviews: the demo seed only runs in a shop nobody has claimed (it is the
+update path now). On browsers without `<dialog>`, the closed cart sheet is hidden.
 
 **Updating.** The dashboard says when the database needs the update and when a new
 version is out. `Update OpenStore` in the Actions tab updates a shop made with the Vercel

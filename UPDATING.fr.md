@@ -38,7 +38,8 @@ changent pas. Environ cinq minutes, rien à installer sur votre ordinateur.
 
 Votre ancien code est conservé dans une branche nommée `backup/before-update-...`. Si
 Vercel ne lance pas de déploiement tout seul, ouvrez votre projet sur vercel.com, puis
-**Deployments**, le menu **...** du plus récent, et **Redeploy**.
+**Deployments**, **Create Deployment**, tapez `main` et confirmez. (Pas **Redeploy** :
+cela reconstruit l'ancienne version.)
 
 ## B. Fork sur GitHub
 
@@ -75,7 +76,11 @@ database by running supabase/schema.sql in the Supabase SQL Editor.
 4. Attendez **Success. No rows returned**, puis actualisez le tableau de bord. Le
    message disparaît.
 
-Relancer le script ne pose aucun problème : il n'ajoute que ce qui manque.
+Relancer le script ne pose aucun problème. Il garde vos produits, commandes, clients et
+réglages. Il réapplique les règles de la boutique (fonctions, règles de sécurité, limites
+du stockage des photos) et ajoute ce qui est nouveau, comme les tarifs des wilayas de 2026.
+Les produits de démonstration ne sont créés que dans une boutique que personne n'a encore
+réclamée.
 
 ## Nouveautés
 

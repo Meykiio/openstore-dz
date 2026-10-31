@@ -149,7 +149,7 @@ function ColourRow({ productId, group }: { productId: string; group: Group }) {
           {uploading ? t("admin.images.uploading") : t("admin.images.add")}
         </Button>
       </div>
-      <FramePicker value={focus} onChange={setFocus} />
+      <FramePicker value={focus} onChange={setFocus} disabled={uploading} />
       {group.urls.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {group.urls.map((url) => (

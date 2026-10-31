@@ -49,7 +49,11 @@ function readCart(): CartItem[] {
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(isCartItem).slice(0, MAX_LINES);
+    // Lines saved before the cap was lowered are clamped, not refused at checkout.
+    return parsed
+      .filter(isCartItem)
+      .slice(0, MAX_LINES)
+      .map((line) => ({ ...line, quantity: Math.min(line.quantity, MAX_PER_LINE) }));
   } catch {
     return [];
   }

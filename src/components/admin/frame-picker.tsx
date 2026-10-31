@@ -14,9 +14,12 @@ const FOCUS = [
 export function FramePicker({
   value,
   onChange,
+  disabled = false,
 }: {
   value: number;
   onChange: (focus: number) => void;
+  /** While a batch uploads: it keeps the choice it started with. */
+  disabled?: boolean;
 }) {
   const { t } = useI18n();
   return (
@@ -31,9 +34,10 @@ export function FramePicker({
           key={option.value}
           type="button"
           aria-pressed={value === option.value}
+          disabled={disabled}
           onClick={() => onChange(option.value)}
           className={cn(
-            "min-h-8 rounded-full border px-3",
+            "min-h-8 rounded-full border px-3 disabled:opacity-50",
             value === option.value
               ? "border-on-surface bg-on-surface text-surface"
               : "border-outline text-on-surface",

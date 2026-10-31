@@ -76,7 +76,19 @@ function DatabaseNotice() {
             )}
             {copied === "done" ? t("update.copied") : t("update.copy")}
           </Button>
-          {copied === "failed" && <p className="mt-1 text-xs">{t("update.copyFailed")}</p>}
+          {copied === "failed" && (
+            <p className="mt-1 text-xs">
+              {t("update.copyFailed")}{" "}
+              <a
+                className="text-primary underline"
+                href="https://github.com/Meykiio/openstore-dz/blob/main/supabase/schema.sql"
+                target="_blank"
+                rel="noreferrer"
+              >
+                schema.sql
+              </a>
+            </p>
+          )}
         </li>
         <li>
           <a href={editor} target="_blank" rel="noreferrer" className="text-primary underline">

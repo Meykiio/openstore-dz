@@ -34,20 +34,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          tag=$(gh release view --repo Meykiio/openstore-dz --json tagName --jq .tagName 2>/dev/null || true)
-          if [ -n "$tag" ]; then
-            echo "ref=refs/tags/$tag" >> "$GITHUB_OUTPUT"
-            echo "name=$tag" >> "$GITHUB_OUTPUT"
-          else
-            echo "ref=refs/heads/main" >> "$GITHUB_OUTPUT"
-            echo "name=main" >> "$GITHUB_OUTPUT"
+          # Only a published release, never work in progress on main. If GitHub
+          # cannot be asked, stop rather than guess.
+          if ! tag=$(gh api repos/Meykiio/openstore-dz/releases/latest --jq .tag_name); then
+            echo "Could not read the latest OpenStore release. Nothing was changed; run it again later." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
           fi
-
-      - name: Save the current code to a backup branch
-        run: |
-          branch="backup/before-update-$(date -u +%Y%m%d-%H%M%S)"
-          git push origin "HEAD:refs/heads/$branch"
-          echo "Your previous code is saved on the branch \`$branch\`." >> "$GITHUB_STEP_SUMMARY"
+          echo "ref=refs/tags/$tag" >> "$GITHUB_OUTPUT"
+          echo "name=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Download OpenStore ${{ steps.latest.outputs.name }}
         env:
@@ -56,6 +50,24 @@ jobs:
           mkdir -p "$RUNNER_TEMP/openstore"
           curl -fsSL "https://codeload.github.com/Meykiio/openstore-dz/tar.gz/$REF" \
             | tar -xz -C "$RUNNER_TEMP/openstore" --strip-components=1
+
+      - name: Stop if this shop is already newer
+        env:
+          NAME: ${{ steps.latest.outputs.name }}
+        run: |
+          mine=$(node -p "require('./package.json').version")
+          theirs=$(node -p "require(process.env.RUNNER_TEMP + '/openstore/package.json').version")
+          newest=$(printf '%s\n%s\n' "$mine" "$theirs" | sort -V | tail -1)
+          if [ "$mine" != "$theirs" ] && [ "$newest" = "$mine" ]; then
+            echo "This shop runs OpenStore $mine, newer than the release $NAME ($theirs). Nothing was changed." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+      - name: Save the current code to a backup branch
+        run: |
+          branch="backup/before-update-$(date -u +%Y%m%d-%H%M%S)"
+          git push origin "HEAD:refs/heads/$branch"
+          echo "Your previous code is saved on the branch \`$branch\`." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Replace the code (your .github folder stays)
         run: rsync -a --delete --exclude '.git/' --exclude '.github/' "$RUNNER_TEMP/openstore/" ./
@@ -78,8 +90,10 @@ jobs:
           git commit -m "chore: update OpenStore to $NAME"
           git push origin HEAD
           {
-            echo "Updated to OpenStore $NAME. Vercel is publishing it now."
+            echo "Updated the \`$GITHUB_REF_NAME\` branch to OpenStore $NAME."
+            echo "Vercel publishes it if \`$GITHUB_REF_NAME\` is your shop's production branch (usually main)."
             echo ""
             echo "Next: update the database. Open your dashboard: it shows the script to copy."
-            echo "If Vercel did not start a deployment, open Vercel > Deployments > Redeploy."
+            echo "If Vercel did not start a deployment: Vercel > your project > Deployments >"
+            echo "Create Deployment, type $GITHUB_REF_NAME, and confirm."
           } >> "$GITHUB_STEP_SUMMARY"

@@ -54,6 +54,12 @@ export function ProductGallery({
 
   // Arrow keys follow the reading direction: in Arabic, left is "next".
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    // The photos are not tab stops, so the strip opens the zoom for the one shown.
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      setOpen(active);
+      return;
+    }
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
     event.preventDefault();
     const rtl = getComputedStyle(event.currentTarget).direction === "rtl";

@@ -9,7 +9,7 @@ export const APP_VERSION: string = __APP_VERSION__;
  * changes, together with `openstore_schema_version()` in that file, so the
  * dashboard can tell an owner who updated the code but not the database.
  */
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 const LATEST_URL = "https://raw.githubusercontent.com/Meykiio/openstore-dz/main/package.json";
 
@@ -32,7 +32,10 @@ export const schemaVersionQuery = () =>
     queryKey: ["schema_version"],
     queryFn: async (): Promise<number> => {
       const { data, error } = await getSupabase().rpc("openstore_schema_version");
-      if (error) return 1;
+      // PGRST202: no such function, i.e. a database from before 0.2.0. Any other
+      // failure is not an answer, so no notice is shown on a network blip.
+      if (error?.code === "PGRST202") return 1;
+      if (error) throw new Error(error.message);
       return typeof data === "number" ? data : 1;
     },
     staleTime: 10 * 60_000,
@@ -45,15 +48,13 @@ export const schemaVersionQuery = () =>
 export const latestVersionQuery = () =>
   queryOptions({
     queryKey: ["openstore_latest"],
+    // A failure throws, so it is retried on the next visit instead of being
+    // remembered as "no new version" for six hours.
     queryFn: async (): Promise<string | null> => {
-      try {
-        const response = await fetch(LATEST_URL, { cache: "no-store" });
-        if (!response.ok) return null;
-        const body = (await response.json()) as { version?: unknown };
-        return typeof body.version === "string" ? body.version : null;
-      } catch {
-        return null;
-      }
+      const response = await fetch(LATEST_URL, { cache: "no-store" });
+      if (!response.ok) throw new Error(`GitHub answered ${response.status}`);
+      const body = (await response.json()) as { version?: unknown };
+      return typeof body.version === "string" ? body.version : null;
     },
     staleTime: 6 * 60 * 60_000,
     retry: false,

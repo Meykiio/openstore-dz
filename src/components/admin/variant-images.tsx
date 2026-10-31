@@ -138,7 +138,7 @@ export function VariantImages({ variant }: { variant: AdminVariant }) {
           {uploading ? <Loader2 size={15} className="animate-spin" /> : <Camera size={15} />}
           {uploading ? t("admin.images.uploading") : t("admin.images.add")}
         </Button>
-        <FramePicker value={focus} onChange={setFocus} />
+        <FramePicker value={focus} onChange={setFocus} disabled={uploading} />
       </div>
 
       {variant.variant_images.length > 0 ? (

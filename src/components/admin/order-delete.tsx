@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n-context";
 import { deleteOrder } from "@/lib/admin";
+import { PHONE_HISTORY_KEY } from "@/lib/admin-phones";
 
 /**
  * Delete an order, after an inline second tap (no `confirm()` or `<dialog>`,
@@ -21,6 +22,8 @@ export function DeleteOrderButton({ orderId }: { orderId: string }) {
     onSuccess: () => {
       toast.success(t("admin.orders.deleted"));
       void queryClient.invalidateQueries({ queryKey: ["admin_orders"] });
+      // A deleted order no longer counts in that number's history.
+      void queryClient.invalidateQueries({ queryKey: [PHONE_HISTORY_KEY] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -52,7 +55,12 @@ export function DeleteOrderButton({ orderId }: { orderId: string }) {
           <Trash2 size={14} aria-hidden="true" />
           {t("admin.orders.delete")}
         </Button>
-        <Button variant="ghost" size="sm" onClick={() => setAsking(false)}>
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={mutation.isPending}
+          onClick={() => setAsking(false)}
+        >
           {t("common.cancel")}
         </Button>
       </span>

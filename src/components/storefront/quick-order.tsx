@@ -35,8 +35,8 @@ export function QuickOrder({
   const [error, setError] = useState<string | null>(null);
   const [placed, setPlaced] = useState<string | null>(null);
 
-  if (settings && !settings.accepts_cod) return null;
   if (placed) return <QuickOrderPlaced token={placed} phone={form.phone} />;
+  if (settings && !settings.accepts_cod) return null;
 
   const subtotal = selected.price * quantity;
   const wilaya = form.wilaya || null;

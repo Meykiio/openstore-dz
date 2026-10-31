@@ -592,6 +592,9 @@ begin
   );
   if v_ip is not null then
     v_client := md5('openstore-order:' || v_ip);
+    -- Parallel requests from one connection wait here, so each one counts the
+    -- orders committed before it and the eleventh is refused.
+    perform pg_advisory_xact_lock(hashtext(v_client));
     if (
       select count(*) from public.orders o
       where o.client_key = v_client and o.created_at > now() - interval '1 hour'
@@ -1125,63 +1128,74 @@ insert into public.store_settings (
 )
 on conflict (id) do nothing;
 
--- Two products: one single item, one pack. Prices and stock are the numbers the
--- storefront and the seed-verification query in the README expect.
-insert into public.categories (slug, name, name_fr, sort_order)
-values
-  ('shirts', 'قمصان', 'Chemises', 1),
-  ('packs',  'باقات', 'Packs',    2)
-on conflict (slug) do nothing;
+-- Demo content goes only into a shop nobody has claimed yet. Owners re-run this
+-- file to update a live shop, and that must never bring back demo products,
+-- photos or reviews they deleted.
+do $$
+begin
+  if exists (select 1 from public.admin_users) then
+    return;
+  end if;
 
-insert into public.products (id, slug, name, name_fr, description, kind, status, category_id, published_at)
-values
-  ('11111111-1111-4111-8111-111111111111', 'shirt-demo',  'قميص قطني كلاسيكي',  'Chemise coton classique',  'قميص قطني 100% بقصة مريحة، مناسب للعمل والمناسبات اليومية.', 'single', 'published', (select id from public.categories where slug = 'shirts'), now()),
-  ('22222222-2222-4222-8222-222222222222', 'pack-demo',    'باك القميص + البنطال', 'Pack chemise + pantalon', 'باقة موفرة تجمع قميصاً وبنطالاً بسعر أقل من شرائهما منفصلين.', 'pack', 'published', (select id from public.categories where slug = 'packs'), now())
-on conflict (id) do nothing;
+  -- Two products: one single item, one pack. Prices and stock are the numbers the
+  -- storefront and the seed-verification query in the README expect.
+  insert into public.categories (slug, name, name_fr, sort_order)
+  values
+    ('shirts', 'قمصان', 'Chemises', 1),
+    ('packs',  'باقات', 'Packs',    2)
+  on conflict (slug) do nothing;
 
-insert into public.product_variants (id, product_id, size, color_name, color_hex, sku, price, stock, weight_grams, sort_order)
-values
-  ('aaaaaaaa-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111', 'M',  'أبيض',  '#ffffff', 'DEMO-TS-W-M',  2500, 12, 180, 0),
-  ('aaaaaaaa-2222-4111-8222-222222222222', '11111111-1111-4111-8111-111111111111', 'L',  'أسود',  '#000000', 'DEMO-TS-B-L',  2500,  8, 180, 1),
-  ('bbbbbbbb-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', 'M',  'أبيض',  '#ffffff', 'DEMO-PK-W-M',  4500,  6, 420, 0),
-  ('bbbbbbbb-2222-4111-8222-222222222222', '22222222-2222-4222-8222-222222222222', 'L',  'أسود',  '#000000', 'DEMO-PK-B-L',  4500,  4, 420, 1)
-on conflict (id) do nothing;
+  insert into public.products (id, slug, name, name_fr, description, kind, status, category_id, published_at)
+  values
+    ('11111111-1111-4111-8111-111111111111', 'shirt-demo',  'قميص قطني كلاسيكي',  'Chemise coton classique',  'قميص قطني 100% بقصة مريحة، مناسب للعمل والمناسبات اليومية.', 'single', 'published', (select id from public.categories where slug = 'shirts'), now()),
+    ('22222222-2222-4222-8222-222222222222', 'pack-demo',    'باك القميص + البنطال', 'Pack chemise + pantalon', 'باقة موفرة تجمع قميصاً وبنطالاً بسعر أقل من شرائهما منفصلين.', 'pack', 'published', (select id from public.categories where slug = 'packs'), now())
+  on conflict (id) do nothing;
 
--- Demo imagery: external placeholders so a fresh install renders a shop that
--- looks like a shop on first load. Replace with uploaded media.
-insert into public.variant_images (variant_id, url, alt, sort_order)
-values
-  ('aaaaaaaa-1111-4111-8111-111111111111', 'https://picsum.photos/seed/openstore-shirt-white/900/900', 'قميص أبيض', 0),
-  ('aaaaaaaa-2222-4111-8222-222222222222', 'https://picsum.photos/seed/openstore-shirt-black/900/900', 'قميص أسود', 0),
-  ('bbbbbbbb-1111-4111-8111-111111111111', 'https://picsum.photos/seed/openstore-pack-white/900/900', 'باقة بيضاء', 0),
-  ('bbbbbbbb-2222-4111-8222-222222222222', 'https://picsum.photos/seed/openstore-pack-black/900/900', 'باقة سوداء', 0)
-on conflict do nothing;
+  insert into public.product_variants (id, product_id, size, color_name, color_hex, sku, price, stock, weight_grams, sort_order)
+  values
+    ('aaaaaaaa-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111', 'M',  'أبيض',  '#ffffff', 'DEMO-TS-W-M',  2500, 12, 180, 0),
+    ('aaaaaaaa-2222-4111-8222-222222222222', '11111111-1111-4111-8111-111111111111', 'L',  'أسود',  '#000000', 'DEMO-TS-B-L',  2500,  8, 180, 1),
+    ('bbbbbbbb-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', 'M',  'أبيض',  '#ffffff', 'DEMO-PK-W-M',  4500,  6, 420, 0),
+    ('bbbbbbbb-2222-4111-8222-222222222222', '22222222-2222-4222-8222-222222222222', 'L',  'أسود',  '#000000', 'DEMO-PK-B-L',  4500,  4, 420, 1)
+  on conflict (id) do nothing;
 
-insert into public.pack_items (product_id, variant_id, quantity, sort_order)
-values
-  ('22222222-2222-4222-8222-222222222222', 'aaaaaaaa-1111-4111-8111-111111111111', 1, 0),
-  ('22222222-2222-4222-8222-222222222222', 'bbbbbbbb-1111-4111-8111-111111111111', 1, 1)
-on conflict (product_id, variant_id) do nothing;
+  -- Demo imagery: external placeholders so a fresh install renders a shop that
+  -- looks like a shop on first load. Replace with uploaded media.
+  insert into public.variant_images (variant_id, url, alt, sort_order)
+  values
+    ('aaaaaaaa-1111-4111-8111-111111111111', 'https://picsum.photos/seed/openstore-shirt-white/900/900', 'قميص أبيض', 0),
+    ('aaaaaaaa-2222-4111-8222-222222222222', 'https://picsum.photos/seed/openstore-shirt-black/900/900', 'قميص أسود', 0),
+    ('bbbbbbbb-1111-4111-8111-111111111111', 'https://picsum.photos/seed/openstore-pack-white/900/900', 'باقة بيضاء', 0),
+    ('bbbbbbbb-2222-4111-8222-222222222222', 'https://picsum.photos/seed/openstore-pack-black/900/900', 'باقة سوداء', 0)
+  on conflict do nothing;
 
-insert into public.reviews (id, product_id, customer_name, rating, comment, is_approved)
-values
-  ('cccccccc-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111', 'سعاد', 5, 'قماش ممتاز والتوصيل كان سريع.', true),
-  ('cccccccc-2222-4222-8222-222222222222', '22222222-2222-4222-8222-222222222222', 'كريم', 4, 'الباك مناسب والسعر معقول.', true)
-on conflict (id) do nothing;
+  insert into public.pack_items (product_id, variant_id, quantity, sort_order)
+  values
+    ('22222222-2222-4222-8222-222222222222', 'aaaaaaaa-1111-4111-8111-111111111111', 1, 0),
+    ('22222222-2222-4222-8222-222222222222', 'bbbbbbbb-1111-4111-8111-111111111111', 1, 1)
+  on conflict (product_id, variant_id) do nothing;
 
--- The `true` above is a lie, and deliberately so. validate_review() forces
--- is_approved := false on every INSERT, including this one, because that trigger
--- is the control that stops a customer approving their own review. The demo
--- reviews therefore arrive unapproved and are approved here with an UPDATE,
--- which is exactly the path the moderation screen uses. Do not "fix" this by
--- weakening the trigger.
-update public.reviews
-   set is_approved = true
- where id in (
-   'cccccccc-1111-4111-8111-111111111111',
-   'cccccccc-2222-4222-8222-222222222222'
- )
-   and is_approved = false;
+  insert into public.reviews (id, product_id, customer_name, rating, comment, is_approved)
+  values
+    ('cccccccc-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111', 'سعاد', 5, 'قماش ممتاز والتوصيل كان سريع.', true),
+    ('cccccccc-2222-4222-8222-222222222222', '22222222-2222-4222-8222-222222222222', 'كريم', 4, 'الباك مناسب والسعر معقول.', true)
+  on conflict (id) do nothing;
+
+  -- The `true` above is a lie, and deliberately so. validate_review() forces
+  -- is_approved := false on every INSERT, including this one, because that trigger
+  -- is the control that stops a customer approving their own review. The demo
+  -- reviews therefore arrive unapproved and are approved here with an UPDATE,
+  -- which is exactly the path the moderation screen uses. Do not "fix" this by
+  -- weakening the trigger.
+  update public.reviews
+     set is_approved = true
+   where id in (
+     'cccccccc-1111-4111-8111-111111111111',
+     'cccccccc-2222-4222-8222-222222222222'
+   )
+     and is_approved = false;
+end;
+$$;
 
 -- =============================================================================
 -- 10. Later additions
@@ -2289,7 +2303,7 @@ language sql
 immutable
 set search_path = ''
 as $$
-  select 2;
+  select 3;
 $$;
 revoke all on function public.openstore_schema_version() from public;
 grant execute on function public.openstore_schema_version() to anon, authenticated;

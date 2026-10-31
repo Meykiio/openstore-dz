@@ -36,7 +36,8 @@ About five minutes, no computer setup.
 
 Your previous code is kept on a branch named `backup/before-update-...`. If Vercel does
 not start a new deployment by itself, open your project on vercel.com, then
-**Deployments**, the **...** menu of the newest one, and **Redeploy**.
+**Deployments**, **Create Deployment**, type `main`, and confirm. (Not **Redeploy**: that
+rebuilds the old version.)
 
 ## B. Forked on GitHub
 
@@ -71,7 +72,10 @@ database by running supabase/schema.sql in the Supabase SQL Editor.
    function, not a table.
 4. Wait for **Success. No rows returned**, then refresh your dashboard. The message is gone.
 
-The script is safe to run again: it only adds what is missing.
+The script is safe to run again. It keeps your products, orders, customers and
+settings. It re-applies the shop's rules (functions, security policies, the photo
+storage limits) and adds what is new, such as delivery prices for the 2026 wilayas.
+Demo products are only created in a shop that nobody has claimed yet.
 
 ## What is new
 
