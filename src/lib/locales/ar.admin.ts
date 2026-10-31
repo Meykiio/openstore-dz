@@ -143,4 +143,25 @@ export const arAdmin = {
   "admin.settings.announcementEnabled": "إظهار الإعلان",
   "admin.settings.returnsNote": "سياسة الإرجاع",
   "admin.settings.returnsNoteHint": "ما يجب أن يعرفه المشتري قبل الطلب. يظهر في أسفل الصفحة.",
+  "admin.orders.delete": "حذف الطلب",
+  "admin.orders.deleteConfirm": "حذف هذا الطلب نهائياً؟ لا يمكن التراجع عن ذلك.",
+  "admin.orders.deleted": "تم حذف الطلب",
+  "admin.frame.keep": "ما يبقى عند القص:",
+  "admin.frame.top": "الأعلى",
+  "admin.frame.center": "الوسط",
+  "admin.frame.bottom": "الأسفل",
+  "admin.frame.hint":
+    "تُقص الصور تلقائياً بمقاس المتجر 4:5. اختر الجزء الذي يبقى: الأعلى لصورة منتج على شخص، الأسفل للأحذية والسراويل، الوسط لصورة على طاولة أو أرض.",
+  "update.dbTitle": "قاعدة بياناتك تحتاج إلى تحديث",
+  "update.dbBody":
+    "تم تحديث متجرك لكن قاعدة البيانات ما زالت على النسخة السابقة، وقد لا تعمل بعض الصفحات حتى تحدّثها. تستغرق دقيقة واحدة:",
+  "update.copy": "انسخ سكربت التحديث",
+  "update.copied": "تم النسخ",
+  "update.copyFailed": "منع المتصفح النسخ. افتح ملف supabase/schema.sql على GitHub وانسخه من هناك.",
+  "update.openEditor": "افتح محرر SQL في Supabase",
+  "update.runIt":
+    "الصق السكربت واضغط Run. إذا ظهرت نافذة تحذير اختر Run without RLS. انتظر رسالة Success ثم حدّث هذه الصفحة.",
+  "update.newTitle": "نسخة جديدة من OpenStore متوفرة ({version}).",
+  "update.newBody": "نسختك الحالية {version}.",
+  "update.howTo": "كيف أحدّث متجري",
 };

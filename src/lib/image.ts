@@ -19,6 +19,16 @@ const BUCKET = "product-media";
 
 export type UploadOutcome = { url: string | null; error: string | null };
 
+/**
+ * A crop applied before upload: `aspect` is width / height, `focus` is which
+ * part of a too-tall photo survives (0 top, 0.5 centre, 1 bottom). A too-wide
+ * photo is always trimmed evenly on both sides.
+ */
+export type Frame = { aspect: number; focus: number };
+
+/** The storefront shows product photos at 4:5, so uploads are cut to it. */
+export const PRODUCT_ASPECT = 4 / 5;
+
 /** Decode a file into a bitmap, whichever route the browser supports. */
 async function decode(file: File): Promise<ImageBitmap | HTMLImageElement> {
   if (typeof createImageBitmap === "function") {
@@ -48,14 +58,26 @@ function dimensions(source: ImageBitmap | HTMLImageElement): { w: number; h: num
   return { w: source.width, h: source.height };
 }
 
+/** The part of the source to keep: all of it, or the frame's crop. */
+export function cropRect(w: number, h: number, frame?: Frame) {
+  if (!frame) return { sx: 0, sy: 0, cw: w, ch: h };
+  if (w / h > frame.aspect) {
+    const cw = Math.round(h * frame.aspect);
+    return { sx: Math.round((w - cw) / 2), sy: 0, cw, ch: h };
+  }
+  const ch = Math.round(w / frame.aspect);
+  return { sx: 0, sy: Math.round((h - ch) * frame.focus), cw: w, ch };
+}
+
 /**
- * Scale so the longest edge is `MAX_EDGE`. Images already smaller are left at
- * their own size rather than upscaled — enlarging a 600px photo only makes the
- * file bigger without adding detail.
+ * Crop to the frame, if any, then scale so the longest edge is `MAX_EDGE`.
+ * Images already smaller are left at their own size rather than upscaled:
+ * enlarging a 600px photo only makes the file bigger without adding detail.
  */
-async function resizeImage(file: File): Promise<Blob> {
+async function resizeImage(file: File, frame?: Frame): Promise<Blob> {
   const source = await decode(file);
-  const { w, h } = dimensions(source);
+  const { w: fullW, h: fullH } = dimensions(source);
+  const { sx, sy, cw: w, ch: h } = cropRect(fullW, fullH, frame);
   const scale = Math.min(1, MAX_EDGE / Math.max(w, h));
   const width = Math.max(1, Math.round(w * scale));
   const height = Math.max(1, Math.round(h * scale));
@@ -67,7 +89,7 @@ async function resizeImage(file: File): Promise<Blob> {
   if (!ctx) throw new Error("This browser cannot process images.");
 
   ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(source as CanvasImageSource, 0, 0, width, height);
+  ctx.drawImage(source as CanvasImageSource, sx, sy, w, h, 0, 0, width, height);
   if ("close" in source) source.close();
 
   const asWebp = await toBlob(canvas, "image/webp");
@@ -100,14 +122,18 @@ function extensionFor(type: string): string {
  * a browser holding the old URL cannot serve a stale photo — and it removes any
  * need to sanitise a user-supplied filename.
  */
-export async function uploadProductImage(file: File, productId: string): Promise<UploadOutcome> {
+export async function uploadProductImage(
+  file: File,
+  productId: string,
+  frame?: Frame,
+): Promise<UploadOutcome> {
   if (!file.type.startsWith("image/")) {
     return { url: null, error: "That file is not an image." };
   }
 
   let blob: Blob;
   try {
-    blob = await resizeImage(file);
+    blob = await resizeImage(file, frame);
   } catch (error) {
     return {
       url: null,

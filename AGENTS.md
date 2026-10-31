@@ -54,7 +54,8 @@ verified result.
    `VITE_`-prefixed variable, a client file, a comment, a log, or a document.
 6. **Database changes go through `supabase/schema.sql`.** Never via ad-hoc console SQL.
    Read the existing schema and RLS first. Never assume the database is empty. There are
-   no migration files, by design.
+   no migration files, by design. Every schema change bumps `openstore_schema_version()`
+   in `schema.sql` and `SCHEMA_VERSION` in `src/lib/version.ts` together.
 7. **Security.** RLS on every table with a base `GRANT` alongside the policy, because
    PostgREST evaluates grants _before_ RLS and returns 401 otherwise. Prices are computed
    server-side; a client-supplied price is a bug. Public storage buckets are read-only

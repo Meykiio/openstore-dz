@@ -161,7 +161,7 @@ export const arStorefront = {
   "home.hero.body": "اطلب اليوم وادفع نقداً عند الاستلام. بلا بطاقة وبلا حساب.",
   "home.trust.cod.title": "الدفع عند الاستلام",
   "home.trust.cod.body": "تدفع نقداً عند وصول الطلب، بدون بطاقة بنكية.",
-  "home.trust.delivery.title": "توصيل إلى 58 ولاية",
+  "home.trust.delivery.title": "توصيل إلى 69 ولاية",
   "home.trust.delivery.body": "نغطي كامل التراب الوطني عبر شركاء توصيل موثوقين.",
   "home.trust.returns.title": "إرجاع خلال {days} يوماً",
   "home.trust.returns.body": "إن لم يعجبك المنتج يمكنك إرجاعه خلال المدة المحددة.",
@@ -212,4 +212,13 @@ export const arStorefront = {
   "search.placeholder": "ابحث عن منتج...",
   "search.for": "نتائج البحث عن",
   "nav.search": "بحث",
+  "checkout.error.too_many_items":
+    "الحد الأقصى 50 قطعة في الطلب الواحد. للطلبات الأكبر تواصل مع المتجر مباشرة.",
+  "checkout.error.too_many_orders":
+    "طلبات كثيرة من هذا الاتصال. حاول بعد قليل أو تواصل مع المتجر مباشرة.",
+  "copy.copy": "نسخ",
+  "copy.copied": "تم النسخ",
+  "order.copyHint": "انسخ رقم طلبك واحتفظ به: ستحتاجه لتتبع طلبك.",
+  "quick.title": "اطلب الآن، وادفع عند الاستلام",
+  "quick.submit": "تأكيد الطلب",
 };

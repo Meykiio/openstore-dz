@@ -39,7 +39,8 @@ const CartContext = createContext<CartValue | null>(null);
 
 const STORAGE_KEY = "openstore-cart-v1";
 const MAX_LINES = 50;
-const MAX_PER_LINE = 100;
+/** Matches the database cap in validate_order_item(). */
+export const MAX_PER_LINE = 20;
 
 function readCart(): CartItem[] {
   if (typeof window === "undefined") return [];
@@ -48,7 +49,11 @@ function readCart(): CartItem[] {
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(isCartItem).slice(0, MAX_LINES);
+    // Lines saved before the cap was lowered are clamped, not refused at checkout.
+    return parsed
+      .filter(isCartItem)
+      .slice(0, MAX_LINES)
+      .map((line) => ({ ...line, quantity: Math.min(line.quantity, MAX_PER_LINE) }));
   } catch {
     return [];
   }

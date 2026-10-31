@@ -163,7 +163,7 @@ export const enStorefront = {
   "home.hero.body": "Order today and pay in cash when it arrives. No card, no account.",
   "home.trust.cod.title": "Cash on delivery",
   "home.trust.cod.body": "Pay the courier in cash on arrival. No card needed.",
-  "home.trust.delivery.title": "Delivery to 58 wilayas",
+  "home.trust.delivery.title": "Delivery to 69 wilayas",
   "home.trust.delivery.body": "We cover the whole country through trusted carriers.",
   "home.trust.returns.title": "{days}-day returns",
   "home.trust.returns.body": "If a product is not right, send it back within the window.",
@@ -216,4 +216,13 @@ export const enStorefront = {
   "search.placeholder": "Search for a product...",
   "search.for": "Results for",
   "nav.search": "Search",
+  "checkout.error.too_many_items":
+    "Up to 50 pieces per order. For more, contact the shop directly.",
+  "checkout.error.too_many_orders":
+    "Too many orders from this connection. Try again later or contact the shop.",
+  "copy.copy": "Copy",
+  "copy.copied": "Copied",
+  "order.copyHint": "Copy your order number and keep it: you need it to track your order.",
+  "quick.title": "Order now, pay on delivery",
+  "quick.submit": "Confirm order",
 };

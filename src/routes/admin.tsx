@@ -1,3 +1,4 @@
+import { UpdateNotices } from "@/components/admin/update-notices";
 import { useEffect, useState } from "react";
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
@@ -103,6 +104,7 @@ function AdminLayout() {
         </div>
 
         <main className="container-page py-6 sm:py-8">
+          <UpdateNotices />
           <Outlet />
         </main>
       </div>

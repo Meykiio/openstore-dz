@@ -177,7 +177,15 @@ function rowFrom(payload) {
     order.total,
     order.tracking_number,
     order.tracking_url,
-  ];
+  ].map(asText);
+}
+
+// A buyer types their own name and note. Text starting with = + - @ would run as
+// a formula in the sheet (a fake order named =IMPORTXML(...) could leak the sheet),
+// so it is written with a leading apostrophe, which keeps it plain text.
+function asText(value) {
+  if (typeof value === "string" && /^[=+\-@\t\r]/.test(value)) return "'" + value;
+  return value;
 }
 
 function respond(payload) {

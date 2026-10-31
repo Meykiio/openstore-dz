@@ -26,7 +26,7 @@ export function ReviewList({ productId }: { productId: string }) {
           <div className="flex items-start gap-3">
             <span
               aria-hidden="true"
-              className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/12 text-xs font-semibold text-primary"
+              className="grid size-9 shrink-0 place-items-center rounded-full bg-surface-mid text-xs font-semibold text-on-surface"
             >
               {initials(review.customer_name)}
             </span>

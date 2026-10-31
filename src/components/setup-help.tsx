@@ -1,3 +1,4 @@
+import { projectRef } from "@/lib/supabase/project-ref";
 import { useEffect, useState } from "react";
 import { Check, Copy, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,18 +10,6 @@ import { Button } from "@/components/ui/button";
  */
 
 const code = "rounded bg-on-surface/5 px-1 font-mono text-xs";
-
-/** `https://<ref>.supabase.co` -> `<ref>`, falling back to the project id variable. */
-function projectRef(): string | null {
-  const url = import.meta.env.VITE_SUPABASE_URL;
-  try {
-    const host = new URL(url ?? "").hostname;
-    if (host.endsWith(".supabase.co")) return host.split(".")[0];
-  } catch {
-    /* not a URL: fall through */
-  }
-  return import.meta.env.VITE_SUPABASE_PROJECT_ID || null;
-}
 
 /** Read after mount, so the server and the first client render agree. */
 function useIsLocal(): boolean {

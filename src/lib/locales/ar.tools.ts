@@ -57,7 +57,7 @@ export const arTools = {
   "admin.setup.gap.delivery": "أسعار التوصيل",
   "admin.setup.gap.legal": "المعلومات القانونية",
   "admin.setup.phoneInvalid": "أدخل رقماً جزائرياً، مثلاً 0555 12 34 56",
-  "admin.setup.applyAll": "تطبيق هذه الأسعار على الولايات الـ58",
+  "admin.setup.applyAll": "تطبيق هذه الأسعار على الولايات الـ69",
   "admin.setup.zonesExist": "لديك أسعار لـ{count} ولاية. فعّل هذا فقط إن أردت استبدالها.",
   "admin.setup.whatsappHint": "اتركه فارغاً إن كان نفس رقم الهاتف.",
   "admin.variants.compareAt": "السعر قبل التخفيض",

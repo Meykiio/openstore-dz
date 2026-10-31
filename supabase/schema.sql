@@ -309,6 +309,10 @@ alter table public.store_settings
   add column if not exists brand_color text check (brand_color ~ '^#[0-9a-fA-F]{6}$');
 alter table public.delivery_zones
   add column if not exists stopdesk_fee int check (stopdesk_fee >= 0);
+-- Who placed the order, as a hash of the caller's IP address (never the address
+-- itself), so place_order() can cap how many orders one connection places an hour.
+alter table public.orders
+  add column if not exists client_key text;
 alter table public.orders
   add column if not exists delivery_method text not null default 'home'
     check (delivery_method in ('home', 'stopdesk')),
@@ -331,6 +335,7 @@ create index if not exists pack_items_product_idx   on public.pack_items (produc
 -- The admin order list sorts by newest first.
 create index if not exists orders_created_at_idx     on public.orders (created_at desc);
 create index if not exists orders_status_idx        on public.orders (status);
+create index if not exists orders_client_key_idx    on public.orders (client_key, created_at desc);
 create index if not exists order_items_order_idx on public.order_items (order_id);
 create index if not exists reviews_product_idx      on public.reviews (product_id);
 create index if not exists reviews_approved_idx     on public.reviews (created_at desc) where is_approved;
@@ -466,7 +471,7 @@ security definer
 set search_path = ''
 as $$
 begin
-  if new.quantity is null or new.quantity < 1 or new.quantity > 100 then
+  if new.quantity is null or new.quantity < 1 or new.quantity > 20 then
     raise exception 'Invalid quantity';
   end if;
 
@@ -499,9 +504,20 @@ $$;
 create or replace function public.validate_review()
 returns trigger
 language plpgsql
+security definer
 set search_path = ''
 as $$
 begin
+  -- A script could fill the moderation queue with junk. Twenty waiting reviews an
+  -- hour is far above what a small shop receives, and a flood stops there.
+  -- Security definer so the count sees unapproved rows, which RLS hides.
+  if (
+    select count(*) from public.reviews r
+    where not r.is_approved and r.created_at > now() - interval '1 hour'
+  ) >= 20 then
+    raise exception 'Too many reviews right now, please try again later'
+      using errcode = 'check_violation', hint = 'too_many_reviews';
+  end if;
   if length(trim(coalesce(new.customer_name, ''))) < 2 or length(new.customer_name) > 120 then
     raise exception 'Invalid customer_name';
   end if;
@@ -536,6 +552,10 @@ declare
   v_token    uuid;
   v_item     jsonb;
   v_inserted int := 0;
+  v_units    int;
+  v_headers  json;
+  v_ip       text;
+  v_client   text;
 begin
   if p_customer is null or p_items is null then
     raise exception 'Missing order details';
@@ -549,10 +569,45 @@ begin
     raise exception 'Order must contain between 1 and 50 items';
   end if;
 
+  -- Fake orders drain real stock: every line takes stock away until the owner
+  -- refuses it. Fifty pieces is a large retail order; bigger ones go through
+  -- WhatsApp or a phone call.
+  select coalesce(sum(greatest(coalesce((i->>'quantity')::int, 1), 1)), 0)
+    into v_units from jsonb_array_elements(p_items) i;
+  if v_units > 50 then
+    raise exception 'Too many pieces in one order'
+      using errcode = 'check_violation', hint = 'too_many_items';
+  end if;
+
+  -- One connection may place ten orders an hour. The per-phone cap alone does
+  -- not stop a script inventing numbers. The IP is stored only as a salted hash.
+  -- Not the first x-forwarded-for entry: a caller can write that one, and
+  -- Cloudflare appends the real address after it (supabase discussion 34647).
+  -- cf-connecting-ip is Cloudflare's own; the last forwarded entry is the
+  -- fallback. Calls with neither (the SQL editor) are not limited.
+  v_headers := nullif(current_setting('request.headers', true), '')::json;
+  v_ip := coalesce(
+    nullif(trim(v_headers->>'cf-connecting-ip'), ''),
+    nullif(trim(regexp_replace(coalesce(v_headers->>'x-forwarded-for', ''), '^.*,', '')), '')
+  );
+  if v_ip is not null then
+    v_client := md5('openstore-order:' || v_ip);
+    -- Parallel requests from one connection wait here, so each one counts the
+    -- orders committed before it and the eleventh is refused.
+    perform pg_advisory_xact_lock(hashtext(v_client));
+    if (
+      select count(*) from public.orders o
+      where o.client_key = v_client and o.created_at > now() - interval '1 hour'
+    ) >= 10 then
+      raise exception 'Too many orders from this connection, please try again later'
+        using errcode = 'check_violation', hint = 'too_many_orders';
+    end if;
+  end if;
+
   -- validate_order() still runs as the BEFORE INSERT trigger and does the field
   -- checks. This function only decides the rows.
   insert into public.orders (customer_name, phone, wilaya, commune, address, note,
-                             delivery_method, stopdesk_id, stopdesk_name)
+                             delivery_method, stopdesk_id, stopdesk_name, client_key)
   values (
     coalesce(p_customer->>'customer_name', ''),
     coalesce(p_customer->>'phone', ''),
@@ -562,7 +617,8 @@ begin
     nullif(p_customer->>'note', ''),
     coalesce(nullif(p_customer->>'delivery_method', ''), 'home'),
     nullif(p_customer->>'stopdesk_id', '')::int,
-    nullif(p_customer->>'stopdesk_name', '')
+    nullif(p_customer->>'stopdesk_name', ''),
+    v_client
   )
   returning id, public_token into v_order_id, v_token;
 
@@ -1072,63 +1128,74 @@ insert into public.store_settings (
 )
 on conflict (id) do nothing;
 
--- Two products: one single item, one pack. Prices and stock are the numbers the
--- storefront and the seed-verification query in the README expect.
-insert into public.categories (slug, name, name_fr, sort_order)
-values
-  ('shirts', 'قمصان', 'Chemises', 1),
-  ('packs',  'باقات', 'Packs',    2)
-on conflict (slug) do nothing;
+-- Demo content goes only into a shop nobody has claimed yet. Owners re-run this
+-- file to update a live shop, and that must never bring back demo products,
+-- photos or reviews they deleted.
+do $$
+begin
+  if exists (select 1 from public.admin_users) then
+    return;
+  end if;
 
-insert into public.products (id, slug, name, name_fr, description, kind, status, category_id, published_at)
-values
-  ('11111111-1111-4111-8111-111111111111', 'shirt-demo',  'قميص قطني كلاسيكي',  'Chemise coton classique',  'قميص قطني 100% بقصة مريحة، مناسب للعمل والمناسبات اليومية.', 'single', 'published', (select id from public.categories where slug = 'shirts'), now()),
-  ('22222222-2222-4222-8222-222222222222', 'pack-demo',    'باك القميص + البنطال', 'Pack chemise + pantalon', 'باقة موفرة تجمع قميصاً وبنطالاً بسعر أقل من شرائهما منفصلين.', 'pack', 'published', (select id from public.categories where slug = 'packs'), now())
-on conflict (id) do nothing;
+  -- Two products: one single item, one pack. Prices and stock are the numbers the
+  -- storefront and the seed-verification query in the README expect.
+  insert into public.categories (slug, name, name_fr, sort_order)
+  values
+    ('shirts', 'قمصان', 'Chemises', 1),
+    ('packs',  'باقات', 'Packs',    2)
+  on conflict (slug) do nothing;
 
-insert into public.product_variants (id, product_id, size, color_name, color_hex, sku, price, stock, weight_grams, sort_order)
-values
-  ('aaaaaaaa-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111', 'M',  'أبيض',  '#ffffff', 'DEMO-TS-W-M',  2500, 12, 180, 0),
-  ('aaaaaaaa-2222-4111-8222-222222222222', '11111111-1111-4111-8111-111111111111', 'L',  'أسود',  '#000000', 'DEMO-TS-B-L',  2500,  8, 180, 1),
-  ('bbbbbbbb-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', 'M',  'أبيض',  '#ffffff', 'DEMO-PK-W-M',  4500,  6, 420, 0),
-  ('bbbbbbbb-2222-4111-8222-222222222222', '22222222-2222-4222-8222-222222222222', 'L',  'أسود',  '#000000', 'DEMO-PK-B-L',  4500,  4, 420, 1)
-on conflict (id) do nothing;
+  insert into public.products (id, slug, name, name_fr, description, kind, status, category_id, published_at)
+  values
+    ('11111111-1111-4111-8111-111111111111', 'shirt-demo',  'قميص قطني كلاسيكي',  'Chemise coton classique',  'قميص قطني 100% بقصة مريحة، مناسب للعمل والمناسبات اليومية.', 'single', 'published', (select id from public.categories where slug = 'shirts'), now()),
+    ('22222222-2222-4222-8222-222222222222', 'pack-demo',    'باك القميص + البنطال', 'Pack chemise + pantalon', 'باقة موفرة تجمع قميصاً وبنطالاً بسعر أقل من شرائهما منفصلين.', 'pack', 'published', (select id from public.categories where slug = 'packs'), now())
+  on conflict (id) do nothing;
 
--- Demo imagery: external placeholders so a fresh install renders a shop that
--- looks like a shop on first load. Replace with uploaded media.
-insert into public.variant_images (variant_id, url, alt, sort_order)
-values
-  ('aaaaaaaa-1111-4111-8111-111111111111', 'https://picsum.photos/seed/openstore-shirt-white/900/900', 'قميص أبيض', 0),
-  ('aaaaaaaa-2222-4111-8222-222222222222', 'https://picsum.photos/seed/openstore-shirt-black/900/900', 'قميص أسود', 0),
-  ('bbbbbbbb-1111-4111-8111-111111111111', 'https://picsum.photos/seed/openstore-pack-white/900/900', 'باقة بيضاء', 0),
-  ('bbbbbbbb-2222-4111-8222-222222222222', 'https://picsum.photos/seed/openstore-pack-black/900/900', 'باقة سوداء', 0)
-on conflict do nothing;
+  insert into public.product_variants (id, product_id, size, color_name, color_hex, sku, price, stock, weight_grams, sort_order)
+  values
+    ('aaaaaaaa-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111', 'M',  'أبيض',  '#ffffff', 'DEMO-TS-W-M',  2500, 12, 180, 0),
+    ('aaaaaaaa-2222-4111-8222-222222222222', '11111111-1111-4111-8111-111111111111', 'L',  'أسود',  '#000000', 'DEMO-TS-B-L',  2500,  8, 180, 1),
+    ('bbbbbbbb-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', 'M',  'أبيض',  '#ffffff', 'DEMO-PK-W-M',  4500,  6, 420, 0),
+    ('bbbbbbbb-2222-4111-8222-222222222222', '22222222-2222-4222-8222-222222222222', 'L',  'أسود',  '#000000', 'DEMO-PK-B-L',  4500,  4, 420, 1)
+  on conflict (id) do nothing;
 
-insert into public.pack_items (product_id, variant_id, quantity, sort_order)
-values
-  ('22222222-2222-4222-8222-222222222222', 'aaaaaaaa-1111-4111-8111-111111111111', 1, 0),
-  ('22222222-2222-4222-8222-222222222222', 'bbbbbbbb-1111-4111-8111-111111111111', 1, 1)
-on conflict (product_id, variant_id) do nothing;
+  -- Demo imagery: external placeholders so a fresh install renders a shop that
+  -- looks like a shop on first load. Replace with uploaded media.
+  insert into public.variant_images (variant_id, url, alt, sort_order)
+  values
+    ('aaaaaaaa-1111-4111-8111-111111111111', 'https://picsum.photos/seed/openstore-shirt-white/900/900', 'قميص أبيض', 0),
+    ('aaaaaaaa-2222-4111-8222-222222222222', 'https://picsum.photos/seed/openstore-shirt-black/900/900', 'قميص أسود', 0),
+    ('bbbbbbbb-1111-4111-8111-111111111111', 'https://picsum.photos/seed/openstore-pack-white/900/900', 'باقة بيضاء', 0),
+    ('bbbbbbbb-2222-4111-8222-222222222222', 'https://picsum.photos/seed/openstore-pack-black/900/900', 'باقة سوداء', 0)
+  on conflict do nothing;
 
-insert into public.reviews (id, product_id, customer_name, rating, comment, is_approved)
-values
-  ('cccccccc-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111', 'سعاد', 5, 'قماش ممتاز والتوصيل كان سريع.', true),
-  ('cccccccc-2222-4222-8222-222222222222', '22222222-2222-4222-8222-222222222222', 'كريم', 4, 'الباك مناسب والسعر معقول.', true)
-on conflict (id) do nothing;
+  insert into public.pack_items (product_id, variant_id, quantity, sort_order)
+  values
+    ('22222222-2222-4222-8222-222222222222', 'aaaaaaaa-1111-4111-8111-111111111111', 1, 0),
+    ('22222222-2222-4222-8222-222222222222', 'bbbbbbbb-1111-4111-8111-111111111111', 1, 1)
+  on conflict (product_id, variant_id) do nothing;
 
--- The `true` above is a lie, and deliberately so. validate_review() forces
--- is_approved := false on every INSERT, including this one, because that trigger
--- is the control that stops a customer approving their own review. The demo
--- reviews therefore arrive unapproved and are approved here with an UPDATE,
--- which is exactly the path the moderation screen uses. Do not "fix" this by
--- weakening the trigger.
-update public.reviews
-   set is_approved = true
- where id in (
-   'cccccccc-1111-4111-8111-111111111111',
-   'cccccccc-2222-4222-8222-222222222222'
- )
-   and is_approved = false;
+  insert into public.reviews (id, product_id, customer_name, rating, comment, is_approved)
+  values
+    ('cccccccc-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111', 'سعاد', 5, 'قماش ممتاز والتوصيل كان سريع.', true),
+    ('cccccccc-2222-4222-8222-222222222222', '22222222-2222-4222-8222-222222222222', 'كريم', 4, 'الباك مناسب والسعر معقول.', true)
+  on conflict (id) do nothing;
+
+  -- The `true` above is a lie, and deliberately so. validate_review() forces
+  -- is_approved := false on every INSERT, including this one, because that trigger
+  -- is the control that stops a customer approving their own review. The demo
+  -- reviews therefore arrive unapproved and are approved here with an UPDATE,
+  -- which is exactly the path the moderation screen uses. Do not "fix" this by
+  -- weakening the trigger.
+  update public.reviews
+     set is_approved = true
+   where id in (
+     'cccccccc-1111-4111-8111-111111111111',
+     'cccccccc-2222-4222-8222-222222222222'
+   )
+     and is_approved = false;
+end;
+$$;
 
 -- =============================================================================
 -- 10. Later additions
@@ -1214,7 +1281,7 @@ security definer
 set search_path = ''
 as $$
 begin
-  if new.quantity is null or new.quantity < 1 or new.quantity > 100 then
+  if new.quantity is null or new.quantity < 1 or new.quantity > 20 then
     raise exception 'Invalid quantity' using errcode = 'check_violation';
   end if;
 
@@ -2113,6 +2180,7 @@ select jsonb_build_object(
               'id', v.id,
               'size', v.size,
               'color_name', v.color_name,
+              'color_hex', v.color_hex,
               'price', v.price,
               'compare_at_price', v.compare_at_price,
               'stock', v.stock,
@@ -2180,6 +2248,65 @@ comment on function public.catalogue_page(text, text, text[], text[], int, int, 
 revoke all on function public.catalogue_page(text, text, text[], text[], int, int, boolean, text, int, int) from public;
 grant execute on function public.catalogue_page(text, text, text[], text[], int, int, boolean, text, int, int) to anon, authenticated;
 grant execute on function public.normalize_arabic(text) to anon, authenticated;
+
+
+-- ── The eleven 2026 wilayas (Law 26-06) ─────────────────────────────────────
+-- Algeria went from 58 to 69 wilayas. A shop that priced its delivery before
+-- then has no row for Aflou, Barika and the rest, so their buyers would see no
+-- price. Each new wilaya starts with the prices of the wilaya it was carved
+-- from, and joins a restricted delivery list wherever its parent is on it. Rows
+-- the owner already set are left alone; edit them in Admin > Delivery.
+insert into public.delivery_zones (wilaya, fee, stopdesk_fee, eta_days, is_active)
+select n.wilaya, p.fee, p.stopdesk_fee, p.eta_days, p.is_active
+  from (values
+    ('Aflou', 'Laghouat'),
+    ('Barika', 'Batna'),
+    ('El Kantara', 'Biskra'),
+    ('Bir El Ater', 'Tebessa'),
+    ('El Aricha', 'Tlemcen'),
+    ('Ksar Chellala', 'Tiaret'),
+    ('Ain Oussara', 'Djelfa'),
+    ('Messaad', 'Djelfa'),
+    ('Ksar El Boukhari', 'Medea'),
+    ('Bou Saada', 'M''Sila'),
+    ('El Abiodh Sidi Cheikh', 'El Bayadh')
+  ) as n (wilaya, parent)
+  join public.delivery_zones p on p.wilaya = n.parent
+on conflict (wilaya) do nothing;
+
+update public.store_settings s
+   set delivery_wilayas = s.delivery_wilayas || array(
+         select n.wilaya from (values
+    ('Aflou', 'Laghouat'),
+    ('Barika', 'Batna'),
+    ('El Kantara', 'Biskra'),
+    ('Bir El Ater', 'Tebessa'),
+    ('El Aricha', 'Tlemcen'),
+    ('Ksar Chellala', 'Tiaret'),
+    ('Ain Oussara', 'Djelfa'),
+    ('Messaad', 'Djelfa'),
+    ('Ksar El Boukhari', 'Medea'),
+    ('Bou Saada', 'M''Sila'),
+    ('El Abiodh Sidi Cheikh', 'El Bayadh')
+         ) as n (wilaya, parent)
+          where n.parent = any(s.delivery_wilayas)
+            and not (n.wilaya = any(s.delivery_wilayas)))
+ where coalesce(array_length(s.delivery_wilayas, 1), 0) > 0;
+
+-- ── Version ────────────────────────────────────────────────────────────────
+-- Which schema.sql this database last ran. The dashboard compares it with the
+-- code (SCHEMA_VERSION in src/lib/version.ts) and asks the owner to run the
+-- update when the code is newer. Bump both together on every schema change.
+create or replace function public.openstore_schema_version()
+returns int
+language sql
+immutable
+set search_path = ''
+as $$
+  select 3;
+$$;
+revoke all on function public.openstore_schema_version() from public;
+grant execute on function public.openstore_schema_version() to anon, authenticated;
 
 -- Ask the API to pick up the new tables and functions straight away, so a shop
 -- set up from the SQL Editor works on the very next page refresh.

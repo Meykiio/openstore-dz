@@ -132,6 +132,29 @@ Browser validation is for the user's benefit. It is not a security control. The 
 length, range and format rules are enforced in BEFORE INSERT triggers on `orders` and
 `reviews`, so a hand-crafted request hits the same wall.
 
+## Abuse limits (0.2.0)
+
+Each refuses with a `hint` the checkout translates (`checkout.error.<hint>`).
+
+| Limit                                    | Where                                                             | Hint               |
+| ---------------------------------------- | ----------------------------------------------------------------- | ------------------ |
+| 20 of one item per line                  | `validate_order_item()`, mirrored by `MAX_PER_LINE` in `cart.tsx` | (message)          |
+| 50 pieces per order                      | `place_order()`                                                   | `too_many_items`   |
+| 10 orders an hour per connection         | `place_order()`, `orders.client_key`                              | `too_many_orders`  |
+| 3 pending orders a day per phone         | `validate_order()`                                                | `too_many_pending` |
+| 20 unapproved reviews an hour, shop-wide | `validate_review()`                                               | `too_many_reviews` |
+
+The connection is Cloudflare's `cf-connecting-ip` request header, else the last
+`x-forwarded-for` entry, stored only as a salted md5. Never the first entry: a caller
+can write that one (supabase discussion 34647). Calls with neither header, as in the SQL
+editor, are not limited.
+
+## Schema version (0.2.0)
+
+`openstore_schema_version()` returns the version of `schema.sql` the database last ran;
+`SCHEMA_VERSION` in `src/lib/version.ts` is the one the code expects. The dashboard asks
+the owner to run the update when the code is newer. **Bump both on every schema change.**
+
 ## Storage
 
 One public bucket, `product-media`, for product and review imagery. Public read is the

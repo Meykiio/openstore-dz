@@ -11,6 +11,7 @@ import { setOrderStatus, type AdminOrder, type OrderStatus } from "@/lib/admin";
 import type { PhoneHistory } from "@/lib/admin-phones";
 import { BlockPhoneButton } from "./phone-guard";
 import { CarrierAction, PickupOffice } from "./carrier-action";
+import { DeleteOrderButton } from "./order-delete";
 
 /** Expanded order: lines, money, recipient, and the status transitions. */
 export function OrderDetail({
@@ -92,6 +93,7 @@ export function OrderDetail({
           {t("admin.slip.printOne")}
         </Link>
         <BlockPhoneButton phone={order.phone} history={history} />
+        <DeleteOrderButton orderId={order.id} />
       </div>
     </div>
   );

@@ -43,7 +43,7 @@ export const Route = createFileRoute("/")({
     const description =
       (ar ? s?.description : s?.description_fr)?.trim() ||
       (ar
-        ? "تسوق أونلاين مع الدفع عند الاستلام والتوصيل إلى 58 ولاية."
+        ? "تسوق أونلاين مع الدفع عند الاستلام والتوصيل إلى 69 ولاية."
         : "Shop online, pay cash on delivery.");
     return {
       meta: [

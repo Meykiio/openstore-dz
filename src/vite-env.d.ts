@@ -9,6 +9,9 @@ interface ImportMetaEnv {
   readonly VITE_DEMO_MODE?: string;
 }
 
+/** OpenStore's version from package.json, set in vite.config.ts. */
+declare const __APP_VERSION__: string;
+
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }

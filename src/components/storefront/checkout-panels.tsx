@@ -7,32 +7,7 @@ import { formatDzd } from "@/lib/format";
 import { WILAYAS } from "@/lib/wilayas";
 import { useStoreSettings } from "@/lib/queries";
 import { useCommunes } from "@/lib/communes";
-import type { DeliveryMethod } from "@/lib/delivery";
-
-/** The address form shape, shared by the page and its panels. */
-export type CheckoutForm = {
-  customer_name: string;
-  phone: string;
-  wilaya: string;
-  commune: string;
-  address: string;
-  note: string;
-  delivery_method: DeliveryMethod;
-  stopdesk_id: string;
-  stopdesk_name: string;
-};
-
-export const EMPTY_CHECKOUT_FORM: CheckoutForm = {
-  customer_name: "",
-  phone: "",
-  wilaya: "",
-  commune: "",
-  address: "",
-  note: "",
-  delivery_method: "home",
-  stopdesk_id: "",
-  stopdesk_name: "",
-};
+import type { CheckoutForm } from "@/lib/checkout-form";
 
 export function AddressFields({
   form,
@@ -49,7 +24,7 @@ export function AddressFields({
 
   // Restrict the picker to wilayas the owner actually serves. An empty list
   // means everywhere. The database enforces the same rule, so this is courtesy
-  // rather than control — but offering 58 options when 6 are served is how a
+  // rather than control — but offering 69 options when 6 are served is how a
   // buyer picks one that gets rejected at the last step.
   const allowed = settings?.delivery_wilayas ?? [];
   const deliverable =

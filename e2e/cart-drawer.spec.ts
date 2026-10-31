@@ -38,6 +38,8 @@ async function addFirstProductToCart(page: Page, width: number) {
     await page.getByTestId("cart-open").click();
   }
   await expect(drawer).toBeVisible({ timeout: 10_000 });
+  // The sheet slides in; measure where it lands, not where it is mid-slide.
+  await drawer.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
 }
 
 for (const width of [320, 360, 414, 768]) {

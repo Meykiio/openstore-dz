@@ -5,10 +5,16 @@ master files; they never weaken a `[HARD]` rule.
 
 ## Current State
 
-Last updated 2026-10-22. Everything in this section was run, not assumed.
+Last updated 2026-10-30. Everything in this section was run, not assumed.
 
 ### Verified
 
+- **0.2.0** (2026-10-30), ported from JOAT-store, a shop built on this code: `npm run
+  check` green (99 unit tests); `schema.sql` parsed with the PostgreSQL parser
+  (libpg-query, all statements and every PL/pgSQL body); the gallery, the product-page
+  order form, the cart sheet and 16px fields checked in headless Chrome on the build.
+  Playwright on the build: accessibility (axe), responsive, catalogue and cart: 30 passed.
+  The limits, delete, crop and formula guard ran in production on JOAT-store.
 - `npm run check` green: typecheck, lint, unit tests, knip, build.
 - `supabase/schema.sql` builds a working shop on an empty database, and re-running
   it is a no-op. The full install path was walked through the UI on a fresh local
@@ -30,10 +36,13 @@ Last updated 2026-10-22. Everything in this section was run, not assumed.
 - LCP is still above the 2.5 s budget on the throttled profile. What is left is
   mostly the 230 KB entry script: the Supabase client ships auth, storage and
   realtime to every buyer, and all three languages' strings load at once.
-- **Algeria may have moved to 69 wilayas** (Law 26-06, JO n°25, 5 April 2026,
-  according to the MIT commune dataset used here). The shop, Guepex and the
-  delivery zones still use 58. Not verified against an official source or the
-  carrier; check Guepex's `/wilayas` before changing anything.
+- **69 wilayas since 0.2.0**, numbered per Décret présidentiel 26-206 (JO n° 40, 25 May
+  2026). Guepex has not confirmed the eleven new ones, so parcels and pickup offices for
+  them use the parent wilaya (`carrierWilaya` in `src/lib/wilayas.ts`), which runs
+  them until 31 December 2026. Switch to the new names once Guepex's `/wilayas` lists them.
+- **The Update OpenStore workflow is untested on a live copy.** It is written to commit
+  as the person who runs it, because Vercel's free plan deploys only the owner's
+  commits; that still needs one real run on a Vercel-button copy.
 - Pickup offices come from the Guepex API, which is untested here: no carrier key.
   Without one, the owner chooses the office on the order before creating a parcel.
 - The Guepex webhook returns 503 by design until `GUEPEX_WEBHOOK_SECRET` is set.

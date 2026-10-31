@@ -152,6 +152,17 @@ export async function setOrderStatus(
   if (error) throw new Error(error.message);
 }
 
+/**
+ * Delete an order for good (test orders, duplicates). Its lines go with it
+ * (`on delete cascade`). The row count is checked because a delete that the
+ * database refuses under RLS returns no error, only zero rows.
+ */
+export async function deleteOrder(id: string): Promise<void> {
+  const { data, error } = await getSupabase().from("orders").delete().eq("id", id).select("id");
+  if (error) throw new Error(error.message);
+  if (!data || data.length === 0) throw new Error("The order could not be deleted.");
+}
+
 export async function saveStoreSettings(patch: Partial<StoreSettings>): Promise<void> {
   const { error } = await getSupabase().from("store_settings").update(patch).eq("id", 1);
   if (error) throw new Error(error.message);

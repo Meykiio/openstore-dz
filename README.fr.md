@@ -37,7 +37,7 @@ recevoir des commandes en paiement à la livraison. Ce qui fonctionne, vérifié
 - **Clients :** catalogue avec recherche et filtres, fiche produit avec choix de la couleur
   puis de la taille, photos zoomables, guide des tailles, avis et produits similaires.
   Livraison à domicile ou retrait au bureau du transporteur, les deux prix affichés avant
-  de commander, et suggestions de communes pour les 58 wilayas. Prix soldés, commande par
+  de commander, et suggestions de communes pour les 69 wilayas. Prix soldés, commande par
   WhatsApp, suivi de commande. En arabe, français et anglais.
 - **Commerçants :** assistant de configuration (nom, logo, couleur, téléphone, prix de
   livraison de toutes les wilayas, mentions légales), file d'appels de confirmation, taux
@@ -83,6 +83,13 @@ ne détient **jamais** l'argent du commerçant.
 - Avis clients, aujourd'hui absents de presque toutes les boutiques algériennes
 
 ---
+
+## Mettre à jour votre boutique
+
+Votre boutique tourne déjà ? [Le guide de mise à jour](UPDATING.fr.md) vous accompagne en
+cinq minutes environ, sans rien installer : un clic dans l'onglet Actions de GitHub pour
+le code, un collage dans l'éditeur SQL de Supabase pour la base de données. Votre tableau
+de bord vous prévient quand une nouvelle version sort et quand la base doit être mise à jour.
 
 ## Installation
 

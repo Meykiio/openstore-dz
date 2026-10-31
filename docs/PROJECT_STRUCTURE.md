@@ -6,7 +6,8 @@ openstore-dz/
 │   ├── workflows/
 │   │   ├── ci.yml               typecheck, lint, tests, knip, build,
 │   │   │                        Trivy, Gitleaks history scan
-│   │   └── codeql.yml           weekly security analysis
+│   │   ├── codeql.yml           weekly security analysis
+│   │   └── update-openstore.yml one-click update for shops made with the Vercel button
 │   ├── ISSUE_TEMPLATE/
 │   │   ├── bug_report.md
 │   │   ├── feature_request.md
@@ -39,7 +40,10 @@ openstore-dz/
 │   │   ├── supabase/
 │   │   │   ├── client.ts        browser client, publishable key only
 │   │   │   ├── health.ts        reachability probe
+│   │   │   ├── project-ref.ts   Supabase project ref from the URL
 │   │   │   └── types.ts         generated, do not hand-edit
+│   │   ├── checkout-form.ts     the order form shape, checkout and product page
+│   │   ├── version.ts           app and schema versions, latest release check
 │   │   ├── theme.ts             data-theme handling, pre-paint bootstrap
 │   │   └── utils.ts             cn()
 │   ├── routes/                  file-based routes, one file per screen
@@ -66,6 +70,7 @@ openstore-dz/
 ├── README.md                    English, with the one-click setup prompt
 ├── README.ar.md                 Arabic
 ├── README.fr.md                 French
+├── UPDATING.md                  how an owner updates a running shop (.ar.md, .fr.md)
 ├── components.json              shadcn configuration
 ├── eslint.config.js
 ├── knip.json                    dead-code configuration

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Check, MessageCircle, Package } from "lucide-react";
 import { useI18n } from "@/lib/i18n-context";
 import { formatDzd } from "@/lib/format";
-import { useCart } from "@/lib/cart";
+import { MAX_PER_LINE, useCart } from "@/lib/cart";
 import { useStoreSettings, type CatalogueProduct, type CatalogueVariant } from "@/lib/queries";
 import { waLink } from "@/lib/whatsapp";
 import { saleOf } from "@/lib/sale";
@@ -148,7 +148,9 @@ export function AddToCart({
           </span>
           <button
             type="button"
-            onClick={() => setQuantity((q) => Math.min(selected?.stock ?? 100, q + 1))}
+            onClick={() =>
+              setQuantity((q) => Math.min(selected?.stock ?? MAX_PER_LINE, MAX_PER_LINE, q + 1))
+            }
             aria-label={`${t("common.quantity")} +`}
           >
             +

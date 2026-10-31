@@ -48,9 +48,18 @@ const COLUMNS = [
   "tracking_number",
 ] as const;
 
-/** RFC 4180 quoting: wrap every field, double any quote inside it. */
-function cell(value: string | number | null): string {
-  return `"${String(value ?? "").replace(/"/g, '""')}"`;
+const FORMULA_START = /^[=+\-@\t\r]/;
+
+/**
+ * RFC 4180 quoting: wrap every field, double any quote inside it. Text a buyer
+ * typed that starts like a formula (`=`, `+`, `-`, `@`, tab, return) gets a
+ * leading apostrophe, so a fake order named `=HYPERLINK(...)` stays text when the
+ * owner opens the file in Excel or Google Sheets. Numbers pass through as numbers.
+ */
+export function cell(value: string | number | null): string {
+  let text = String(value ?? "");
+  if (typeof value === "string" && FORMULA_START.test(text)) text = `'${text}`;
+  return `"${text.replace(/"/g, '""')}"`;
 }
 
 /**

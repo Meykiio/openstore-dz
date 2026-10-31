@@ -769,6 +769,10 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
       };
+      openstore_schema_version: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
       category_product_counts: {
         Args: Record<PropertyKey, never>;
         Returns: {

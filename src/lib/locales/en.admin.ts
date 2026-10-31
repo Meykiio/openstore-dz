@@ -147,4 +147,26 @@ export const enAdmin = {
   "admin.settings.returnsNote": "Returns policy",
   "admin.settings.returnsNoteHint":
     "What a buyer should know before ordering. Shown in the footer.",
+  "admin.orders.delete": "Delete order",
+  "admin.orders.deleteConfirm": "Delete this order for good? This cannot be undone.",
+  "admin.orders.deleted": "Order deleted",
+  "admin.frame.keep": "Keep:",
+  "admin.frame.top": "Top",
+  "admin.frame.center": "Centre",
+  "admin.frame.bottom": "Bottom",
+  "admin.frame.hint":
+    "Photos are cropped to the shop's 4:5 frame. Choose the part to keep: top for an item on a model, bottom for shoes or trousers, centre for a flat lay.",
+  "update.dbTitle": "Your database needs an update",
+  "update.dbBody":
+    "Your shop was updated but its database is still on the previous version, and some pages may not work until it is. It takes a minute:",
+  "update.copy": "Copy the update script",
+  "update.copied": "Copied",
+  "update.copyFailed":
+    "Your browser blocked the copy. Open supabase/schema.sql on GitHub and copy it from there.",
+  "update.openEditor": "Open your Supabase SQL Editor",
+  "update.runIt":
+    "Paste the script and click Run. If a warning window appears, choose Run without RLS. Wait for Success, then refresh this page.",
+  "update.newTitle": "A new OpenStore version is available ({version}).",
+  "update.newBody": "You have {version}.",
+  "update.howTo": "How to update",
 };

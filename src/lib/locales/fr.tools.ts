@@ -62,7 +62,7 @@ export const frTools = {
   "admin.setup.gap.delivery": "Prix de livraison",
   "admin.setup.gap.legal": "Mentions légales",
   "admin.setup.phoneInvalid": "Saisissez un numéro algérien, ex. 0555 12 34 56",
-  "admin.setup.applyAll": "Appliquer ces prix aux 58 wilayas",
+  "admin.setup.applyAll": "Appliquer ces prix aux 69 wilayas",
   "admin.setup.zonesExist":
     "Vous avez déjà des prix pour {count} wilayas. Activez ceci seulement pour les remplacer.",
   "admin.setup.whatsappHint": "Laissez vide si c’est le même numéro.",

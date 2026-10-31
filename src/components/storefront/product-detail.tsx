@@ -13,6 +13,7 @@ import {
 import { StarRating } from "./star-rating";
 import { ProductGallery } from "./product-gallery";
 import { AddToCart, StockLine } from "./product-purchase";
+import { QuickOrder } from "./quick-order";
 import { localized } from "@/lib/i18n";
 import { ColourPicker, SizePicker } from "./variant-picker";
 
@@ -93,6 +94,7 @@ export function ProductDetail({ product }: { product: CatalogueProduct }) {
             setQuantity={setQuantity}
           />
         )}
+        {selected && selected.stock > 0 && <QuickOrder selected={selected} quantity={quantity} />}
 
         {description && (
           <div className="flex flex-col gap-2 border-t border-outline pt-5">
