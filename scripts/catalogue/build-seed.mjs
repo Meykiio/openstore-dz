@@ -122,7 +122,7 @@ function q(value) {
  * and does want JSON, so the two are formatted differently on purpose.
  */
 function pgArray(values) {
-  return `{${values.map((v) => `"${String(v).replace(/"/g, '\\"')}"`).join(",")}}`;
+  return `{${values.map((v) => `"${String(v).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`).join(",")}}`;
 }
 
 function rows(list) {

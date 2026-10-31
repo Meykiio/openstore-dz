@@ -10,6 +10,12 @@ request.
 
 ## Ideas with a clear trigger
 
+**Vite 8 with TanStack Start 1.169, and Lucide 1.x.**
+Trigger: a fix or feature needs either. `@tanstack/react-start` 1.169 requires Vite 8, and
+`lucide-react` 1.x renames or removes icons. Dependabot skips both
+(`.github/dependabot.yml`) until they are done as their own change, with the full check
+and the browser tests.
+
 **A captcha on the order forms (Cloudflare Turnstile).**
 Trigger: fake orders get past the database limits (many phones from many IPs). It needs
 a server check of the token before `place_order`, so orders would go through a server

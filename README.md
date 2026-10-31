@@ -12,7 +12,7 @@ Arabic (RTL) first. French. Cash on delivery. No subscription, no setup fee, no 
 
 ---
 
-## Status: v0.1.0, first public release
+## Status: v0.2.0
 
 **Live demo: [openstore-dz.vercel.app](https://openstore-dz.vercel.app)**, a real
 clothing catalogue running on this exact code.
