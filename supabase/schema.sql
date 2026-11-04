@@ -2303,7 +2303,7 @@ language sql
 immutable
 set search_path = ''
 as $$
-  select 3;
+  select 4;
 $$;
 revoke all on function public.openstore_schema_version() from public;
 grant execute on function public.openstore_schema_version() to anon, authenticated;
