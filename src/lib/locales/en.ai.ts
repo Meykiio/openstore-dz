@@ -1,0 +1,75 @@
+import type { arAi } from "./ar.ai";
+
+/** AI assistant strings: Admin > Integrations and the photo upload link (0.3.0). */
+export const enAi: Record<keyof typeof arAi, string> = {
+  "admin.nav.integrations": "Integrations",
+  "ai.int.title": "Integrations",
+  "ai.int.intro":
+    "Connect Claude to your shop once, then ask it in words: add a product, change a text, confirm an order. It acts with your own account, and you can switch it off here at any time.",
+  "ai.int.ownerOnly": "This page is for the shop owner only.",
+  "ai.int.dbMissing":
+    "The database is not updated yet. Run supabase/schema.sql in Supabase, then reopen this page.",
+  "ai.int.url": "Connection address",
+  "ai.int.urlHelp": "Copy this address and paste it in Claude when you add the connector.",
+  "ai.int.connected": "Connected assistants",
+  "ai.int.none": "No assistant connected yet. Follow the steps below.",
+  "ai.int.connectedOn": "Connected {date}",
+  "ai.int.lastUsed": "Last used {date}",
+  "ai.int.neverUsed": "Not used yet",
+  "ai.int.enabled": "Allowed to manage the shop",
+  "ai.int.notAllowed": "Signed in but not allowed yet. Allow it so it can work.",
+  "ai.int.allow": "Allow",
+  "ai.int.signedOut": "No longer signed in. Reconnect it from Claude or remove it.",
+  "ai.int.revoke": "Disconnect",
+  "ai.int.revokeConfirm": "Tap again to confirm",
+  "ai.int.revoked": "Assistant disconnected",
+  "ai.int.saved": "Saved",
+  "ai.int.activity": "Activity",
+  "ai.int.activityHelp": "The last 100 actions. Refreshes every 30 seconds.",
+  "ai.int.activityEmpty": "Nothing yet.",
+  "ai.int.all": "All assistants",
+  "ai.int.kind.read": "Read",
+  "ai.int.kind.write": "Change",
+  "ai.int.kind.propose": "Asked to confirm",
+  "ai.int.kind.destructive": "Delete or price",
+  "ai.int.refused": "Refused",
+  "ai.int.setup": "How to connect",
+  "ai.int.claude.title": "Claude (web, desktop, phone)",
+  "ai.int.claude.1":
+    "On claude.ai or the desktop app: Customize, then Connectors, then Add, then Add custom connector.",
+  "ai.int.claude.2": "Name: your shop name. Address: paste the connection address above, then Add.",
+  "ai.int.claude.3":
+    "Tap Connect. A page of your shop opens: sign in with the shop owner's account and approve.",
+  "ai.int.claude.4":
+    "Come back to this page and check the assistant is allowed. It then works in the phone app too.",
+  "ai.int.code.title": "Claude Code (developers)",
+  "ai.int.code.1": "Run this command, then /mcp to sign in:",
+  "ai.int.safety":
+    "Safety: deletes and price changes always ask for your yes. Buyer text (notes, names, reviews) can contain fake orders, and the assistant is told to ignore them. Do not turn on email or web browsing connectors in the same chat.",
+  "ai.upload.title": "Add photos",
+  "ai.upload.for": "{product}, colour {colour}",
+  "ai.upload.keepHint": "Photos are cut to the shop's 4:5 frame and resized, as in Products.",
+  "ai.upload.pick": "Choose photos",
+  "ai.upload.drive": "Import from Google Drive",
+  "ai.upload.driveHelp": "The file must be shared: Anyone with the link.",
+  "ai.upload.driveFailed":
+    "Could not fetch the Drive file. Check it is shared (Anyone with the link) and is an image.",
+  "ai.upload.working": "Uploading {done} of {total}…",
+  "ai.upload.done": "{count} photo(s) added. Go back to Claude.",
+  "ai.upload.expired": "This link has expired. Ask Claude for a new one.",
+  "ai.upload.used": "This link was already used. Ask Claude for a new one.",
+  "ai.upload.missing": "This link is not valid.",
+  "ai.int.aiTitle": "AI assistant (Claude)",
+  "ai.consent.title": "Connect an AI assistant",
+  "ai.consent.body":
+    "{name} wants to manage your shop: products, settings, texts and orders. Approve only if you asked for this connection yourself.",
+  "ai.consent.returnsTo": "Returns to: {host}",
+  "ai.consent.approve": "Approve and connect",
+  "ai.consent.deny": "Deny",
+  "ai.consent.unnamed": "Unnamed assistant",
+  "ai.consent.signInFirst": "Sign in with the shop owner's account to continue.",
+  "ai.consent.ownerOnly": "Only the shop owner can connect an AI assistant.",
+  "ai.consent.missing":
+    "The connection link is incomplete. Go back to the assistant and start again.",
+  "ai.consent.error": "The connection did not go through. Go back to the assistant and try again.",
+};

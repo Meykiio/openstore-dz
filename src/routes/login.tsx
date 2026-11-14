@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LockKeyhole, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,8 +6,13 @@ import { Field, Input } from "@/components/ui/form";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n-context";
 import { getSupabase } from "@/lib/supabase/client";
+import { safeNext } from "@/lib/safe-next";
 
 export const Route = createFileRoute("/login")({
+  validateSearch: (search: Record<string, unknown>): { next?: string } => {
+    const next = safeNext(search.next);
+    return next ? { next } : {};
+  },
   head: () => ({ meta: [{ title: "دخول الإدارة" }, { name: "robots", content: "noindex" }] }),
   component: LoginPage,
 });
@@ -68,6 +73,12 @@ function LoginPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const { isAdmin, loading, user, refreshRole } = useAuth();
+  const { next } = Route.useSearch();
+  const goOn = useCallback(() => {
+    // A full load, so the consent or upload page starts with the fresh session.
+    if (next) window.location.assign(next);
+    else void navigate({ to: "/admin" });
+  }, [next, navigate]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -77,8 +88,8 @@ function LoginPage() {
 
   // Already signed in as an admin: nothing to do here.
   useEffect(() => {
-    if (!loading && isAdmin) void navigate({ to: "/admin" });
-  }, [loading, isAdmin, navigate]);
+    if (!loading && isAdmin) goOn();
+  }, [loading, isAdmin, goOn]);
 
   // A brand-new install has no owner, so point at setup rather than leaving the
   // owner staring at a sign-in form for an account that cannot exist yet.
@@ -100,7 +111,7 @@ function LoginPage() {
     setBusy(false);
     if (outcome.ok) {
       await refreshRole();
-      void navigate({ to: "/admin" });
+      goOn();
       return;
     }
     setError(outcome.error);

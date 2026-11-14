@@ -8,6 +8,13 @@ import { LoadingState } from "@/components/ui/feedback";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n-context";
 
+/** A photo upload link opened while signed out comes back here after sign-in. */
+function returnTo(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  const path = window.location.pathname;
+  return path.startsWith("/admin/upload/") ? path : undefined;
+}
+
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "لوحة التحكم" }, { name: "robots", content: "noindex" }] }),
   component: AdminLayout,
@@ -74,7 +81,9 @@ function AdminLayout() {
           {user ? t("admin.login.notAdmin") : t("admin.login.body")}
         </p>
         <Button asChild>
-          <Link to="/login">{t("admin.login.submit")}</Link>
+          <Link to="/login" search={{ next: returnTo() }}>
+            {t("admin.login.submit")}
+          </Link>
         </Button>
       </main>
     );

@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import {
+  Bot,
   ChevronsLeft,
   ClipboardList,
   LogOut,
@@ -39,6 +40,11 @@ const LINKS = [
   { to: "/admin/settings", labelKey: "admin.settings.title", icon: Settings, exact: false },
 ] as const;
 
+/** Only the owner can connect an assistant, so only the owner sees the link. */
+const OWNER_LINKS = [
+  { to: "/admin/integrations", labelKey: "admin.nav.integrations", icon: Bot, exact: false },
+] as const;
+
 export function AdminSidebar({
   open,
   collapsed,
@@ -51,7 +57,8 @@ export function AdminSidebar({
   onToggleCollapse: () => void;
 }) {
   const { t } = useI18n();
-  const { signOut } = useAuth();
+  const { signOut, role } = useAuth();
+  const links = role === "owner" ? [...LINKS, ...OWNER_LINKS] : LINKS;
 
   return (
     <>
@@ -87,7 +94,7 @@ export function AdminSidebar({
         <nav className="admin-sidebar-nav">
           <p className="admin-nav-group-label">{t("admin.nav.manage")}</p>
           <ul>
-            {LINKS.map((link) => (
+            {links.map((link) => (
               <li key={link.to}>
                 <Link
                   to={link.to}

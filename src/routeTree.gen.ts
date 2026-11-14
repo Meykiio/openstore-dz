@@ -21,6 +21,7 @@ import { Route as TrackRouteImport } from './routes/track'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
+import { Route as AdminIntegrationsRouteImport } from './routes/admin.integrations'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
@@ -28,10 +29,12 @@ import { Route as AdminSlipsRouteImport } from './routes/admin.slips'
 import { Route as AdminWelcomeRouteImport } from './routes/admin.welcome'
 import { Route as ApiAiDriveRouteImport } from './routes/api.ai-drive'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
+import { Route as OauthConsentRouteImport } from './routes/oauth.consent'
 import { Route as OrderTokenRouteImport } from './routes/order.$token'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as DotwellKnownOauthProtectedResourceMcpRouteImport } from './routes/[.]well-known.oauth-protected-resource.mcp'
 import { Route as AdminProductIdRouteImport } from './routes/admin.product.$id'
+import { Route as AdminUploadCodeRouteImport } from './routes/admin.upload.$code'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -93,6 +96,11 @@ const AdminDeliveryRoute = AdminDeliveryRouteImport.update({
   path: '/delivery',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminIntegrationsRoute = AdminIntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminProductsRoute = AdminProductsRouteImport.update({
   id: '/products',
   path: '/products',
@@ -128,6 +136,11 @@ const CategorySlugRoute = CategorySlugRouteImport.update({
   path: '/category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OauthConsentRoute = OauthConsentRouteImport.update({
+  id: '/oauth/consent',
+  path: '/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrderTokenRoute = OrderTokenRouteImport.update({
   id: '/order/$token',
   path: '/order/$token',
@@ -149,6 +162,11 @@ const AdminProductIdRoute = AdminProductIdRouteImport.update({
   path: '/product/$id',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminUploadCodeRoute = AdminUploadCodeRouteImport.update({
+  id: '/upload/$code',
+  path: '/upload/$code',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -162,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/track': typeof TrackRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/delivery': typeof AdminDeliveryRoute
+  '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -169,11 +188,13 @@ export interface FileRoutesByFullPath {
   '/admin/welcome': typeof AdminWelcomeRoute
   '/api/ai-drive': typeof ApiAiDriveRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/oauth/consent': typeof OauthConsentRoute
   '/order/$token': typeof OrderTokenRoute
   '/product/$slug': typeof ProductSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/.well-known/oauth-protected-resource/mcp': typeof DotwellKnownOauthProtectedResourceMcpRoute
   '/admin/product/$id': typeof AdminProductIdRoute
+  '/admin/upload/$code': typeof AdminUploadCodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -186,6 +207,7 @@ export interface FileRoutesByTo {
   '/track': typeof TrackRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/delivery': typeof AdminDeliveryRoute
+  '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -193,11 +215,13 @@ export interface FileRoutesByTo {
   '/admin/welcome': typeof AdminWelcomeRoute
   '/api/ai-drive': typeof ApiAiDriveRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/oauth/consent': typeof OauthConsentRoute
   '/order/$token': typeof OrderTokenRoute
   '/product/$slug': typeof ProductSlugRoute
   '/admin': typeof AdminIndexRoute
   '/.well-known/oauth-protected-resource/mcp': typeof DotwellKnownOauthProtectedResourceMcpRoute
   '/admin/product/$id': typeof AdminProductIdRoute
+  '/admin/upload/$code': typeof AdminUploadCodeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -212,6 +236,7 @@ export interface FileRoutesById {
   '/track': typeof TrackRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/delivery': typeof AdminDeliveryRoute
+  '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -219,11 +244,13 @@ export interface FileRoutesById {
   '/admin/welcome': typeof AdminWelcomeRoute
   '/api/ai-drive': typeof ApiAiDriveRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/oauth/consent': typeof OauthConsentRoute
   '/order/$token': typeof OrderTokenRoute
   '/product/$slug': typeof ProductSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/.well-known/oauth-protected-resource/mcp': typeof DotwellKnownOauthProtectedResourceMcpRoute
   '/admin/product/$id': typeof AdminProductIdRoute
+  '/admin/upload/$code': typeof AdminUploadCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -239,6 +266,7 @@ export interface FileRouteTypes {
     | '/track'
     | '/admin/categories'
     | '/admin/delivery'
+    | '/admin/integrations'
     | '/admin/products'
     | '/admin/reviews'
     | '/admin/settings'
@@ -246,11 +274,13 @@ export interface FileRouteTypes {
     | '/admin/welcome'
     | '/api/ai-drive'
     | '/category/$slug'
+    | '/oauth/consent'
     | '/order/$token'
     | '/product/$slug'
     | '/admin/'
     | '/.well-known/oauth-protected-resource/mcp'
     | '/admin/product/$id'
+    | '/admin/upload/$code'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -263,6 +293,7 @@ export interface FileRouteTypes {
     | '/track'
     | '/admin/categories'
     | '/admin/delivery'
+    | '/admin/integrations'
     | '/admin/products'
     | '/admin/reviews'
     | '/admin/settings'
@@ -270,11 +301,13 @@ export interface FileRouteTypes {
     | '/admin/welcome'
     | '/api/ai-drive'
     | '/category/$slug'
+    | '/oauth/consent'
     | '/order/$token'
     | '/product/$slug'
     | '/admin'
     | '/.well-known/oauth-protected-resource/mcp'
     | '/admin/product/$id'
+    | '/admin/upload/$code'
   id:
     | '__root__'
     | '/'
@@ -288,6 +321,7 @@ export interface FileRouteTypes {
     | '/track'
     | '/admin/categories'
     | '/admin/delivery'
+    | '/admin/integrations'
     | '/admin/products'
     | '/admin/reviews'
     | '/admin/settings'
@@ -295,11 +329,13 @@ export interface FileRouteTypes {
     | '/admin/welcome'
     | '/api/ai-drive'
     | '/category/$slug'
+    | '/oauth/consent'
     | '/order/$token'
     | '/product/$slug'
     | '/admin/'
     | '/.well-known/oauth-protected-resource/mcp'
     | '/admin/product/$id'
+    | '/admin/upload/$code'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -314,6 +350,7 @@ export interface RootRouteChildren {
   TrackRoute: typeof TrackRoute
   ApiAiDriveRoute: typeof ApiAiDriveRoute
   CategorySlugRoute: typeof CategorySlugRoute
+  OauthConsentRoute: typeof OauthConsentRoute
   OrderTokenRoute: typeof OrderTokenRoute
   ProductSlugRoute: typeof ProductSlugRoute
   DotwellKnownOauthProtectedResourceMcpRoute: typeof DotwellKnownOauthProtectedResourceMcpRoute
@@ -405,6 +442,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDeliveryRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/integrations': {
+      id: '/admin/integrations'
+      path: '/integrations'
+      fullPath: '/admin/integrations'
+      preLoaderRoute: typeof AdminIntegrationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/products': {
       id: '/admin/products'
       path: '/products'
@@ -454,6 +498,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/oauth/consent': {
+      id: '/oauth/consent'
+      path: '/oauth/consent'
+      fullPath: '/oauth/consent'
+      preLoaderRoute: typeof OauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/order/$token': {
       id: '/order/$token'
       path: '/order/$token'
@@ -482,12 +533,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminProductIdRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/upload/$code': {
+      id: '/admin/upload/$code'
+      path: '/upload/$code'
+      fullPath: '/admin/upload/$code'
+      preLoaderRoute: typeof AdminUploadCodeRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminDeliveryRoute: typeof AdminDeliveryRoute
+  AdminIntegrationsRoute: typeof AdminIntegrationsRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
@@ -495,11 +554,13 @@ interface AdminRouteChildren {
   AdminWelcomeRoute: typeof AdminWelcomeRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminProductIdRoute: typeof AdminProductIdRoute
+  AdminUploadCodeRoute: typeof AdminUploadCodeRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminDeliveryRoute: AdminDeliveryRoute,
+  AdminIntegrationsRoute: AdminIntegrationsRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminReviewsRoute: AdminReviewsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
@@ -507,6 +568,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminWelcomeRoute: AdminWelcomeRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminProductIdRoute: AdminProductIdRoute,
+  AdminUploadCodeRoute: AdminUploadCodeRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -523,6 +585,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrackRoute: TrackRoute,
   ApiAiDriveRoute: ApiAiDriveRoute,
   CategorySlugRoute: CategorySlugRoute,
+  OauthConsentRoute: OauthConsentRoute,
   OrderTokenRoute: OrderTokenRoute,
   ProductSlugRoute: ProductSlugRoute,
   DotwellKnownOauthProtectedResourceMcpRoute:
