@@ -1920,9 +1920,21 @@ begin
 end;
 $$;
 
+-- Two triggers, one function. A new order is exported at commit: place_order()
+-- inserts the order row first and its lines after, so a plain AFTER INSERT
+-- trigger ran before the lines existed and sent "created" with no items and a
+-- total of 0 (fixed in 0.3.0). The deferred constraint trigger runs once the
+-- transaction is done, and the payload re-reads the order by id. A status change
+-- is a single statement, so it stays an ordinary trigger.
 drop trigger if exists order_export_enqueue on public.orders;
 create trigger order_export_enqueue
-  after insert or update of status on public.orders
+  after update of status on public.orders
+  for each row execute function public.enqueue_order_export();
+
+drop trigger if exists order_export_created on public.orders;
+create constraint trigger order_export_created
+  after insert on public.orders
+  deferrable initially deferred
   for each row execute function public.enqueue_order_export();
 
 alter table public.order_export_targets enable row level security;
@@ -2303,7 +2315,7 @@ language sql
 immutable
 set search_path = ''
 as $$
-  select 3;
+  select 4;
 $$;
 revoke all on function public.openstore_schema_version() from public;
 grant execute on function public.openstore_schema_version() to anon, authenticated;
