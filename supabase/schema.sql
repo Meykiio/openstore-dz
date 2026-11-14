@@ -125,6 +125,20 @@ create table if not exists public.admin_users (
   created_at  timestamptz not null default now()
 );
 
+-- AI assistants the owner allowed (section 13). Created here, before
+-- has_admin_role() in section 4, because that function reads it. Empty until the
+-- owner connects one, and an empty table means every assistant is refused.
+create table if not exists public.ai_connections (
+  -- The OAuth client id Supabase assigned to the assistant (the token's client_id).
+  client_id     text primary key,
+  user_id       uuid not null references auth.users(id) on delete cascade,
+  name          text not null default 'Assistant',
+  enabled       boolean not null default true,
+  created_at    timestamptz not null default now(),
+  last_used_at  timestamptz
+);
+alter table public.ai_connections enable row level security;
+
 -- Categories are rows, not free text, so a category page has a canonical slug and
 -- a renamed label does not split one category into two.
 create table if not exists public.categories (
@@ -357,6 +371,22 @@ create index if not exists size_guides_product_idx  on public.size_guides (produ
 -- admin_users' own policy. search_path is pinned and every reference is
 -- schema-qualified, so a caller cannot point an unqualified name at their own
 -- object and run it with this function owner's privileges.
+--
+-- AI assistants (0.3.0, section 13). An assistant signs in through Supabase's
+-- OAuth server and holds the owner's own token plus a `client_id` claim. A normal
+-- sign-in has no client_id and gets exactly the answer it always got. A token with
+-- a client_id passes only for the owner, and only while the owner's switch for
+-- that assistant is on, so switching it off stops even a leaked token.
+create or replace function public.ai_request()
+returns boolean
+language sql
+stable
+set search_path = ''
+as $$
+  select coalesce(auth.jwt() ->> 'client_id', '') <> '';
+$$;
+grant execute on function public.ai_request() to anon, authenticated;
+
 create or replace function public.has_admin_role(_user_id uuid, _roles public.admin_role[])
 returns boolean
 language sql
@@ -367,6 +397,17 @@ as $$
   select exists (
     select 1 from public.admin_users
     where user_id = _user_id and role = any(_roles)
+  )
+  and (
+    coalesce(auth.jwt() ->> 'client_id', '') = ''
+    or exists (
+      select 1
+      from public.ai_connections c
+      join public.admin_users a on a.user_id = c.user_id and a.role = 'owner'
+      where c.client_id = auth.jwt() ->> 'client_id'
+        and c.user_id = _user_id
+        and c.enabled
+    )
   );
 $$;
 
@@ -1341,11 +1382,18 @@ create table if not exists public.blocked_phones (
 
 alter table public.blocked_phones enable row level security;
 
+-- Never an AI assistant: no tool needs the blocklist.
 drop policy if exists "Admins manage blocked phones" on public.blocked_phones;
 create policy "Admins manage blocked phones"
   on public.blocked_phones for all to authenticated
-  using      ((select public.has_admin_role((select auth.uid()), array['owner','staff']::public.admin_role[])) is true)
-  with check ((select public.has_admin_role((select auth.uid()), array['owner','staff']::public.admin_role[])) is true);
+  using (
+    (select public.has_admin_role((select auth.uid()), array['owner','staff']::public.admin_role[])) is true
+    and not (select public.ai_request())
+  )
+  with check (
+    (select public.has_admin_role((select auth.uid()), array['owner','staff']::public.admin_role[])) is true
+    and not (select public.ai_request())
+  );
 
 revoke all on public.blocked_phones from anon, authenticated;
 grant select, insert, delete on public.blocked_phones to authenticated;
@@ -1951,9 +1999,11 @@ create policy order_export_targets_admin on public.order_export_targets
   for all to authenticated
   using (
     (select public.has_admin_role((select auth.uid()), array['owner'::public.admin_role])) is true
+    and not (select public.ai_request())
   )
   with check (
     (select public.has_admin_role((select auth.uid()), array['owner'::public.admin_role])) is true
+    and not (select public.ai_request())
   );
 
 drop policy if exists order_export_log_admin on public.order_export_log;
@@ -2305,6 +2355,297 @@ update public.store_settings s
             and not (n.wilaya = any(s.delivery_wilayas)))
  where coalesce(array_length(s.delivery_wilayas, 1), 0) > 0;
 
+-- =============================================================================
+-- 13. AI assistant (Claude over MCP), 0.3.0
+-- =============================================================================
+--
+-- Off until the owner connects one. Claude signs in through Supabase Auth's OAuth
+-- 2.1 server and receives an ordinary access token for the owner's own account,
+-- with an extra `client_id` claim naming the assistant. Everything it does
+-- therefore goes through the policies above. Already in place earlier in this file:
+-- the `ai_connections` table (section 2), `ai_request()` and the assistant-aware
+-- `has_admin_role()` (section 4), and the blocklist and export-target policies that
+-- refuse assistants (sections 10 and 11). This section adds:
+--
+--   * ai_activity: an append-only log of every tool call, for Admin > Integrations.
+--   * ai_pending_actions: one-time codes. A delete or price change first returns a
+--     summary and a code; only a second call with the code does it, and it does
+--     exactly what was summarised (the arguments are stored, not resent).
+--   * ai_upload_codes: one-time photo upload links (the /admin/upload page).
+--
+-- Assistants are owner-only. Staff tokens with a client_id are always refused.
+-- docs/AI_ASSISTANT.md has the reasoning and the sources.
+
+create table if not exists public.ai_activity (
+  id          bigint generated always as identity primary key,
+  client_id   text not null,
+  tool        text not null,
+  -- read, write, propose (first half of a confirmed action), destructive (done).
+  kind        text not null check (kind in ('read', 'write', 'propose', 'destructive')),
+  target      text,
+  ok          boolean not null,
+  detail      text,
+  created_at  timestamptz not null default now()
+);
+create index if not exists ai_activity_client_time on public.ai_activity (client_id, created_at desc);
+create index if not exists ai_activity_time on public.ai_activity (created_at desc);
+
+create table if not exists public.ai_pending_actions (
+  code        text primary key,
+  client_id   text not null,
+  tool        text not null,
+  args        jsonb not null,
+  summary     text not null,
+  expires_at  timestamptz not null,
+  used_at     timestamptz,
+  created_at  timestamptz not null default now()
+);
+
+create table if not exists public.ai_upload_codes (
+  code        uuid primary key default gen_random_uuid(),
+  client_id   text not null,
+  product_id  uuid not null references public.products(id) on delete cascade,
+  color_name  text,
+  drive_url   text check (drive_url is null or drive_url ~ '^https://(drive|docs)\.google\.com/'),
+  expires_at  timestamptz not null,
+  used_at     timestamptz,
+  created_at  timestamptz not null default now()
+);
+
+alter table public.ai_activity        enable row level security;
+alter table public.ai_pending_actions enable row level security;
+alter table public.ai_upload_codes    enable row level security;
+
+-- Only the owner, signed in normally (never through an assistant), manages the
+-- assistants and reads their log. An assistant cannot switch itself back on.
+drop policy if exists "Owner manages assistants" on public.ai_connections;
+create policy "Owner manages assistants"
+  on public.ai_connections for all to authenticated
+  using (
+    (select public.has_admin_role((select auth.uid()), array['owner']::public.admin_role[])) is true
+    and not (select public.ai_request())
+  )
+  with check (
+    (select public.has_admin_role((select auth.uid()), array['owner']::public.admin_role[])) is true
+    and not (select public.ai_request())
+    and user_id = (select auth.uid())
+  );
+
+drop policy if exists "Owner reads assistant activity" on public.ai_activity;
+create policy "Owner reads assistant activity"
+  on public.ai_activity for select to authenticated
+  using (
+    (select public.has_admin_role((select auth.uid()), array['owner']::public.admin_role[])) is true
+    and not (select public.ai_request())
+  );
+
+revoke all on public.ai_connections, public.ai_activity, public.ai_pending_actions,
+  public.ai_upload_codes from anon, authenticated;
+grant select, insert, update, delete on public.ai_connections to authenticated;
+grant select on public.ai_activity to authenticated;
+revoke all on sequence public.ai_activity_id_seq from anon, authenticated;
+
+-- The calling assistant, or an error. Every ai_* function below starts here.
+create or replace function public.ai_caller()
+returns text
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  v_client text := auth.jwt() ->> 'client_id';
+begin
+  if coalesce(v_client, '') = '' then
+    raise exception 'ai_not_assistant' using errcode = '42501';
+  end if;
+  if (select public.has_admin_role(auth.uid(), array['owner']::public.admin_role[])) is not true then
+    raise exception 'ai_switched_off' using errcode = '42501';
+  end if;
+  return v_client;
+end;
+$$;
+
+-- Before every tool call: is this assistant on, and within its limits?
+-- Per assistant: 60 calls a minute, 20 changes a minute, 10 confirmed deletes or
+-- price changes an hour.
+create or replace function public.ai_begin(p_kind text)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_client text := public.ai_caller();
+begin
+  if (select count(*) from public.ai_activity
+      where client_id = v_client and created_at > now() - interval '1 minute') >= 60 then
+    raise exception 'ai_rate_limit_calls' using errcode = 'P0001';
+  end if;
+  if p_kind in ('write', 'destructive') and (select count(*) from public.ai_activity
+      where client_id = v_client and kind in ('write', 'destructive') and ok
+        and created_at > now() - interval '1 minute') >= 20 then
+    raise exception 'ai_rate_limit_writes' using errcode = 'P0001';
+  end if;
+  if p_kind = 'destructive' and (select count(*) from public.ai_activity
+      where client_id = v_client and kind = 'destructive' and ok
+        and created_at > now() - interval '1 hour') >= 10 then
+    raise exception 'ai_rate_limit_destructive' using errcode = 'P0001';
+  end if;
+  update public.ai_connections set last_used_at = now() where client_id = v_client;
+end;
+$$;
+
+-- After every tool call. The assistant is taken from the token, never from input.
+create or replace function public.ai_log(
+  p_tool text, p_kind text, p_target text, p_ok boolean, p_detail text
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_client text := public.ai_caller();
+begin
+  insert into public.ai_activity (client_id, tool, kind, target, ok, detail)
+  values (v_client, left(p_tool, 60), p_kind, left(p_target, 200), p_ok, left(p_detail, 300));
+  -- Housekeeping, about one call in fifty: the log keeps 90 days, codes one day.
+  if random() < 0.02 then
+    delete from public.ai_activity where created_at < now() - interval '90 days';
+    delete from public.ai_pending_actions where created_at < now() - interval '1 day';
+    delete from public.ai_upload_codes where created_at < now() - interval '1 day';
+  end if;
+end;
+$$;
+
+-- First half of a confirmed action: store exactly what will be done.
+create or replace function public.ai_propose(p_tool text, p_args jsonb, p_summary text)
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_client text := public.ai_caller();
+  v_code text := upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 8));
+begin
+  insert into public.ai_pending_actions (code, client_id, tool, args, summary, expires_at)
+  values (v_code, v_client, p_tool, p_args, left(p_summary, 1000), now() + interval '10 minutes');
+  return v_code;
+end;
+$$;
+
+-- Second half: the code is single use, expires after 10 minutes, and only works
+-- for the same assistant and the same tool. Returns the stored arguments.
+create or replace function public.ai_claim(p_code text, p_tool text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_client text := public.ai_caller();
+  v_args jsonb;
+begin
+  update public.ai_pending_actions
+     set used_at = now()
+   where code = upper(trim(p_code))
+     and client_id = v_client
+     and tool = p_tool
+     and used_at is null
+     and expires_at > now()
+  returning args into v_args;
+  if v_args is null then
+    raise exception 'ai_bad_code' using errcode = 'P0001';
+  end if;
+  return v_args;
+end;
+$$;
+
+-- A one-time photo upload link for one product colour, valid 15 minutes.
+create or replace function public.ai_upload_create(p_product_id uuid, p_color text, p_drive_url text)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_client text := public.ai_caller();
+  v_code uuid;
+begin
+  if not exists (select 1 from public.products where id = p_product_id) then
+    raise exception 'ai_unknown_product' using errcode = 'P0001';
+  end if;
+  insert into public.ai_upload_codes (client_id, product_id, color_name, drive_url, expires_at)
+  values (v_client, p_product_id, nullif(trim(p_color), ''), nullif(trim(p_drive_url), ''),
+          now() + interval '15 minutes')
+  returning code into v_code;
+  return v_code;
+end;
+$$;
+
+-- The upload page (the owner, signed in normally) reads a link, then closes it.
+create or replace function public.ai_upload_get(p_code uuid)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  v jsonb;
+begin
+  if (select public.has_admin_role(auth.uid(), array['owner']::public.admin_role[])) is not true
+     or public.ai_request() then
+    raise exception 'ai_owner_only' using errcode = '42501';
+  end if;
+  select jsonb_build_object(
+           'product_id', u.product_id, 'product_name', p.name, 'color_name', u.color_name,
+           'drive_url', u.drive_url, 'expires_at', u.expires_at,
+           'used', u.used_at is not null, 'expired', u.expires_at <= now())
+    into v
+    from public.ai_upload_codes u
+    join public.products p on p.id = u.product_id
+   where u.code = p_code;
+  return v;
+end;
+$$;
+
+create or replace function public.ai_upload_finish(p_code uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if (select public.has_admin_role(auth.uid(), array['owner']::public.admin_role[])) is not true
+     or public.ai_request() then
+    raise exception 'ai_owner_only' using errcode = '42501';
+  end if;
+  -- A short grace after expiry, so a photo picked at minute 14 still lands.
+  update public.ai_upload_codes set used_at = now()
+   where code = p_code and used_at is null and expires_at > now() - interval '15 minutes';
+  return found;
+end;
+$$;
+
+revoke all on function public.ai_caller() from public, anon, authenticated;
+revoke all on function public.ai_begin(text) from public, anon;
+revoke all on function public.ai_log(text, text, text, boolean, text) from public, anon;
+revoke all on function public.ai_propose(text, jsonb, text) from public, anon;
+revoke all on function public.ai_claim(text, text) from public, anon;
+revoke all on function public.ai_upload_create(uuid, text, text) from public, anon;
+revoke all on function public.ai_upload_get(uuid) from public, anon;
+revoke all on function public.ai_upload_finish(uuid) from public, anon;
+grant execute on function public.ai_begin(text) to authenticated;
+grant execute on function public.ai_log(text, text, text, boolean, text) to authenticated;
+grant execute on function public.ai_propose(text, jsonb, text) to authenticated;
+grant execute on function public.ai_claim(text, text) to authenticated;
+grant execute on function public.ai_upload_create(uuid, text, text) to authenticated;
+grant execute on function public.ai_upload_get(uuid) to authenticated;
+grant execute on function public.ai_upload_finish(uuid) to authenticated;
+
 -- ── Version ────────────────────────────────────────────────────────────────
 -- Which schema.sql this database last ran. The dashboard compares it with the
 -- code (SCHEMA_VERSION in src/lib/version.ts) and asks the owner to run the
@@ -2315,7 +2656,7 @@ language sql
 immutable
 set search_path = ''
 as $$
-  select 4;
+  select 5;
 $$;
 revoke all on function public.openstore_schema_version() from public;
 grant execute on function public.openstore_schema_version() to anon, authenticated;

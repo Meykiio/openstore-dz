@@ -166,6 +166,40 @@ triggers, so the file drops and recreates them.
 `SCHEMA_VERSION` in `src/lib/version.ts` is the one the code expects. The dashboard asks
 the owner to run the update when the code is newer. **Bump both on every schema change.**
 
+## AI assistant (0.3.0, section 13 plus pieces earlier in the file)
+
+Off until the owner connects one. Claude signs in through Supabase Auth's OAuth 2.1
+server and holds an ordinary token for the owner's account, with a `client_id` claim.
+Everything it does goes through the policies above.
+
+- `ai_connections` (created in section 2): one row per allowed assistant, with
+  `enabled`. `has_admin_role()` (section 4) refuses any token carrying a `client_id`
+  unless that row exists, is on, and belongs to the owner. It is the only definition of
+  the function in the file, so every admin policy follows it. Staff tokens with a
+  `client_id` are always refused. Only the owner, signed in normally, can read or change
+  this table (an assistant cannot switch itself back on). The table sits in section 2
+  because a `language sql` function body is checked when it is created, so the table
+  must exist before section 4 on a fresh database and on an upgraded one.
+- `ai_request()` (section 4): true when the token has a `client_id`. The
+  `blocked_phones` (section 10) and `order_export_targets` (section 11) policies refuse
+  assistants with it.
+- `ai_activity`: append-only log, written only by `ai_log()`, read by the owner. Kept
+  90 days.
+- `ai_pending_actions`: one-time codes for deletes and price changes (`ai_propose`,
+  `ai_claim`): single use, 10 minutes, same assistant and same tool, and the stored
+  arguments are what runs.
+- `ai_upload_codes`: one-time photo links (`ai_upload_create` by the assistant,
+  `ai_upload_get` and `ai_upload_finish` by the owner's browser only). A Drive link must
+  start with `https://drive.google.com/` or `https://docs.google.com/`.
+- `ai_begin()`: switch and limits before every tool call: 60 calls a minute, 20 changes
+  a minute, 10 confirmed deletes or price changes an hour, per assistant.
+
+Tested in PGlite with Supabase stubs (44 checks): fresh install, re-run, upgrade from
+the 0.2.0 file and from schema 4, one `has_admin_role`, normal owner and staff
+unchanged, enabled, disabled, unknown and staff assistants, orders visibility, the
+blocklist and export targets refused, codes (wrong tool, other assistant, reuse,
+expiry), upload links, rate limits.
+
 ## Storage
 
 One public bucket, `product-media`, for product and review imagery. Public read is the
