@@ -79,6 +79,13 @@ says the phone call is what works, not the message.
 
 ## Ideas with no trigger yet
 
+**ChatGPT as an assistant.** The `/mcp` server already speaks the standard; ChatGPT needs
+OAuth with dynamic registration too. Trigger: an owner asks, and write tools are
+confirmed on the plans Algerian owners use.
+
+**Automatic Drive photo import (no tap).** Needs server-side re-encoding, so an image
+package (`sharp`, Apache-2.0). Trigger: owners find the one-time link too slow.
+
 **Multi-warehouse stock.**
 One shop, one stock pool. Recorded because it is the first thing an ERP-minded shop owner
 asks for, and the answer for a long time is no.

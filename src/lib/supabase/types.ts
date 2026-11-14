@@ -41,6 +41,44 @@ export type Database = {
   };
   public: {
     Tables: {
+      ai_activity: {
+        Row: {
+          client_id: string;
+          created_at: string;
+          detail: string | null;
+          id: number;
+          kind: string;
+          ok: boolean;
+          target: string | null;
+          tool: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      ai_connections: {
+        Row: {
+          client_id: string;
+          created_at: string;
+          enabled: boolean;
+          last_used_at: string | null;
+          name: string;
+          user_id: string;
+        };
+        Insert: {
+          client_id: string;
+          created_at?: string;
+          enabled?: boolean;
+          last_used_at?: string | null;
+          name?: string;
+          user_id: string;
+        };
+        Update: {
+          enabled?: boolean;
+          name?: string;
+        };
+        Relationships: [];
+      };
       admin_users: {
         Row: {
           created_at: string;
@@ -751,6 +789,44 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      ai_begin: {
+        Args: { p_kind: string };
+        Returns: undefined;
+      };
+      ai_claim: {
+        Args: { p_code: string; p_tool: string };
+        Returns: Json;
+      };
+      ai_log: {
+        Args: {
+          p_detail: string | null;
+          p_kind: string;
+          p_ok: boolean;
+          p_target: string | null;
+          p_tool: string;
+        };
+        Returns: undefined;
+      };
+      ai_propose: {
+        Args: { p_args: Json; p_summary: string; p_tool: string };
+        Returns: string;
+      };
+      ai_upload_create: {
+        Args: { p_color: string | null; p_drive_url: string | null; p_product_id: string };
+        Returns: string;
+      };
+      ai_upload_finish: {
+        Args: { p_code: string };
+        Returns: boolean;
+      };
+      ai_upload_get: {
+        Args: { p_code: string };
+        Returns: Json;
+      };
+      ai_request: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
       admin_analytics: {
         Args: { p_days?: number };
         Returns: Json;

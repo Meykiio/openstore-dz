@@ -272,3 +272,41 @@ Delivery outcomes are not surfaced in the app beyond a "queued" log row, because
 in `net._http_response` for six hours, which `docs/GOOGLE_SHEETS.md` tells the owner
 how to read. A per-target health indicator would be better and is recorded in
 `docs/LATER.md`.
+
+## 13. An AI assistant signs in as the owner through Supabase OAuth (0.3.0)
+
+**Context.** Owners want to run the shop by talking to Claude. Assistants connect to
+sites over MCP, and Claude signs in with OAuth; pasted bearer keys are a limited beta in
+Claude and unsupported in ChatGPT. Built first on JOAT-store and run there in production.
+
+**Decision.** The MCP server is a TanStack Start route (`/mcp`) deployed with the shop:
+nothing new to host, no Supabase CLI. Sign-in uses Supabase Auth's OAuth 2.1 server
+(beta, all plans), so the assistant holds an ordinary token for the owner's account and
+every write goes through the existing RLS. The service-role key is never used. Owner
+only. Off until the owner switches on the OAuth server and approves an assistant; a shop
+that does nothing sees no change.
+
+**Known gap.** Supabase tokens always carry `aud = "authenticated"` and Supabase ignores
+the `resource` parameter, so the server cannot prove a token was minted for `/mcp` as the
+MCP specification asks. Substitute: only OAuth-issued tokens (`client_id` claim) of the
+owner pass, and the database checks a per-assistant allow-list (decision 14).
+
+## 14. How the assistant is kept safe (0.3.0)
+
+**Decision.** (1) A per-assistant switch inside `has_admin_role()`, so turning it off stops
+even a token used directly against the API. The function stays defined once, in section
+4; its `ai_connections` table is created in section 2 so a fresh install and an upgrade
+both find it. (2) Deletes and price changes in two steps: a summary and a one-time code
+first; the second call runs the stored arguments, so a confused or manipulated second
+call cannot change the target. (3) Buyer text is returned under `untrusted_buyer_text`.
+(4) No tool reaches outside the shop. (5) Limits per assistant, in Postgres, no new
+service. (6) Money settings and secrets stay out of reach.
+
+**Photos.** Claude cannot pass a chat image to a tool (the MCP file-upload extension is
+still experimental), so a tool returns a one-time link to an owner page that uses the
+admin's own crop and resize. Drive files are fetched from Google hosts only and
+re-encoded in the browser: no image package on the server.
+
+**Dependencies.** `@modelcontextprotocol/server` 2.4.0 (Apache-2.0, official SDK) and
+`zod` (MIT, the SDK's peer). `mcp-handler` was not added: it covers about 40 lines
+written here.

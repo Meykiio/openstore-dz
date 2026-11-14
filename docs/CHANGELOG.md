@@ -6,6 +6,27 @@ All notable changes to OpenStore DZ. Format follows
 
 ## [Unreleased]
 
+**Added: manage the shop from Claude** (optional, off by default; guide
+`docs/AI_ASSISTANT.md`). Claude connects to `/mcp` and signs in as the owner through
+Supabase's OAuth 2.1 server (beta), so every action goes through the shop's own RLS. 30
+tools (products, variants, prices, photos, categories, delivery prices, orders, reviews,
+settings), each through one wrapper with a database switch, limits, a log, and a
+two-step code for deletes and price changes. Admin > Integrations (owner only),
+`/oauth/consent`, one-time photo links with Drive import. Ported from JOAT-store, where it
+runs in production. New dependencies: `@modelcontextprotocol/server` 2.4.0 (Apache-2.0),
+`zod` (MIT). Schema version 5.
+
+Verified: `npm run check` (130 unit tests); schema in PGlite with Supabase stubs, 44
+checks (fresh, re-run, upgrade from 0.2.0 and from schema 4); every column the tools use
+exists; on the production build `/mcp` answers 401 with the sign-in pointer, the
+metadata names the shop's Supabase, the consent page asks for the owner's sign-in, and a
+signed-out upload link returns to itself after sign-in. **Not verified:** a live Claude
+sign-in on an OpenStore project (needs the owner at the sign-in screens).
+
+**Fixed: two copies of the TanStack router.** `react-router` 1.170.46 sat next to
+`react-start` 1.168.61, which pins 1.170.42. Pinned to 1.170.42; Dependabot keeps them
+together.
+
 **Fixed.** The Google Sheets (webhook) export sent each new order before its lines
 existed, so the `created` event had no items and a total of 0. It now goes out at
 commit (a deferred constraint trigger). Verified in PGlite against this file: before

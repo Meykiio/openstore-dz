@@ -77,6 +77,7 @@ docs/
 | --------------- | ------------------------- | -------- | ----------------------- |
 | `getSupabase()` | publishable / anon        | Enforced | Every browser code path |
 | Edge Function   | service role, server-side | Bypassed | Guepex webhook only     |
+| `/mcp` route    | the owner's own token     | Enforced | AI assistant (0.3.0)    |
 
 There is no service-role key in the application bundle. `GUEPEX_API_TOKEN` is server-side
 only and is never prefixed with `VITE_`.
@@ -89,6 +90,9 @@ layer, by design: a forgotten `WHERE` clause cannot leak a row if the policy say
 - **Public (anon):** read published products and approved reviews, submit an order,
   submit a review.
 - **Admin (authenticated, listed in `admin_users`):** everything else.
+- **AI assistant (0.3.0):** the owner's token plus a `client_id` claim. `has_admin_role()`
+  passes it only while the owner's switch for that assistant is on
+  (`docs/AI_ASSISTANT.md`).
 
 Every table needs both a policy **and** a base `GRANT`. PostgREST evaluates grants before
 policies and returns `401 Unauthorized` if the role lacks the table privilege, which

@@ -17,6 +17,11 @@ updates:
       # 1.169 needs Vite 8 (peer vite >= 8); the project is on Vite 7.
       - dependency-name: "@tanstack/react-start"
         versions: [">=1.169.0"]
+      # Pinned to the exact version react-start 1.168.61 is built against. A
+      # newer one installs a second router copy, and server routes (/mcp) lose
+      # their types. Move both together when react-start moves.
+      - dependency-name: "@tanstack/react-router"
+        versions: [">1.170.42"]
       # 1.x is a major version: icons renamed or removed.
       - dependency-name: "lucide-react"
         update-types: ["version-update:semver-major"]
