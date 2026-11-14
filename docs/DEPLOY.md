@@ -63,6 +63,9 @@ In **Authentication → URL Configuration**:
   `http://localhost:8080/**` for local development.
 
 If the Site URL still points at localhost, any Auth redirect bounces to the wrong place.
+The optional Claude connection (0.3.0) also uses it: Supabase builds the consent page
+address from the Site URL plus the OAuth server's Authorization Path (`/oauth/consent`).
+See `docs/AI_ASSISTANT.md`. No new environment variable is needed for Claude or Telegram.
 
 ### Email confirmation
 

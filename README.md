@@ -39,6 +39,9 @@ and working, in `docs/FEATURES.md`:
   refusal history), shipping labels for 100 x 150 mm thermal printers or four per A4,
   CSV export. Products with a colour x size generator and photos per colour,
   categories, size guides, review moderation, Guepex parcels.
+- **Optional, off until you connect them (0.3.0):** manage the shop by talking to
+  Claude ([guide](docs/AI_ASSISTANT.md)), and a Telegram message for every new order
+  ([guide](docs/TELEGRAM.md)).
 - **Safety:** prices and delivery fees are computed in the database, never trusted from
   the browser. Row-level security on every table. Secrets stay on the server. The
   platform never holds the shop's money.
@@ -305,16 +308,31 @@ B4. ENVIRONMENT. Create `.env` (never commit it) with:
    - The daily commands: PATH A - start Docker, `npx supabase start`, `npm run dev`.
      PATH B - `npm run dev`. How to stop everything.
    - What still needs the shop owner to do by hand, and where to find the instructions
+   - The two optional add-ons, off by default: Claude (docs/AI_ASSISTANT.md) and Telegram
+     order messages (docs/TELEGRAM.md). Mention them; do not set them up unless asked.
    - Any unresolved issue, with its exact error message
 
 HARD RULES:
 - Never commit secrets or .env files. Never run `git commit` at all; the owner commits.
 - Never modify the database except through `supabase/schema.sql`.
+- Never connect an AI assistant or a Telegram bot for the owner: both need the owner's
+  own sign-in or bot token, typed by the owner.
 - The service_role key must never appear in the app, in `.env`, or in your reply.
 - Do not add dependencies.
 - If a step cannot be completed, STOP and explain exactly what is missing rather than
   improvising or guessing a value.
 ```
+
+### After setup: optional add-ons
+
+Both are off until you connect them, and a shop that never does works exactly the same.
+
+- **Claude manages your shop** (products, prices, orders, by chat, also on your phone):
+  three settings in Supabase and one connector in Claude. [docs/AI_ASSISTANT.md](docs/AI_ASSISTANT.md)
+- **Telegram message for every new order:** create a bot with @BotFather and paste its
+  token in Admin > Integrations. [docs/TELEGRAM.md](docs/TELEGRAM.md)
+
+The steps are also shown, in Arabic, French and English, on the Admin > Integrations page.
 
 ### After setup: Guepex delivery credentials
 
