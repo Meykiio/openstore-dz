@@ -310,3 +310,20 @@ re-encoded in the browser: no image package on the server.
 **Dependencies.** `@modelcontextprotocol/server` 2.4.0 (Apache-2.0, official SDK) and
 `zod` (MIT, the SDK's peer). `mcp-handler` was not added: it covers about 40 lines
 written here.
+
+## 15. New-order messages go from the database straight to Telegram (0.3.0)
+
+**Context.** Owners want to know at once when an order lands, on the phone they already
+use. An assistant like Claude cannot start a conversation, so the shop has to send it.
+
+**Decision.** A Telegram bot the owner creates: free, instant, no business account. The
+database sends the message (`pg_net`, after commit) from a deferred constraint trigger,
+the same way the Sheets export reaches outside; no server or job in between. The token
+is kept in a table no API role can read rather than in Vercel, because the database is
+what sends. Connecting uses a one-time Start link (or the same code pasted as a message),
+so the owner never has to find a chat id. Messages are plain text in the language the
+owner chose (Arabic by default) and start with the shop name. Off until connected.
+
+**Rejected.** Supabase Vault for the token: its docs do not state it is enabled on every
+project, and a no-grant table keeps the token out of every API path. Arabic-only
+messages (as on JOAT-store): OpenStore shops are run in all three languages.

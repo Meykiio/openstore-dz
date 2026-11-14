@@ -109,6 +109,9 @@ Last verified against the built output, not the dev server.
   reviews, settings. Deletes and price changes take a confirmation code; Admin >
   Integrations allows, switches off or disconnects an assistant and shows its log.
   Guide: `docs/AI_ASSISTANT.md`.
+- **Telegram message for every new order** (0.3.0, optional, off by default): name,
+  phone, wilaya, items, total, note, in Arabic, French or English. Connected from Admin >
+  Integrations in three steps. Guide: `docs/TELEGRAM.md`.
 - **Order export to Google Sheets.** Any number of destinations, off by default. Each
   new order and each status change is signed with HMAC-SHA256 and posted to the
   owner's own Google Apps Script, which writes it into their sheet. Setup guide and

@@ -30,7 +30,7 @@ OpenStore répond à ça : une vraie boutique, en arabe, qui s'installe en une �
 
 ## État actuel
 
-**Version 0.2.0.** Un commerçant peut l'installer aujourd'hui et
+**Version 0.3.0.** Un commerçant peut l'installer aujourd'hui et
 recevoir des commandes en paiement à la livraison. Ce qui fonctionne, vérifié, est dans
 `docs/FEATURES.md` :
 
@@ -90,6 +90,16 @@ Votre boutique tourne déjà ? [Le guide de mise à jour](UPDATING.fr.md) vous a
 cinq minutes environ, sans rien installer : un clic dans l'onglet Actions de GitHub pour
 le code, un collage dans l'éditeur SQL de Supabase pour la base de données. Votre tableau
 de bord vous prévient quand une nouvelle version sort et quand la base doit être mise à jour.
+
+## Modules optionnels (0.3.0, inactifs tant que vous ne les connectez pas)
+
+- **Gérer votre boutique depuis Claude.** Ajouter des produits, changer des prix, confirmer
+  des commandes en parlant à Claude, sur téléphone ou ordinateur. Guide (en anglais) :
+  [docs/AI_ASSISTANT.md](docs/AI_ASSISTANT.md).
+- **Un message Telegram à chaque nouvelle commande.** Guide (en anglais) :
+  [docs/TELEGRAM.md](docs/TELEGRAM.md).
+
+Les étapes de connexion sont aussi en français dans le tableau de bord : Admin > Intégrations.
 
 ## Installation
 

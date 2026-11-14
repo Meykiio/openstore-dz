@@ -84,5 +84,12 @@ réclamée.
 
 ## Nouveautés
 
+**0.3.0.** Relancez la mise à jour de la base (étape D) : elle corrige l'export vers
+Google Sheets (les nouvelles commandes arrivaient sans articles et avec un total de 0) et
+ajoute deux modules optionnels, inactifs tant que vous ne les connectez pas : gérer la
+boutique depuis Claude ([guide](docs/AI_ASSISTANT.md)) et un message Telegram à chaque
+nouvelle commande ([guide](docs/TELEGRAM.md)). Si vous ne faites rien d'autre, votre
+boutique fonctionne exactement comme avant.
+
 Voir le [journal des modifications](docs/CHANGELOG.md). Votre tableau de bord vous
 prévient quand une nouvelle version sort.

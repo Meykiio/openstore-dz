@@ -12,7 +12,7 @@ Arabic (RTL) first. French. Cash on delivery. No subscription, no setup fee, no 
 
 ---
 
-## Status: v0.2.0
+## Status: v0.3.0
 
 **Live demo: [openstore-dz.vercel.app](https://openstore-dz.vercel.app)**, a real
 clothing catalogue running on this exact code.
@@ -145,6 +145,12 @@ Already running a shop? [UPDATING.md](UPDATING.md) walks you through it in about
 minutes, without a computer setup: one click in GitHub's Actions tab for the code, one
 paste into the Supabase SQL Editor for the database. Your dashboard tells you when a new
 version is out and when the database needs the update.
+
+## Optional add-ons (0.3.0, off until you connect them)
+
+- **Manage your shop from Claude.** Add products, change prices, confirm orders by
+  talking to Claude on your phone or computer. Guide: [docs/AI_ASSISTANT.md](docs/AI_ASSISTANT.md).
+- **A Telegram message for every new order.** Guide: [docs/TELEGRAM.md](docs/TELEGRAM.md).
 
 ---
 
@@ -338,6 +344,7 @@ GUEPEX_WEBHOOK_SECRET=
 | `docs/DEPLOY.md`                    | Putting a shop online                                                                    |
 | `docs/DECISIONS.md`                 | Decisions already made, and why                                                          |
 | `docs/AI_ASSISTANT.md`              | Optional: manage the shop from Claude (setup, tools, safety)                             |
+| `docs/TELEGRAM.md`                  | Optional: a Telegram message for every new order                                         |
 | `docs/CHANGELOG.md`                 | What actually changed, per sprint                                                        |
 | `docs/skills/yalidine-integration/` | Guepex delivery integration for AI agents                                                |
 | `AGENTS.md`                         | Rules for any AI agent working in this repo                                              |
