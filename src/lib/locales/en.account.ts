@@ -19,4 +19,15 @@ export const enAccount: Record<keyof typeof arAccount, string> = {
   "account.signInAgain": "For your safety: sign out, sign in again, then retry.",
   "account.tooMany": "Too many attempts. Wait a little, then try again.",
   "account.demo": "Changing the password is not available on the demo shop.",
+  "account.forgotLink": "Forgot your password?",
+  "account.forgotTitle": "Forgot your password",
+  "account.forgotHelp": "Enter your email and we will send a link to choose a new password.",
+  "account.send": "Send the link",
+  "account.sent":
+    "If this address has an account, the link is on its way. Check your email (and spam). The link expires soon.",
+  "account.backToLogin": "Back to sign in",
+  "account.resetTitle": "Choose a new password",
+  "account.resetHelp": "Type the new password twice.",
+  "account.linkExpired": "This link has expired or was already used.",
+  "account.askAgain": "Ask for a new link",
 };

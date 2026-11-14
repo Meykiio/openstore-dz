@@ -21,4 +21,16 @@ export const frAccount: Record<keyof typeof arAccount, string> = {
   "account.tooMany": "Trop de tentatives. Patientez un peu, puis réessayez.",
   "account.demo":
     "Le changement de mot de passe n'est pas disponible sur la boutique de démonstration.",
+  "account.forgotLink": "Mot de passe oublié ?",
+  "account.forgotTitle": "Mot de passe oublié",
+  "account.forgotHelp":
+    "Saisissez votre e-mail : nous vous envoyons un lien pour choisir un nouveau mot de passe.",
+  "account.send": "Envoyer le lien",
+  "account.sent":
+    "Si cette adresse a un compte, le lien est en route. Regardez vos e-mails (et les indésirables). Le lien expire vite.",
+  "account.backToLogin": "Retour à la connexion",
+  "account.resetTitle": "Choisir un nouveau mot de passe",
+  "account.resetHelp": "Saisissez le nouveau mot de passe deux fois.",
+  "account.linkExpired": "Ce lien a expiré ou a déjà servi.",
+  "account.askAgain": "Demander un nouveau lien",
 };

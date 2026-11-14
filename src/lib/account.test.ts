@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { explainPasswordError, passwordProblem } from "./account";
+import { explainPasswordError, linkError, passwordProblem } from "./account";
 
 describe("passwordProblem", () => {
   it("refuses fewer than 8 characters", () => {
@@ -35,5 +35,16 @@ describe("explainPasswordError", () => {
   });
   it("leaves anything else to the raw message", () => {
     expect(explainPasswordError({ code: "unexpected_failure", message: "boom" })).toBeNull();
+  });
+});
+
+describe("linkError", () => {
+  it("reads Supabase's error from the link", () => {
+    expect(linkError("#error=access_denied&error_code=otp_expired&error_description=x")).toBe(
+      "otp_expired",
+    );
+  });
+  it("is null for a good link", () => {
+    expect(linkError("#access_token=abc&type=recovery")).toBeNull();
   });
 });
