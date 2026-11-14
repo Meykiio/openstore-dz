@@ -84,6 +84,12 @@ réclamée.
 
 ## Nouveautés
 
+**0.4.0.** Pas de mise à jour de la base. Vous pouvez changer votre mot de passe dans
+**Admin > Mon compte**. Pour que « Mot de passe oublié ? » fonctionne, ajoutez
+`https://<votre boutique>/reset-password` dans Supabase > Authentication > URL Configuration >
+**Redirect URLs**, et lisez la note sur les e-mails dans [docs/DEPLOY.md](docs/DEPLOY.md)
+(en anglais).
+
 **0.3.0.** Relancez la mise à jour de la base (étape D) : elle corrige l'export vers
 Google Sheets (les nouvelles commandes arrivaient sans articles et avec un total de 0) et
 ajoute deux modules optionnels, inactifs tant que vous ne les connectez pas : gérer la

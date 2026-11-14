@@ -78,6 +78,11 @@ database by running supabase/schema.sql in the Supabase SQL Editor.
 
 ## ما الجديد
 
+**0.4.0.** لا تحتاج قاعدة البيانات إلى تحديث. يمكنك الآن تغيير كلمة المرور من **الإدارة > حسابي**.
+لكي يعمل «نسيت كلمة المرور؟»، أضف `https://<متجرك>/reset-password` في Supabase > Authentication >
+URL Configuration > **Redirect URLs**، واقرأ ملاحظة البريد في [docs/DEPLOY.md](docs/DEPLOY.md)
+(بالإنجليزية).
+
 **0.3.0.** شغّل تحديث قاعدة البيانات (الخطوة د) مرة أخرى: يصلح تصدير الطلبات إلى Google
 Sheets (كانت الطلبيات الجديدة تصل بدون منتجات وبمجموع 0)، ويضيف ميزتين اختياريتين
 متوقفتين حتى تربطهما: إدارة المتجر من Claude ([الدليل](docs/AI_ASSISTANT.md))، ورسالة

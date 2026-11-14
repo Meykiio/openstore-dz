@@ -79,6 +79,11 @@ Demo products are only created in a shop that nobody has claimed yet.
 
 ## What is new
 
+**0.4.0.** No database update. You can now change your password in **Admin > My
+account**. For "Forgot your password?" to work, add `https://<your shop>/reset-password`
+to Supabase > Authentication > URL Configuration > **Redirect URLs**, and read the email
+note in [docs/DEPLOY.md](docs/DEPLOY.md).
+
 **0.3.0.** Run the database update (step D) once more: it fixes the Google Sheets
 export (new orders used to arrive with no items and a total of 0) and adds two optional
 features, both off until you connect them: managing the shop from Claude

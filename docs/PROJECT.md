@@ -7,6 +7,14 @@ master files; they never weaken a `[HARD]` rule.
 
 Last updated 2026-11-14. Everything in this section was run, not assumed.
 
+### 0.4.0 (2026-11-14)
+
+- Own password: Admin > My account (change, current password required) and "Forgot
+  your password?" (Supabase reset email to `/reset-password`). `npm run check` green (154
+  tests); pages checked on the production build. **Not verified yet:** a real change and a
+  real reset email. Reset emails need the Redirect URL and usually custom SMTP
+  (`docs/DEPLOY.md`).
+
 ### 0.3.0 (2026-11-14), live on openstore-dz.vercel.app
 
 - Merged in PRs #17 (Sheets export at commit, schema 4), #18 (Claude over MCP, schema

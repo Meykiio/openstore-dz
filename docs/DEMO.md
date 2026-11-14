@@ -16,6 +16,10 @@ These are published on purpose. The account is a demo and holds no real data.
 
 ## What the demo account can and cannot do
 
+The demo hides My account's password change and "Forgot your password?"
+(`VITE_DEMO_MODE=true`): the password above is published, and a visitor changing it would
+lock everyone else out.
+
 It is `staff`, not `owner`, and that is the whole point. RLS decides, not the UI.
 
 **Can:** see the dashboard, orders, the call queue, products, variants, reviews,

@@ -52,6 +52,10 @@ Last verified against the built output, not the dev server.
 
 ### Selling
 
+- **Your own password** (0.4.0). Admin > My account changes it (current password
+  required), for the owner and for staff. "Forgot your password?" on the sign-in page
+  emails a reset link (needs the Redirect URL and, for most shops, your own email sender:
+  `docs/DEPLOY.md`). Neither is offered on the public demo.
 - **Delete an order** (0.2.0), after an inline second tap, for test orders and
   duplicates. Real orders the owner turns down are refused instead.
 - **Uploads cut to the storefront's 4:5 frame** (0.2.0) in the browser, keeping the
