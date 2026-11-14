@@ -243,7 +243,9 @@ A POST with a JSON body:
 
 `event` is `created` for a new order and `status_changed` for any later status
 change, so a confirmed or refused order updates its existing row rather than
-appearing twice.
+appearing twice. The `created` event is sent once the order is complete, with its
+lines and total. Before 0.3.0 it went out too early and carried no items and a
+total of 0; run the 0.3.0 database update to fix it.
 
 **If your sheet already has data, delete it first.** The script assumes row 1 is its
 own header row and writes from row 2. An existing header row will be duplicated.

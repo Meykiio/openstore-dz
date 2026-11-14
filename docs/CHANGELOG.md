@@ -6,6 +6,13 @@ All notable changes to OpenStore DZ. Format follows
 
 ## [Unreleased]
 
+**Fixed.** The Google Sheets (webhook) export sent each new order before its lines
+existed, so the `created` event had no items and a total of 0. It now goes out at
+commit (a deferred constraint trigger). Verified in PGlite against this file: before
+the fix the payload had `items: []` and `total: 0` for a 5,400 DA order; after it, one
+line and 5,400; status changes still export; an upgrade from the 0.2.0 file leaves
+exactly the two expected triggers. Schema version 4: run the database update.
+
 ## [0.2.0] - 2026-10-30
 
 Ported from JOAT-store, a shop running on this code. Update guide: `UPDATING.md`.

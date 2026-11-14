@@ -149,6 +149,17 @@ The connection is Cloudflare's `cf-connecting-ip` request header, else the last
 can write that one (supabase discussion 34647). Calls with neither header, as in the SQL
 editor, are not limited.
 
+## Order notifications run at commit (0.3.0)
+
+`place_order()` inserts the order row first and its lines after, in one transaction. A
+plain `AFTER INSERT` trigger on `orders` therefore runs before the lines and the total
+exist. Anything that reports a new order (the Sheets export `order_export_created`) is a
+`DEFERRABLE INITIALLY DEFERRED` constraint trigger instead: it runs at commit and
+re-reads the order by id. Status changes are one statement, so `order_export_enqueue`
+stays an ordinary `AFTER UPDATE OF status` trigger. Before 0.3.0 the "created" export
+carried no items and a total of 0. Postgres has no `create or replace` for constraint
+triggers, so the file drops and recreates them.
+
 ## Schema version (0.2.0)
 
 `openstore_schema_version()` returns the version of `schema.sql` the database last ran;
