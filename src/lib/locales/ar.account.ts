@@ -1,0 +1,20 @@
+/** My account: change or reset the admin's own password (0.4.0). */
+export const arAccount = {
+  "admin.nav.account": "حسابي",
+  "account.title": "حسابي",
+  "account.signedInAs": "متصل بـ {email}",
+  "account.passwordTitle": "تغيير كلمة المرور",
+  "account.passwordHelp": "أدخل كلمة المرور الحالية ثم الجديدة مرتين.",
+  "account.current": "كلمة المرور الحالية",
+  "account.new": "كلمة المرور الجديدة",
+  "account.newHint": "{min} أحرف على الأقل.",
+  "account.save": "غيّر كلمة المرور",
+  "account.changed": "تم تغيير كلمة المرور.",
+  "account.tooShort": "كلمة المرور قصيرة: {min} أحرف على الأقل.",
+  "account.samePassword": "هذه هي كلمة المرور الحالية. اختر كلمة أخرى.",
+  "account.weakPassword": "كلمة المرور ضعيفة. أضف أحرفاً وأرقاماً أو اجعلها أطول.",
+  "account.wrongCurrent": "كلمة المرور الحالية غير صحيحة.",
+  "account.signInAgain": "لأمانك: اخرج ثم سجّل الدخول من جديد، وأعد المحاولة.",
+  "account.tooMany": "محاولات كثيرة. انتظر قليلاً ثم أعد المحاولة.",
+  "account.demo": "تغيير كلمة المرور غير متاح في المتجر التجريبي.",
+};

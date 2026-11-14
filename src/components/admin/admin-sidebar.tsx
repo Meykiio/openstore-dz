@@ -10,6 +10,7 @@ import {
   Store,
   Tags,
   Truck,
+  UserRound,
   X,
 } from "lucide-react";
 import { LocaleSwitcher } from "@/components/locale-switcher";
@@ -38,6 +39,7 @@ const LINKS = [
   { to: "/admin/reviews", labelKey: "admin.reviews.title", icon: Star, exact: false },
   { to: "/admin/delivery", labelKey: "admin.delivery.title", icon: Truck, exact: false },
   { to: "/admin/settings", labelKey: "admin.settings.title", icon: Settings, exact: false },
+  { to: "/admin/account", labelKey: "admin.nav.account", icon: UserRound, exact: false },
 ] as const;
 
 /** Only the owner can connect an assistant, so only the owner sees the link. */
