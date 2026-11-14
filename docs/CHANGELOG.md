@@ -6,6 +6,11 @@ All notable changes to OpenStore DZ. Format follows
 
 ## [Unreleased]
 
+**Fixed.** The Supabase address and key read from the environment are trimmed. A value
+pasted into Vercel with a trailing line break put `\r\n` inside the sign-in server
+address `/mcp` gives to Claude, so Claude could not register. Unit test added; checked
+on the live metadata after the deploy.
+
 ## [0.3.0] - 2026-11-14
 
 Needs `schema.sql` re-run (schema version 6; the dashboard says so). Both new features
@@ -36,8 +41,9 @@ Verified: `npm run check` (130 unit tests); schema in PGlite with Supabase stubs
 checks (fresh, re-run, upgrade from 0.2.0 and from schema 4); every column the tools use
 exists; on the production build `/mcp` answers 401 with the sign-in pointer, the
 metadata names the shop's Supabase, the consent page asks for the owner's sign-in, and a
-signed-out upload link returns to itself after sign-in. **Not verified:** a live Claude
-sign-in on an OpenStore project (needs the owner at the sign-in screens).
+signed-out upload link returns to itself after sign-in. **Verified live by the owner**
+on the demo shop the same day: Claude registered itself, the owner approved, the tools
+worked.
 
 **Fixed: two copies of the TanStack router.** `react-router` 1.170.46 sat next to
 `react-start` 1.168.61, which pins 1.170.42. Pinned to 1.170.42; Dependabot keeps them
