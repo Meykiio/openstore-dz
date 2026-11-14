@@ -9,7 +9,7 @@ export const APP_VERSION: string = __APP_VERSION__;
  * changes, together with `openstore_schema_version()` in that file, so the
  * dashboard can tell an owner who updated the code but not the database.
  */
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 const LATEST_URL = "https://raw.githubusercontent.com/Meykiio/openstore-dz/main/package.json";
 
