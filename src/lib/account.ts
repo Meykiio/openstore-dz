@@ -55,3 +55,22 @@ export async function setPassword(next: string, current?: string): Promise<AuthF
   );
   return error ? { code: error.code, message: error.message } : null;
 }
+
+/**
+ * Email a password-reset link. The link signs the admin in and lands on
+ * /reset-password, which must be listed in Supabase > Authentication > URL
+ * Configuration > Redirect URLs. Supabase never says whether the address has
+ * an account (no user enumeration), so neither does the page.
+ */
+export async function sendResetLink(email: string): Promise<AuthFailure | null> {
+  const { error } = await getSupabase().auth.resetPasswordForEmail(email.trim(), {
+    redirectTo: `${window.location.origin}/reset-password`,
+  });
+  return error ? { code: error.code, message: error.message } : null;
+}
+
+/** An expired or used link comes back as `#error=...&error_code=otp_expired`. */
+export function linkError(hash: string): string | null {
+  const params = new URLSearchParams(hash.replace(/^#/, ""));
+  return params.get("error_code") ?? params.get("error");
+}

@@ -6,6 +6,26 @@ All notable changes to OpenStore DZ. Format follows
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-14
+
+No database update needed.
+
+**Added: change or reset your own password.** Admin > My account (owner and staff)
+changes the password with the current one required, so an admin left open on a phone
+cannot be used to lock the owner out (`updateUser` with `current_password`,
+supabase-js 2.102+). "Forgot your password?" on `/login` emails a Supabase reset link
+to `/reset-password`, which asks for the new password twice; the request page never
+says whether an address has an account. Supabase's error codes become plain messages in
+AR/FR/EN. Both are hidden on the public demo. Owners: add `/reset-password` to Supabase's
+Redirect URLs; reset emails need your own SMTP unless your admin email is on your
+Supabase team (`docs/DEPLOY.md`).
+
+Verified: `npm run check` (154 unit tests: form checks, error mapping, expired-link
+parsing); on the production build the sign-in page shows the link, an expired link and
+a missing session both say "expired" with a way to ask again, and My account asks a
+signed-out visitor to sign in. **Not verified:** a real password change and a real reset
+email (need an account and its password).
+
 **Fixed.** The Supabase address and key read from the environment are trimmed. A value
 pasted into Vercel with a trailing line break put `\r\n` inside the sign-in server
 address `/mcp` gives to Claude, so Claude could not register. Unit test added; checked

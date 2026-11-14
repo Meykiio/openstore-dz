@@ -67,6 +67,20 @@ The optional Claude connection (0.3.0) also uses it: Supabase builds the consent
 address from the Site URL plus the OAuth server's Authorization Path (`/oauth/consent`).
 See `docs/AI_ASSISTANT.md`. No new environment variable is needed for Claude or Telegram.
 
+### Password reset emails (0.4.0)
+
+"Forgot your password?" on `/login` emails a link to `https://<your shop>/reset-password`.
+Two Supabase settings decide whether it works:
+
+- **Redirect URLs** must include `https://<your shop>/reset-password` (or
+  `https://<your shop>/**`). Otherwise Supabase sends people to the Site URL instead.
+- **Email delivery.** Supabase's built-in email service sends only to members of your
+  Supabase team, and only 2 emails an hour (supabase.com/docs/guides/auth/auth-smtp).
+  If your admin email is not a team member, set up your own sender in Authentication >
+  Emails > SMTP Settings before relying on reset emails.
+
+Changing the password while signed in (Admin > My account) needs neither.
+
 ### Email confirmation
 
 During setup, confirm-email is turned **off** so a fresh project is not blocked. Once you

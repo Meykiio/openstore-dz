@@ -13,8 +13,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CatalogueRouteImport } from './routes/catalogue'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as TrackRouteImport } from './routes/track'
@@ -58,6 +60,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -66,6 +73,11 @@ const LoginRoute = LoginRouteImport.update({
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -185,8 +197,10 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/catalogue': typeof CatalogueRoute
   '/checkout': typeof CheckoutRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
   '/track': typeof TrackRoute
@@ -214,8 +228,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/catalogue': typeof CatalogueRoute
   '/checkout': typeof CheckoutRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
   '/track': typeof TrackRoute
@@ -245,8 +261,10 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/catalogue': typeof CatalogueRoute
   '/checkout': typeof CheckoutRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
   '/track': typeof TrackRoute
@@ -277,8 +295,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/catalogue'
     | '/checkout'
+    | '/forgot-password'
     | '/login'
     | '/mcp'
+    | '/reset-password'
     | '/search'
     | '/setup'
     | '/track'
@@ -306,8 +326,10 @@ export interface FileRouteTypes {
     | '/'
     | '/catalogue'
     | '/checkout'
+    | '/forgot-password'
     | '/login'
     | '/mcp'
+    | '/reset-password'
     | '/search'
     | '/setup'
     | '/track'
@@ -336,8 +358,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/catalogue'
     | '/checkout'
+    | '/forgot-password'
     | '/login'
     | '/mcp'
+    | '/reset-password'
     | '/search'
     | '/setup'
     | '/track'
@@ -367,8 +391,10 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   CatalogueRoute: typeof CatalogueRoute
   CheckoutRoute: typeof CheckoutRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   McpRoute: typeof McpRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SearchRoute: typeof SearchRoute
   SetupRoute: typeof SetupRoute
   TrackRoute: typeof TrackRoute
@@ -411,6 +437,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -423,6 +456,13 @@ declare module '@tanstack/react-router' {
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -619,8 +659,10 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   CatalogueRoute: CatalogueRoute,
   CheckoutRoute: CheckoutRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   McpRoute: McpRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SearchRoute: SearchRoute,
   SetupRoute: SetupRoute,
   TrackRoute: TrackRoute,

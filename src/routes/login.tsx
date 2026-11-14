@@ -6,6 +6,7 @@ import { Field, Input } from "@/components/ui/form";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n-context";
 import { getSupabase } from "@/lib/supabase/client";
+import { isDemoShop } from "@/components/storefront/demo-banner";
 import { safeNext } from "@/lib/safe-next";
 
 export const Route = createFileRoute("/login")({
@@ -173,6 +174,15 @@ function LoginPage() {
         <Button type="submit" size="lg" disabled={busy}>
           {busy ? t("common.loading") : t("admin.login.submit")}
         </Button>
+
+        {!isDemoShop && (
+          <Link
+            to="/forgot-password"
+            className="self-center text-sm text-primary underline-offset-4 hover:underline"
+          >
+            {t("account.forgotLink")}
+          </Link>
+        )}
 
         {/* Only offered while the shop has no owner, so it cannot be used to
             take over a running store. */}

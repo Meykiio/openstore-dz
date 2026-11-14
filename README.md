@@ -12,7 +12,7 @@ Arabic (RTL) first. French. Cash on delivery. No subscription, no setup fee, no 
 
 ---
 
-## Status: v0.3.0
+## Status: v0.4.0
 
 **Live demo: [openstore-dz.vercel.app](https://openstore-dz.vercel.app)**, a real
 clothing catalogue running on this exact code.
@@ -136,7 +136,9 @@ free tiers, in this order:
    details.
 4. **Close the door behind you.** In Supabase → **Authentication**, set the Site
    URL to your Vercel address and turn off **Allow new users to sign up**. Your
-   owner account keeps working.
+   owner account keeps working. Under **Redirect URLs**, add
+   `https://<your-site>/reset-password` so "Forgot your password?" can bring you back
+   (see `docs/DEPLOY.md` for the email limits).
 
 Prefer your own machine, or want an AI agent to do it for you? Read on.
 
