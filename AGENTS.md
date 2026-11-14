@@ -77,6 +77,20 @@ verified result.
 13. **If mid-sprint evidence contradicts the plan:** stop, research, update the docs,
     revalidate. Never silently change architecture.
 
+## Optional features (0.3.0)
+
+- **AI assistant over MCP** (`docs/AI_ASSISTANT.md`). Every tool goes through
+  `defineTool` in `src/lib/server/mcp/tools/define.ts` (switch, limits, log, two-step code).
+  A new delete or price change must be `destructive`; `tools/catalogue.test.ts` checks.
+  Assistants act with the owner's token, so RLS applies; never use the service-role key
+  there. `has_admin_role()` is defined once (section 4) and must stay so.
+- **Telegram order messages** (`docs/TELEGRAM.md`). The bot token lives in
+  `telegram_settings`, which has no grants; never return it to the browser.
+- Anything that reports a new order must run at commit (a deferred constraint trigger):
+  `place_order()` adds the lines after the order row. See `docs/DATABASE.md`.
+- Both are off by default. Never connect them for an owner: the sign-in and the bot token
+  are the owner's to type.
+
 ## Verification
 
 The gate is one command and it must pass before every commit:

@@ -44,6 +44,9 @@ recevoir des commandes en paiement à la livraison. Ce qui fonctionne, vérifié
   de refus par wilaya, protection contre les fausses commandes (limite par numéro, liste
   noire, historique des refus), étiquettes 100×150 mm ou 4 par A4, export CSV, générateur
   tailles × couleurs, photos par couleur, catégories et guides des tailles.
+- **Optionnel, inactif tant que vous ne le connectez pas (0.3.0) :** gérer la boutique en
+  parlant à Claude, et un message Telegram à chaque nouvelle commande. Les étapes sont dans
+  le tableau de bord : Admin > Intégrations.
 - **Sécurité :** prix et frais de livraison calculés en base de données ; la plateforme ne
   détient jamais l'argent de la boutique.
 
