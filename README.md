@@ -337,6 +337,7 @@ GUEPEX_WEBHOOK_SECRET=
 | `docs/PROJECT_STRUCTURE.md`         | How the code is organised                                                                |
 | `docs/DEPLOY.md`                    | Putting a shop online                                                                    |
 | `docs/DECISIONS.md`                 | Decisions already made, and why                                                          |
+| `docs/AI_ASSISTANT.md`              | Optional: manage the shop from Claude (setup, tools, safety)                             |
 | `docs/CHANGELOG.md`                 | What actually changed, per sprint                                                        |
 | `docs/skills/yalidine-integration/` | Guepex delivery integration for AI agents                                                |
 | `AGENTS.md`                         | Rules for any AI agent working in this repo                                              |

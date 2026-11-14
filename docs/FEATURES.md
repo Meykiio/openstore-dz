@@ -103,6 +103,12 @@ Last verified against the built output, not the dev server.
   the shop does not serve.
 - **Guepex parcels.** Create a parcel for an order from the dashboard, with the
   address and declared value read from the database rather than the request.
+- **Manage the shop from Claude** (0.3.0, optional, off by default). Claude connects to
+  `/mcp`, signs in as the owner through Supabase OAuth, and has 30 tools: products,
+  variants, prices, photos (one-time upload link), categories, delivery prices, orders,
+  reviews, settings. Deletes and price changes take a confirmation code; Admin >
+  Integrations allows, switches off or disconnects an assistant and shows its log.
+  Guide: `docs/AI_ASSISTANT.md`.
 - **Order export to Google Sheets.** Any number of destinations, off by default. Each
   new order and each status change is signed with HMAC-SHA256 and posted to the
   owner's own Google Apps Script, which writes it into their sheet. Setup guide and
