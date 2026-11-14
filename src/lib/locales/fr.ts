@@ -3,6 +3,7 @@ import { frAdmin } from "./fr.admin";
 import { frTools } from "./fr.tools";
 import { frStorefront } from "./fr.storefront";
 import { frAi } from "./fr.ai";
+import { frTelegram } from "./fr.telegram";
 
 /** Mirrors the Arabic keys exactly; a missing key is a compile error. */
 export const fr: Record<TranslationKey, string> = {
@@ -10,4 +11,5 @@ export const fr: Record<TranslationKey, string> = {
   ...frAdmin,
   ...frTools,
   ...frAi,
+  ...frTelegram,
 };
