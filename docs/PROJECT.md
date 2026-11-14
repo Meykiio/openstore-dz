@@ -5,7 +5,25 @@ master files; they never weaken a `[HARD]` rule.
 
 ## Current State
 
-Last updated 2026-10-30. Everything in this section was run, not assumed.
+Last updated 2026-11-14. Everything in this section was run, not assumed.
+
+### 0.3.0 (2026-11-14), local branches, not pushed or merged yet
+
+- Branches, each built on the one before: `fix/order-export-at-commit` (Sheets export
+  at commit, schema 4), `feat/ai-assistant` (Claude over MCP, schema 5, plus the
+  `react-router` pin), `feat/telegram-orders` (Telegram, schema 6, version 0.3.0).
+- Verified: `npm run check` green at every commit (144 unit tests at the end).
+  `schema.sql` run in PGlite with Supabase stubs (scratch harness, not in the repo): 4
+  export checks, 46 AI checks, 31 Telegram checks, including upgrades from the 0.2.0
+  file and from schemas 4 and 5, and re-runs. On the production build: `/mcp` and
+  `/api/telegram` refuse callers without a token, the OAuth metadata points at the
+  shop's Supabase, the consent page asks for the owner's sign-in.
+- **Not verified yet:** a live Claude sign-in and a real Telegram message on an
+  OpenStore project. They need the OAuth server switched on in Supabase, a bot token,
+  and the owner at the sign-in screens. The admin Integrations page was not opened
+  signed in (no owner session here).
+- Production (openstore-dz.vercel.app) is still 0.2.0 and needs `schema.sql` re-run
+  after the merge.
 
 ### Verified
 

@@ -28,6 +28,7 @@ import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSlipsRouteImport } from './routes/admin.slips'
 import { Route as AdminWelcomeRouteImport } from './routes/admin.welcome'
 import { Route as ApiAiDriveRouteImport } from './routes/api.ai-drive'
+import { Route as ApiTelegramRouteImport } from './routes/api.telegram'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as OauthConsentRouteImport } from './routes/oauth.consent'
 import { Route as OrderTokenRouteImport } from './routes/order.$token'
@@ -131,6 +132,11 @@ const ApiAiDriveRoute = ApiAiDriveRouteImport.update({
   path: '/api/ai-drive',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTelegramRoute = ApiTelegramRouteImport.update({
+  id: '/api/telegram',
+  path: '/api/telegram',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CategorySlugRoute = CategorySlugRouteImport.update({
   id: '/category/$slug',
   path: '/category/$slug',
@@ -187,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/admin/slips': typeof AdminSlipsRoute
   '/admin/welcome': typeof AdminWelcomeRoute
   '/api/ai-drive': typeof ApiAiDriveRoute
+  '/api/telegram': typeof ApiTelegramRoute
   '/category/$slug': typeof CategorySlugRoute
   '/oauth/consent': typeof OauthConsentRoute
   '/order/$token': typeof OrderTokenRoute
@@ -214,6 +221,7 @@ export interface FileRoutesByTo {
   '/admin/slips': typeof AdminSlipsRoute
   '/admin/welcome': typeof AdminWelcomeRoute
   '/api/ai-drive': typeof ApiAiDriveRoute
+  '/api/telegram': typeof ApiTelegramRoute
   '/category/$slug': typeof CategorySlugRoute
   '/oauth/consent': typeof OauthConsentRoute
   '/order/$token': typeof OrderTokenRoute
@@ -243,6 +251,7 @@ export interface FileRoutesById {
   '/admin/slips': typeof AdminSlipsRoute
   '/admin/welcome': typeof AdminWelcomeRoute
   '/api/ai-drive': typeof ApiAiDriveRoute
+  '/api/telegram': typeof ApiTelegramRoute
   '/category/$slug': typeof CategorySlugRoute
   '/oauth/consent': typeof OauthConsentRoute
   '/order/$token': typeof OrderTokenRoute
@@ -273,6 +282,7 @@ export interface FileRouteTypes {
     | '/admin/slips'
     | '/admin/welcome'
     | '/api/ai-drive'
+    | '/api/telegram'
     | '/category/$slug'
     | '/oauth/consent'
     | '/order/$token'
@@ -300,6 +310,7 @@ export interface FileRouteTypes {
     | '/admin/slips'
     | '/admin/welcome'
     | '/api/ai-drive'
+    | '/api/telegram'
     | '/category/$slug'
     | '/oauth/consent'
     | '/order/$token'
@@ -328,6 +339,7 @@ export interface FileRouteTypes {
     | '/admin/slips'
     | '/admin/welcome'
     | '/api/ai-drive'
+    | '/api/telegram'
     | '/category/$slug'
     | '/oauth/consent'
     | '/order/$token'
@@ -349,6 +361,7 @@ export interface RootRouteChildren {
   SetupRoute: typeof SetupRoute
   TrackRoute: typeof TrackRoute
   ApiAiDriveRoute: typeof ApiAiDriveRoute
+  ApiTelegramRoute: typeof ApiTelegramRoute
   CategorySlugRoute: typeof CategorySlugRoute
   OauthConsentRoute: typeof OauthConsentRoute
   OrderTokenRoute: typeof OrderTokenRoute
@@ -491,6 +504,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAiDriveRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/telegram': {
+      id: '/api/telegram'
+      path: '/api/telegram'
+      fullPath: '/api/telegram'
+      preLoaderRoute: typeof ApiTelegramRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/category/$slug': {
       id: '/category/$slug'
       path: '/category/$slug'
@@ -584,6 +604,7 @@ const rootRouteChildren: RootRouteChildren = {
   SetupRoute: SetupRoute,
   TrackRoute: TrackRoute,
   ApiAiDriveRoute: ApiAiDriveRoute,
+  ApiTelegramRoute: ApiTelegramRoute,
   CategorySlugRoute: CategorySlugRoute,
   OauthConsentRoute: OauthConsentRoute,
   OrderTokenRoute: OrderTokenRoute,

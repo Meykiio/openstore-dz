@@ -79,4 +79,10 @@ Demo products are only created in a shop that nobody has claimed yet.
 
 ## What is new
 
+**0.3.0.** Run the database update (step D) once more: it fixes the Google Sheets
+export (new orders used to arrive with no items and a total of 0) and adds two optional
+features, both off until you connect them: managing the shop from Claude
+([guide](docs/AI_ASSISTANT.md)) and a Telegram message for every new order
+([guide](docs/TELEGRAM.md)). If you do nothing else, your shop works exactly as before.
+
 See the [changelog](docs/CHANGELOG.md). Your dashboard tells you when a new version is out.

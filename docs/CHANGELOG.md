@@ -6,6 +6,22 @@ All notable changes to OpenStore DZ. Format follows
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-14
+
+Needs `schema.sql` re-run (schema version 6; the dashboard says so). Both new features
+are off until the owner connects them: a shop that only updates sees no change except the
+fixed Sheets export.
+
+**Added: a Telegram message for every new order** (optional; guide `docs/TELEGRAM.md`).
+The owner connects a bot in Admin > Integrations; the database sends the message at
+commit with the lines and the real total, in Arabic, French or English, starting with the
+shop name. The token is kept where no browser or assistant can read it. Verified:
+`npm run check` (144 unit tests); 31 PGlite checks (fresh, re-run, upgrades from 0.2.0
+and schemas 4 and 5, owner only, three languages, E2E-TEST skipped, a failing send does not
+fail the order); on the production build `/api/telegram` refuses a caller without the
+owner's session. **Not verified:** a real message on an OpenStore project (needs a bot
+token and the owner's phone).
+
 **Added: manage the shop from Claude** (optional, off by default; guide
 `docs/AI_ASSISTANT.md`). Claude connects to `/mcp` and signs in as the owner through
 Supabase's OAuth 2.1 server (beta), so every action goes through the shop's own RLS. 30
