@@ -200,6 +200,31 @@ unchanged, enabled, disabled, unknown and staff assistants, orders visibility, t
 blocklist and export targets refused, codes (wrong tool, other assistant, reuse,
 expiry), upload links, rate limits.
 
+## Telegram order messages (0.3.0, section 14)
+
+Off until the owner connects a bot in Admin > Integrations.
+
+- `telegram_settings`: one row (bot token, bot name, chat id, site address, `lang`,
+  `enabled`). RLS on and every grant revoked: only the functions below read it, so the
+  token never leaves the database. `telegram_status()` returns the bot name, language
+  and switch, never the token.
+- `telegram_save`, `telegram_set_enabled`, `telegram_set_lang`, `telegram_disconnect`,
+  `telegram_test`: owner signed in normally only (staff and assistant tokens refused).
+- `telegram_new_order`: a `DEFERRABLE INITIALLY DEFERRED` constraint trigger after insert
+  on `orders`, so it runs at commit, when the lines and total exist (see "Order
+  notifications run at commit"). It queues the message with `pg_net` and swallows every
+  error: a broken Telegram never fails a checkout.
+- Language: `lang` is `ar`, `fr` or `en`, set from the dashboard's language when the
+  owner connects, changeable on the card. The words live in `telegram_words()`. Every
+  message starts with the shop name from `store_settings`.
+- Orders named `E2E-TEST` (the e2e buyer journey) are not sent.
+
+Tested in PGlite (31 checks): fresh, re-run, upgrades from 0.2.0 and schemas 4 and 5;
+off by default; owner only; token unreadable; one message per order with the real
+total, lines and note; Arabic, French and English; unknown language refused;
+E2E-TEST skipped; switch off; test message; a failing `pg_net` does not fail the order;
+disconnect.
+
 ## Storage
 
 One public bucket, `product-media`, for product and review imagery. Public read is the

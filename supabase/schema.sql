@@ -2646,6 +2646,297 @@ grant execute on function public.ai_upload_create(uuid, text, text) to authentic
 grant execute on function public.ai_upload_get(uuid) to authenticated;
 grant execute on function public.ai_upload_finish(uuid) to authenticated;
 
+-- =============================================================================
+-- 14. Telegram: a message to the owner for every new order, 0.3.0
+-- =============================================================================
+--
+-- Off until the owner connects a bot. The owner creates a bot with @BotFather,
+-- pastes its token in Admin > Integrations, and taps Start in Telegram once. From
+-- then on every new order arrives as a Telegram message with what is needed to call
+-- the buyer, in the language the owner chose (Arabic, French or English).
+--
+--  * The bot token is stored here, in a table no API role can read: no grant, no
+--    policy. Only the functions below, running as their owner, touch it. The
+--    browser never gets it back, and an assistant (AI token) cannot reach it.
+--  * Sent with pg_net (section 11), which starts the request only after the
+--    transaction commits, so a slow or broken Telegram can never delay or fail a
+--    checkout.
+--  * The trigger is a DEFERRED constraint trigger: it runs at commit, after
+--    place_order() has inserted the lines and computed the total. A plain AFTER
+--    INSERT trigger on orders runs before the lines exist and would say 0 DA.
+--  * Orders named E2E-TEST (the automated buyer journey in e2e/) are not sent.
+
+create table if not exists public.telegram_settings (
+  id            smallint primary key default 1 check (id = 1),
+  bot_token     text not null check (bot_token ~ '^[0-9]+:[A-Za-z0-9_-]{20,}$'),
+  bot_username  text not null,
+  chat_id       bigint not null,
+  -- Where "open the dashboard" in each message points.
+  site_url      text not null check (site_url ~ '^https?://'),
+  -- The language of the messages, chosen by the owner when connecting.
+  lang          text not null default 'ar' check (lang in ('ar', 'fr', 'en')),
+  enabled       boolean not null default true,
+  updated_at    timestamptz not null default now()
+);
+
+alter table public.telegram_settings enable row level security;
+revoke all on public.telegram_settings from anon, authenticated;
+
+-- The owner, signed in normally (not an assistant), or an error.
+create or replace function public.telegram_owner_check()
+returns void
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  if (select public.has_admin_role(auth.uid(), array['owner']::public.admin_role[])) is not true
+     or public.ai_request() then
+    raise exception 'telegram_owner_only' using errcode = '42501';
+  end if;
+end;
+$$;
+
+-- What the admin card shows. Never the token.
+create or replace function public.telegram_status()
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  v jsonb;
+begin
+  perform public.telegram_owner_check();
+  select jsonb_build_object('connected', true, 'bot_username', bot_username, 'lang', lang,
+                            'enabled', enabled, 'updated_at', updated_at)
+    into v from public.telegram_settings where id = 1;
+  return coalesce(v, jsonb_build_object('connected', false));
+end;
+$$;
+
+-- Saved once the server has checked the token and found the owner's chat.
+create or replace function public.telegram_save(
+  p_bot_token text, p_bot_username text, p_chat_id bigint, p_site_url text, p_lang text
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  perform public.telegram_owner_check();
+  insert into public.telegram_settings (id, bot_token, bot_username, chat_id, site_url, lang, enabled, updated_at)
+  values (1, trim(p_bot_token), trim(p_bot_username), p_chat_id, trim(p_site_url),
+          coalesce(nullif(p_lang, ''), 'ar'), true, now())
+  on conflict (id) do update
+    set bot_token = excluded.bot_token, bot_username = excluded.bot_username,
+        chat_id = excluded.chat_id, site_url = excluded.site_url, lang = excluded.lang,
+        enabled = true, updated_at = now();
+end;
+$$;
+
+create or replace function public.telegram_set_enabled(p_enabled boolean)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  perform public.telegram_owner_check();
+  update public.telegram_settings set enabled = p_enabled, updated_at = now() where id = 1;
+end;
+$$;
+
+create or replace function public.telegram_set_lang(p_lang text)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  perform public.telegram_owner_check();
+  update public.telegram_settings set lang = p_lang, updated_at = now() where id = 1;
+end;
+$$;
+
+create or replace function public.telegram_disconnect()
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  perform public.telegram_owner_check();
+  delete from public.telegram_settings where id = 1;
+end;
+$$;
+
+-- The words of a message, per language. Plain text, no formatting.
+create or replace function public.telegram_words(p_lang text)
+returns jsonb
+language sql
+immutable
+set search_path = ''
+as $$
+  select case p_lang
+    when 'fr' then jsonb_build_object(
+      'new', 'Nouvelle commande', 'name', 'Nom', 'phone', 'Téléphone', 'wilaya', 'Wilaya',
+      'delivery', 'Livraison', 'office', 'Bureau du transporteur', 'home', 'À domicile',
+      'total', 'Total', 'da', 'DA', 'note', 'Note', 'sep', ', ',
+      'test', 'Message de test. Les notifications fonctionnent.')
+    when 'en' then jsonb_build_object(
+      'new', 'New order', 'name', 'Name', 'phone', 'Phone', 'wilaya', 'Wilaya',
+      'delivery', 'Delivery', 'office', 'Carrier office', 'home', 'Home',
+      'total', 'Total', 'da', 'DA', 'note', 'Note', 'sep', ', ',
+      'test', 'Test message. Notifications work.')
+    else jsonb_build_object(
+      'new', 'طلبية جديدة', 'name', 'الاسم', 'phone', 'الهاتف', 'wilaya', 'الولاية',
+      'delivery', 'التوصيل', 'office', 'مكتب التوصيل', 'home', 'إلى المنزل',
+      'total', 'المجموع', 'da', 'دج', 'note', 'ملاحظة', 'sep', '، ',
+      'test', 'رسالة تجريبية. الإشعارات تعمل.')
+  end;
+$$;
+
+-- The shop's name as the message's first word, so an owner with several shops
+-- knows which one it is.
+create or replace function public.telegram_shop_name()
+returns text
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select coalesce(nullif(trim((select name from public.store_settings where id = 1)), ''), 'OpenStore');
+$$;
+
+-- The message for one order. Telegram's limit is 4096 characters.
+create or replace function public.telegram_order_text(p_order_id uuid, p_site_url text, p_lang text)
+returns text
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select left(concat_ws(E'\n',
+    public.telegram_shop_name() || ': ' || (w ->> 'new') || ' ' || upper(left(o.public_token::text, 8)),
+    (w ->> 'name') || ': ' || o.customer_name,
+    (w ->> 'phone') || ': ' || o.phone,
+    (w ->> 'wilaya') || ': ' || o.wilaya || coalesce((w ->> 'sep') || nullif(o.commune, ''), ''),
+    (w ->> 'delivery') || ': ' || case when o.delivery_method = 'stopdesk'
+                      then (w ->> 'office') || coalesce(' (' || o.stopdesk_name || ')', '')
+                      else (w ->> 'home') end,
+    '',
+    (select string_agg('- ' || i.product_name || coalesce(' (' || i.variant_label || ')', '')
+                       || ' x' || i.quantity, E'\n' order by i.created_at)
+       from public.order_items i where i.order_id = o.id),
+    '',
+    (w ->> 'total') || ': ' || o.total || ' ' || (w ->> 'da'),
+    case when coalesce(o.note, '') <> '' then (w ->> 'note') || ': ' || o.note end,
+    '',
+    rtrim(p_site_url, '/') || '/admin'
+  ), 4000)
+  from public.orders o, public.telegram_words(p_lang) w
+  where o.id = p_order_id;
+$$;
+
+-- Queue one Telegram message. Never raises: a notification must not fail a checkout.
+create or replace function public.telegram_send(p_text text)
+returns bigint
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  s record;
+  v_request bigint;
+begin
+  select bot_token, chat_id into s from public.telegram_settings where id = 1 and enabled;
+  if not found or coalesce(p_text, '') = '' then
+    return null;
+  end if;
+  select net.http_post(
+    url := 'https://api.telegram.org/bot' || s.bot_token || '/sendMessage',
+    body := jsonb_build_object(
+      'chat_id', s.chat_id,
+      'text', p_text,
+      'link_preview_options', jsonb_build_object('is_disabled', true)
+    ),
+    timeout_milliseconds := 10000
+  ) into v_request;
+  return v_request;
+exception when others then
+  return null;
+end;
+$$;
+
+create or replace function public.telegram_notify_new_order()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  s record;
+begin
+  if new.customer_name = 'E2E-TEST' then
+    return null;
+  end if;
+  select site_url, lang into s from public.telegram_settings where id = 1 and enabled;
+  if found then
+    perform public.telegram_send(public.telegram_order_text(new.id, s.site_url, s.lang));
+  end if;
+  return null;
+exception when others then
+  return null;
+end;
+$$;
+
+drop trigger if exists telegram_new_order on public.orders;
+create constraint trigger telegram_new_order
+  after insert on public.orders
+  deferrable initially deferred
+  for each row execute function public.telegram_notify_new_order();
+
+-- A test message from the admin card.
+create or replace function public.telegram_test()
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_lang text;
+begin
+  perform public.telegram_owner_check();
+  select lang into v_lang from public.telegram_settings where id = 1;
+  return public.telegram_send(
+    public.telegram_shop_name() || ': ' || (public.telegram_words(v_lang) ->> 'test')
+  ) is not null;
+end;
+$$;
+
+revoke all on function public.telegram_owner_check() from public, anon, authenticated;
+revoke all on function public.telegram_words(text) from public, anon, authenticated;
+revoke all on function public.telegram_shop_name() from public, anon, authenticated;
+revoke all on function public.telegram_order_text(uuid, text, text) from public, anon, authenticated;
+revoke all on function public.telegram_send(text) from public, anon, authenticated;
+revoke all on function public.telegram_notify_new_order() from public, anon, authenticated;
+revoke all on function public.telegram_status() from public, anon;
+revoke all on function public.telegram_save(text, text, bigint, text, text) from public, anon;
+revoke all on function public.telegram_set_enabled(boolean) from public, anon;
+revoke all on function public.telegram_set_lang(text) from public, anon;
+revoke all on function public.telegram_disconnect() from public, anon;
+revoke all on function public.telegram_test() from public, anon;
+grant execute on function public.telegram_status() to authenticated;
+grant execute on function public.telegram_save(text, text, bigint, text, text) to authenticated;
+grant execute on function public.telegram_set_enabled(boolean) to authenticated;
+grant execute on function public.telegram_set_lang(text) to authenticated;
+grant execute on function public.telegram_disconnect() to authenticated;
+grant execute on function public.telegram_test() to authenticated;
+
 -- ── Version ────────────────────────────────────────────────────────────────
 -- Which schema.sql this database last ran. The dashboard compares it with the
 -- code (SCHEMA_VERSION in src/lib/version.ts) and asks the owner to run the
@@ -2656,7 +2947,7 @@ language sql
 immutable
 set search_path = ''
 as $$
-  select 5;
+  select 6;
 $$;
 revoke all on function public.openstore_schema_version() from public;
 grant execute on function public.openstore_schema_version() to anon, authenticated;

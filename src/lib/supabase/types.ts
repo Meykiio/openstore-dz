@@ -789,6 +789,36 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      telegram_disconnect: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
+      telegram_save: {
+        Args: {
+          p_bot_token: string;
+          p_bot_username: string;
+          p_chat_id: number;
+          p_lang: string;
+          p_site_url: string;
+        };
+        Returns: undefined;
+      };
+      telegram_set_enabled: {
+        Args: { p_enabled: boolean };
+        Returns: undefined;
+      };
+      telegram_set_lang: {
+        Args: { p_lang: string };
+        Returns: undefined;
+      };
+      telegram_status: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
+      telegram_test: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
       ai_begin: {
         Args: { p_kind: string };
         Returns: undefined;
