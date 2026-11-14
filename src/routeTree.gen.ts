@@ -19,6 +19,7 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as TrackRouteImport } from './routes/track'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminAccountRouteImport } from './routes/admin.account'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
 import { Route as AdminIntegrationsRouteImport } from './routes/admin.integrations'
@@ -85,6 +86,11 @@ const TrackRoute = TrackRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAccountRoute = AdminAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
@@ -184,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
   '/track': typeof TrackRoute
+  '/admin/account': typeof AdminAccountRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
@@ -212,6 +219,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
   '/track': typeof TrackRoute
+  '/admin/account': typeof AdminAccountRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
@@ -242,6 +250,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
   '/track': typeof TrackRoute
+  '/admin/account': typeof AdminAccountRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
@@ -273,6 +282,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/setup'
     | '/track'
+    | '/admin/account'
     | '/admin/categories'
     | '/admin/delivery'
     | '/admin/integrations'
@@ -301,6 +311,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/setup'
     | '/track'
+    | '/admin/account'
     | '/admin/categories'
     | '/admin/delivery'
     | '/admin/integrations'
@@ -330,6 +341,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/setup'
     | '/track'
+    | '/admin/account'
     | '/admin/categories'
     | '/admin/delivery'
     | '/admin/integrations'
@@ -439,6 +451,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/account': {
+      id: '/admin/account'
+      path: '/account'
+      fullPath: '/admin/account'
+      preLoaderRoute: typeof AdminAccountRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/categories': {
@@ -564,6 +583,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminAccountRoute: typeof AdminAccountRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminDeliveryRoute: typeof AdminDeliveryRoute
   AdminIntegrationsRoute: typeof AdminIntegrationsRoute
@@ -578,6 +598,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAccountRoute: AdminAccountRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminDeliveryRoute: AdminDeliveryRoute,
   AdminIntegrationsRoute: AdminIntegrationsRoute,

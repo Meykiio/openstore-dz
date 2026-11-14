@@ -1,0 +1,57 @@
+import type { TranslationKey } from "./i18n";
+import { getSupabase } from "./supabase/client";
+
+/**
+ * Changing and resetting an admin's own password (0.4.0).
+ *
+ * Supabase Auth does the work (`auth.updateUser`). This file only checks the
+ * form before anything is sent, and turns Supabase's error codes into words the
+ * owner can act on.
+ */
+
+/** Same floor as the setup screen. Supabase may be set to ask for more. */
+export const MIN_PASSWORD = 8;
+
+/** What is wrong with the new password as typed, or null when it can be sent. */
+export function passwordProblem(next: string, confirm: string): TranslationKey | null {
+  if (next.length < MIN_PASSWORD) return "account.tooShort";
+  if (next !== confirm) return "setup.passMismatch";
+  return null;
+}
+
+type AuthFailure = { code?: string; message: string };
+
+/** A Supabase Auth error, as a translation key when we know it. */
+export function explainPasswordError(error: AuthFailure): TranslationKey | null {
+  switch (error.code) {
+    case "same_password":
+      return "account.samePassword";
+    case "weak_password":
+      return "account.weakPassword";
+    case "invalid_credentials":
+      return "account.wrongCurrent";
+    case "reauthentication_needed":
+    case "reauthentication_not_valid":
+    case "session_expired":
+    case "session_not_found":
+      return "account.signInAgain";
+    case "over_request_rate_limit":
+    case "over_email_send_rate_limit":
+      return "account.tooMany";
+    default:
+      // Older Auth servers say it in words only.
+      return /current password/i.test(error.message) ? "account.wrongCurrent" : null;
+  }
+}
+
+/**
+ * Set a new password. `current` is required when signed in normally, so a
+ * session left open on someone's phone cannot be used to lock the owner out.
+ * A password-reset link signs in for this one purpose and has no current one.
+ */
+export async function setPassword(next: string, current?: string): Promise<AuthFailure | null> {
+  const { error } = await getSupabase().auth.updateUser(
+    current === undefined ? { password: next } : { password: next, current_password: current },
+  );
+  return error ? { code: error.code, message: error.message } : null;
+}
