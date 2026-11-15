@@ -6,6 +6,13 @@ All notable changes to OpenStore DZ. Format follows
 
 ## [Unreleased]
 
+**Fixed.** On the public demo, opening `/reset-password` directly let the shared staff
+account set a new password. It now follows the same rule as My account, and both let the
+demo's owner change theirs. The language picker on the collapsed admin rail spilled out of
+the 70px rail; it is now a round language button that opens the same native picker.
+Verified: `npm run check` (156 tests); the rail measured on the production build (40px
+button collapsed, full-width picker expanded).
+
 ## [0.4.0] - 2026-11-14
 
 No database update needed.

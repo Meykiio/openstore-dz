@@ -1288,6 +1288,21 @@ html[dir="rtl"] {
   border-top: 1px solid var(--outline);
 }
 
+.admin-locale {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-locale .form-select-compact {
+  width: 100%;
+  max-width: none;
+}
+
+.admin-locale-icon {
+  display: none;
+}
+
 /* Desktop-only collapse control. On mobile the rail is a drawer instead. */
 .admin-collapse-toggle {
   display: none;
@@ -1366,6 +1381,47 @@ html[dir="rtl"] {
   html.nav-collapsed .admin-sidebar-footer {
     flex-direction: column;
     padding: 10px 8px;
+  }
+
+  /* Same 40px circle as the theme toggle under it. */
+  html.nav-collapsed .admin-locale {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--outline);
+    border-radius: 9999px;
+    color: var(--on-surface);
+  }
+
+  html.nav-collapsed .admin-locale:hover {
+    background: var(--surface-mid);
+  }
+
+  html.nav-collapsed .admin-locale:focus-within {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  html.nav-collapsed .admin-locale-icon {
+    display: block;
+    width: 18px;
+    height: 18px;
+  }
+
+  html.nav-collapsed .admin-locale select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 100%;
+    padding: 0;
+    border-radius: 9999px;
+    opacity: 0;
+    cursor: pointer;
   }
 }
 

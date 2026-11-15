@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { explainPasswordError, linkError, passwordProblem } from "./account";
+import { explainPasswordError, linkError, mayChangePassword, passwordProblem } from "./account";
 
 describe("passwordProblem", () => {
   it("refuses fewer than 8 characters", () => {
@@ -46,5 +46,17 @@ describe("linkError", () => {
   });
   it("is null for a good link", () => {
     expect(linkError("#access_token=abc&type=recovery")).toBeNull();
+  });
+});
+
+describe("mayChangePassword", () => {
+  it("lets every admin change it on a real shop", () => {
+    expect(mayChangePassword(false, "staff")).toBe(true);
+    expect(mayChangePassword(false, "owner")).toBe(true);
+  });
+  it("lets only the owner change it on the demo", () => {
+    expect(mayChangePassword(true, "owner")).toBe(true);
+    expect(mayChangePassword(true, "staff")).toBe(false);
+    expect(mayChangePassword(true, null)).toBe(false);
   });
 });

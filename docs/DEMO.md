@@ -16,9 +16,12 @@ These are published on purpose. The account is a demo and holds no real data.
 
 ## What the demo account can and cannot do
 
-The demo hides My account's password change and "Forgot your password?"
-(`VITE_DEMO_MODE=true`): the password above is published, and a visitor changing it would
-lock everyone else out.
+On the demo (`VITE_DEMO_MODE=true`) only the owner can set a password, in My account or
+on `/reset-password`. The shared staff account above cannot: its password is published,
+and a visitor changing it would lock everyone else out. "Forgot your password?" is hidden.
+This is a screen rule only. Supabase still lets any signed-in account change its own
+password through the API, so if the demo password ever stops working, set it again in
+Supabase > Authentication > Users.
 
 It is `staff`, not `owner`, and that is the whole point. RLS decides, not the UI.
 

@@ -3,6 +3,7 @@ import {
   Bot,
   ChevronsLeft,
   ClipboardList,
+  Languages,
   LogOut,
   Package,
   Settings,
@@ -115,7 +116,13 @@ export function AdminSidebar({
         </nav>
 
         <div className="admin-sidebar-footer">
-          <LocaleSwitcher className="min-w-0 flex-1" />
+          {/* On the collapsed rail the select becomes a globe button: the native
+              select stays on top, invisible, so it still opens the platform's
+              own picker. */}
+          <div className="admin-locale">
+            <Languages className="admin-locale-icon" aria-hidden="true" />
+            <LocaleSwitcher />
+          </div>
           <ThemeToggle />
         </div>
 
