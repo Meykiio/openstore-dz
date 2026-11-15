@@ -74,3 +74,13 @@ export function linkError(hash: string): string | null {
   const params = new URLSearchParams(hash.replace(/^#/, ""));
   return params.get("error_code") ?? params.get("error");
 }
+
+/**
+ * Whether this signed-in admin may set a new password here. On the public demo
+ * the shared staff account's password is published, so only the owner may; on
+ * a real shop everyone may. Every page that sets a password asks this, so a
+ * direct visit to /reset-password cannot get round My account's rule.
+ */
+export function mayChangePassword(demo: boolean, role: string | null): boolean {
+  return !demo || role === "owner";
+}

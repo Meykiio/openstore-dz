@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { PasswordForm } from "@/components/admin/password-form";
 import { isDemoShop } from "@/components/storefront/demo-banner";
+import { mayChangePassword } from "@/lib/account";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n-context";
 
@@ -11,13 +12,13 @@ export const Route = createFileRoute("/admin/account")({
 
 /**
  * Admin > My account: the signed-in admin's own password. Owner and staff alike,
- * because each has their own account. Not on the public demo, whose staff
- * password is published on purpose (docs/DEMO.md): a visitor changing it would
- * lock everyone else out.
+ * because each has their own account. On the public demo only the owner: the
+ * staff password is published on purpose (docs/DEMO.md), and a visitor changing
+ * it would lock everyone else out.
  */
 function AccountPage() {
   const { t } = useI18n();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
 
   return (
     <div className="flex max-w-md flex-col gap-6">
@@ -35,10 +36,10 @@ function AccountPage() {
           <h2 className="font-display text-lg font-semibold">{t("account.passwordTitle")}</h2>
           <p className="text-sm text-on-surface-muted">{t("account.passwordHelp")}</p>
         </div>
-        {isDemoShop ? (
-          <p className="text-sm text-on-surface-muted">{t("account.demo")}</p>
-        ) : (
+        {mayChangePassword(isDemoShop, role) ? (
           <PasswordForm askCurrent onDone={() => toast.success(t("account.changed"))} />
+        ) : (
+          <p className="text-sm text-on-surface-muted">{t("account.demo")}</p>
         )}
       </section>
     </div>
