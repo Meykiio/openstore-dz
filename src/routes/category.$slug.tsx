@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { StoreLayout } from "@/components/storefront/store-layout";
 import { CatalogueView } from "@/components/storefront/catalogue-view";
+import { CategoryChips } from "@/components/storefront/home-shelf";
 import { useI18n } from "@/lib/i18n-context";
 import { categoriesQuery, useCategories } from "@/lib/queries";
 import { localized } from "@/lib/i18n";
@@ -48,6 +49,7 @@ function CategoryPage() {
 
   return (
     <StoreLayout>
+      <CategoryChips />
       <div className="container-page py-10">
         {/* The view owns its own query, loading and empty states now: filtering and
             paging happen in the database, so a component handed a list could only
@@ -65,9 +67,7 @@ function CategoryPage() {
             className="mt-12 flex flex-col gap-3 border-t border-outline pt-8"
             aria-label={t("home.categories")}
           >
-            <h2 className="text-sm font-semibold uppercase tracking-[0.03em] text-on-surface-muted">
-              {t("home.categories")}
-            </h2>
+            <h2 className="section-title text-base">{t("home.categories")}</h2>
             <div className="flex flex-wrap gap-2">
               {others.map((entry) => (
                 <Link

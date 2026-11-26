@@ -6,6 +6,7 @@ import {
   priceRange,
   sortVariants,
   productImage,
+  productSecondImage,
   totalStock,
   type CatalogueProduct,
 } from "@/lib/queries";
@@ -16,14 +17,16 @@ import { StarRating } from "./star-rating";
 /**
  * Catalogue card.
  *
- * Full-bleed 1:1 media, then a deliberately small text block: brand line, title,
- * rating, mono price, CTA. The thesis is that the photograph sells and the card
- * should not compete with it, so the only coloured element is the price.
+ * A photograph on the page, then four lines of type. No frame, no surface, no
+ * button: the whole card is the link, and the only chrome is a sale tag or a
+ * sold-out band when one applies. The second photo crossfades on hover, which
+ * shows the cut or the back of the garment without opening the product.
  */
 function ProductCard({ product }: { product: CatalogueProduct }) {
   const { t, locale } = useI18n();
 
   const image = productImage(product);
+  const secondImage = productSecondImage(product);
   const range = priceRange(product);
   // The cheapest variant sets the headline price, so its sale is the one shown.
   const cheapest = sortVariants(product.product_variants).find((v) => v.price === range?.min);
@@ -33,27 +36,46 @@ function ProductCard({ product }: { product: CatalogueProduct }) {
   const rating = product.rating_avg ?? null;
   const ratingCount = product.rating_count ?? 0;
   // Display only, not a link: the whole card is already an anchor, and a nested
-  // anchor is invalid HTML. Category navigation lives on the category pages and
-  // the category strip.
+  // anchor is invalid HTML.
   const category = product.categories
     ? localized(locale, product.categories.name, product.categories.name_fr)
     : undefined;
+  const name = localized(locale, product.name, product.name_fr);
 
   return (
     <Link to="/product/$slug" params={{ slug: product.slug }} className="product-card">
       <div className="pc-media">
         {image ? (
-          <img src={image} alt="" loading="lazy" decoding="async" />
+          <>
+            {/* The card's own title is the accessible name; a second copy of it
+                in the image alt would be read twice inside the same link. */}
+            <img src={image} alt="" loading="lazy" decoding="async" />
+            {secondImage && secondImage !== image && (
+              <img
+                className="pc-alt"
+                src={secondImage}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                aria-hidden="true"
+              />
+            )}
+          </>
         ) : (
           <ImageOff size={44} aria-hidden="true" />
         )}
-        {soldOut ? <span className="pc-flag out">{t("store.outOfStock")}</span> : null}
+        {sale && !soldOut && (
+          <span className="pc-flag sale" dir="ltr">
+            −{sale.percent}%
+          </span>
+        )}
+        {soldOut && <span className="pc-flag out">{t("store.outOfStock")}</span>}
       </div>
 
       <div className="pc-body">
         {category && <span className="pc-brand">{category}</span>}
 
-        <h3 className="pc-title">{localized(locale, product.name, product.name_fr)}</h3>
+        <h3 className="pc-title">{name}</h3>
 
         {rating !== null && ratingCount > 0 && (
           <span className="pc-rating">
@@ -70,21 +92,12 @@ function ProductCard({ product }: { product: CatalogueProduct }) {
                 : `${t("store.from")} ${formatDzd(range.min, locale)}`}
             </span>
             {sale && (
-              <>
-                <span className="pc-price-old" dir="ltr">
-                  {formatDzd(sale.was, locale)}
-                </span>
-                <span className="pc-price-save" dir="ltr">
-                  −{sale.percent}%
-                </span>
-              </>
+              <span className="pc-price-old" dir="ltr">
+                {formatDzd(sale.was, locale)}
+              </span>
             )}
           </span>
         )}
-
-        <span className="pc-cta">
-          <span className="btn btn-secondary btn-sm btn-block">{t("store.viewDetails")}</span>
-        </span>
       </div>
     </Link>
   );

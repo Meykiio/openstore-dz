@@ -208,17 +208,21 @@ Listed so the remaining scope is visible, with reasons, in `docs/ROADMAP.md`.
   component-CSS system, including the component classes (`.btn`, `.chip`, `.product-card`,
   `.gallery`, `.cart-*`, `.review-card`, `.ds-table`) rather than an approximation rebuilt
   out of utilities.
-- **Palette: burnt orange with a berry accent.** Primary `#c2410c`, secondary `#e11d48`,
-  tertiary `#b45309`.
-- **Two measured deviations from the reference, both for WCAG AA.** The reference primary
-  `#d9480f` scores 4.29:1 white-on-orange and 4.02:1 orange-on-cream, under the 4.5:1
-  floor for text below 18.66px, so it fails on every button label. `#c2410c` is the same
-  hue one step darker and scores 5.18:1 and 4.85:1. Muted text was likewise darkened from
-  `#78716c` to `#6b6460`. Both are asserted by `e2e/accessibility.spec.ts`.
-- **Arabic typography.** Cairo is added to the font stacks because the reference is
-  Latin-only and would otherwise fall back to whatever the operating system has.
-- **Arabic density override.** 17px at 1.75 line height against Latin's 15px at 1.5,
+- **Palette: paper, ink and one oxblood accent.** Paper `#f4efe6`, ink `#171512`,
+  oxblood `#7b1e1e`, with amber and teal kept for states. Ink on paper measures 15.9:1,
+  muted text 6.1:1, paper on oxblood 9.7:1; the values are asserted by
+  `e2e/accessibility.spec.ts`. The cream is the background the demo photography is shot
+  on, so the page and the product shots share a material.
+- **One display face.** Geist carries the wordmark, the hero and section headings at
+  weights 700–800 with tight tracking. Outfit carries body and interface; IBM Plex Mono
+  carries prices and identifiers.
+- **Arabic typography.** Cairo is added to every stack because the Latin faces have no
+  Arabic glyphs. Arabic also loses Latin letter-spacing on display type, because tracking
+  breaks joined letters.
+- **Arabic density override.** 17px at 1.75 line height against Latin's 15px at 1.6,
   because Arabic has a smaller x-height at the same nominal size.
+- **Unframed product cards.** Photographs are square-cornered and carry no card surface;
+  interface controls stay rounded. A shelf is one row on desktop.
 - **Reduced motion is respected.** Animations collapse under `prefers-reduced-motion`.
 
 ## Setup

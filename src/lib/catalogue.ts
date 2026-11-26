@@ -126,3 +126,43 @@ export function activeFilterCount(filters: CatalogueFilters): number {
   if (filters.minPrice !== null || filters.maxPrice !== null) count += 1;
   return count;
 }
+
+/**
+ * The home page feed.
+ *
+ * The storefront home is a stack of shelves (new arrivals, then one shelf per
+ * category), and one page of twelve is not enough to fill them. This fetches one
+ * larger page and groups it in the browser: a shelf per category built from
+ * separate queries would be a round trip each on the first screen a buyer sees.
+ * 24 is four shelves of six, enough for the three-product shelves the page shows.
+ */
+const HOME_FEED_SIZE = 24;
+
+async function fetchHomeFeed(): Promise<CatalogueProduct[]> {
+  const { data, error } = await getSupabase().rpc("catalogue_page", {
+    p_category_slug: null,
+    p_query: null,
+    p_sizes: null,
+    p_colors: null,
+    p_min_price: null,
+    p_max_price: null,
+    p_in_stock: false,
+    p_sort: "newest",
+    p_limit: HOME_FEED_SIZE,
+    p_offset: 0,
+  });
+
+  if (error) throw new Error(error.message);
+  return ((data ?? {}) as CatalogueResponse).products ?? [];
+}
+
+export const homeFeedQuery = () =>
+  queryOptions({
+    queryKey: ["home-feed"] as const,
+    queryFn: fetchHomeFeed,
+    placeholderData: keepPreviousData,
+  });
+
+export function useHomeFeed() {
+  return useQuery(homeFeedQuery());
+}

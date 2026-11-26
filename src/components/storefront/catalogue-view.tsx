@@ -71,7 +71,7 @@ export function CatalogueView({
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
-        <h1 className="font-display text-2xl font-semibold sm:text-3xl">{heading}</h1>
+        <h1 className="section-title text-2xl sm:text-3xl">{heading}</h1>
         {subheading && <p className="max-w-2xl text-sm text-on-surface-muted">{subheading}</p>}
       </header>
 

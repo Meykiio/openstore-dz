@@ -93,7 +93,7 @@ export function ErrorState({
 export function ProductSkeleton({ className }: { className?: string }) {
   return (
     <div className={cn("flex flex-col gap-3", className)} aria-hidden="true">
-      <div className="aspect-[4/5] animate-pulse rounded-[16px] bg-surface-high" />
+      <div className="aspect-[4/5] animate-pulse rounded-[2px] bg-surface-high" />
       <div className="h-4 w-3/4 animate-pulse rounded bg-surface-high" />
       <div className="h-4 w-1/3 animate-pulse rounded bg-surface-high" />
     </div>

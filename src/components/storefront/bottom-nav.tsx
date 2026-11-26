@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, LayoutGrid, ShoppingBag, Truck } from "lucide-react";
+import { Home, LayoutGrid, Search, ShoppingBag, Truck } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { useI18n } from "@/lib/i18n-context";
 import { cn } from "@/lib/utils";
@@ -23,12 +23,13 @@ export function BottomNav() {
   const tabs = [
     { key: "home", to: "/", label: t("nav.home"), icon: Home },
     { key: "shop", to: "/catalogue", label: t("nav.shop"), icon: LayoutGrid },
+    { key: "search", to: "/search", label: t("nav.search"), icon: Search },
     { key: "track", to: "/track", label: t("nav.trackOrder"), icon: Truck },
   ] as const;
 
   // The owner reaches the dashboard from the footer. A buyer's tab bar is for
   // buying, and a "Dashboard" tab there reads as a broken link.
-  const shopPaths = ["/catalogue", "/category", "/product", "/search"];
+  const shopPaths = ["/catalogue", "/category", "/product"];
 
   return (
     <nav className="bottom-nav" aria-label={t("nav.shop")}>
@@ -38,7 +39,9 @@ export function BottomNav() {
             ? pathname === "/"
             : tab.key === "shop"
               ? shopPaths.some((path) => pathname.startsWith(path))
-              : pathname.startsWith(tab.to);
+              : tab.key === "search"
+                ? pathname.startsWith("/search")
+                : pathname.startsWith(tab.to);
         return (
           <Link key={tab.key} to={tab.to} className={cn("bn-item", active && "active")}>
             <tab.icon aria-hidden="true" />
@@ -51,7 +54,7 @@ export function BottomNav() {
         <ShoppingBag aria-hidden="true" />
         <span>{t("nav.cart")}</span>
         <span className="sr-only" aria-live="polite">
-          {count > 0 ? t("cart.itemMany", { count }) : ""}
+          {count > 0 ? (count === 1 ? t("cart.itemOne") : t("cart.itemMany", { count })) : ""}
         </span>
         {count > 0 && (
           <span className="bn-badge" aria-hidden="true">

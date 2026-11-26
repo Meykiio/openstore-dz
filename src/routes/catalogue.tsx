@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { StoreLayout } from "@/components/storefront/store-layout";
 import { CatalogueView } from "@/components/storefront/catalogue-view";
+import { CategoryChips } from "@/components/storefront/home-shelf";
 import { EMPTY_FILTERS, cataloguePageQuery } from "@/lib/catalogue";
 import { translate } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-context";
@@ -37,6 +38,10 @@ function CatalogueRoute() {
 
   return (
     <StoreLayout>
+      {/* Both axes stay reachable from the full catalogue: a buyer who lands
+          here should be able to switch garment or universe without going back
+          to the home page. */}
+      <CategoryChips />
       <div className="container-page py-10">
         <CatalogueView heading={t("nav.products")} />
       </div>

@@ -1,74 +1,45 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Quote } from "lucide-react";
+import { Quote } from "lucide-react";
 import { useI18n } from "@/lib/i18n-context";
 import { formatRelative } from "@/lib/format";
-import { useCategories, useReviews } from "@/lib/queries";
+import { useReviews } from "@/lib/queries";
 import { StarRating } from "./star-rating";
-import { localized } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
 
 /**
- * Category strip.
+ * Shop bulletin.
  *
- * Real links to real category pages, built from the categories table rather than
- * derived from whatever text happens to be on products. A category with no
- * published products is not rendered, because an empty category page is a dead
- * end and makes a small shop look broken.
+ * The four promises the shop actually keeps, repeated in an ink band. It is the
+ * only moving element on the page, so it stays slow and stops entirely under
+ * prefers-reduced-motion. Hidden from assistive tech: the trust bar says the
+ * same things in reading order, and a screen reader should not hear them twice.
  */
-export function CategoryStrip() {
-  const { t, locale } = useI18n();
-  const { data: categories } = useCategories();
-
-  const visible = (categories ?? []).filter((category) => category.product_count > 0);
-  if (visible.length === 0) return null;
+export function Ticker({ returnsDays }: { returnsDays: number }) {
+  const { t } = useI18n();
+  const items = [
+    t("home.ticker.delivery"),
+    t("home.ticker.cod"),
+    t("home.ticker.returns", { days: returnsDays }),
+    t("home.ticker.noAccount"),
+  ];
+  // Six copies: two halves for a seamless -50% loop, wide enough on a desktop.
+  const run = Array.from({ length: 6 }, () => items).flat();
 
   return (
-    <section className="container-page py-10">
-      <h2 className="mb-5 font-display text-xl font-semibold sm:text-2xl">
-        {t("home.categories")}
-      </h2>
-
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {visible.map((category) => (
-          <Link
-            key={category.id}
-            to="/category/$slug"
-            params={{ slug: category.slug }}
-            className="group flex items-center justify-between gap-3 rounded-[16px] border border-outline bg-surface transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-outline-hi hover:shadow-sm"
-          >
-            {category.image_url && (
-              <span className="size-16 shrink-0 overflow-hidden rounded-s-[16px] bg-surface-high">
-                <img
-                  src={category.image_url}
-                  alt=""
-                  loading="lazy"
-                  className="size-full object-cover"
-                />
-              </span>
-            )}
-            <span className="min-w-0 flex-1 px-4 py-3.5">
-              <span className="block truncate text-sm font-medium">
-                {localized(locale, category.name, category.name_fr)}
-              </span>
-              <span className="font-mono text-xs text-on-surface-muted">
-                {category.product_count} {t("nav.products")}
-              </span>
-            </span>
-            <ArrowRight
-              size={16}
-              className="me-4 shrink-0 text-on-surface-muted transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
-              aria-hidden="true"
-            />
-          </Link>
+    <div className="ticker" aria-hidden="true">
+      <div className="ticker-track">
+        {run.map((item, index) => (
+          <span key={index} className="ticker-item">
+            {item}
+          </span>
         ))}
       </div>
-    </section>
+    </div>
   );
 }
 
 /**
- * Promo band. Berry, per the reference's "sale/secondary action" colour, so it
- * reads as a time-limited offer rather than as another primary button.
+ * Promo band. Oxblood, because it is the one colour in the system and this is
+ * the one place on the page that asks for a decision.
  */
 export function PromoBand({ threshold }: { threshold: number }) {
   const { t, locale } = useI18n();
@@ -77,11 +48,11 @@ export function PromoBand({ threshold }: { threshold: number }) {
   const formatted = new Intl.NumberFormat("en-US").format(threshold);
 
   return (
-    <section className="container-page py-6">
+    <section className="container-page py-7">
       <div className="promo-bar">
         <span className="p-text">
-          {t("home.promo.title")} -{" "}
-          <span dir="ltr" className="font-mono">
+          {t("home.promo.title")} —{" "}
+          <span dir="ltr" className="font-mono font-semibold">
             {formatted}
           </span>{" "}
           {locale === "ar" ? "دج" : "DA"}
@@ -106,17 +77,15 @@ export function ReviewWall() {
   return (
     <section className="section-alt border-y border-outline py-14">
       <div className="container-page">
-        <div className="mb-8 flex flex-col items-center text-center">
-          <h2 className="font-display text-xl font-semibold sm:text-2xl">
-            {t("home.reviews.title")}
-          </h2>
-          <p className="mt-2 max-w-lg text-sm text-on-surface-muted">{t("home.reviews.body")}</p>
+        <div className="mb-8 flex flex-col gap-2 sm:mb-10">
+          <h2 className="section-title text-xl sm:text-2xl">{t("home.reviews.title")}</h2>
+          <p className="max-w-lg text-sm text-on-surface-muted">{t("home.reviews.body")}</p>
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3">
           {top.map((review) => (
             <figure key={review.id} className="review-card">
-              <Quote size={18} className="mb-3 text-outline-hi" aria-hidden="true" />
+              <Quote size={18} className="mb-3 text-secondary" aria-hidden="true" />
               <StarRating value={review.rating} className="mb-3" />
               <blockquote className="review-body">{review.comment}</blockquote>
               <figcaption className="mt-4 flex items-center gap-2.5">
@@ -143,22 +112,18 @@ export function ClosingCta({ storeName }: { storeName: string }) {
   const { t } = useI18n();
   return (
     <section className="container-page py-14">
-      <div
-        className={cn(
-          "flex flex-col items-center gap-4 rounded-[24px] border border-outline bg-surface px-6 py-12 text-center",
-        )}
-      >
-        <h2 className="font-display text-xl font-semibold sm:text-2xl">{t("home.cta.title")}</h2>
+      <div className="flex flex-col items-center gap-4 rounded-[2px] border border-outline bg-surface px-6 py-12 text-center">
+        <h2 className="section-title text-xl sm:text-2xl">{t("home.cta.title")}</h2>
         <p className="max-w-md text-sm text-on-surface-muted">{t("home.cta.body")}</p>
         <div className="flex flex-wrap justify-center gap-3">
-          <a href="#catalogue" className="btn btn-primary btn-lg">
+          <Link to="/catalogue" className="btn btn-primary btn-lg">
             {t("home.browseAll")}
-          </a>
+          </Link>
           <Link to="/track" className="btn btn-secondary btn-lg">
             {t("nav.trackOrder")}
           </Link>
         </div>
-        <p className="mt-2 text-xs text-on-surface-muted">{storeName}</p>
+        <p className="mt-2 font-mono text-[11px] text-on-surface-muted">{storeName}</p>
       </div>
     </section>
   );

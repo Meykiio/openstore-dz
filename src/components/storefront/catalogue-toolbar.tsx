@@ -62,7 +62,10 @@ export function CatalogueToolbar({
         </span>
 
         <span className="ms-auto flex items-center gap-2">
-          <label htmlFor="catalogue-sort" className="text-xs text-on-surface-muted">
+          <label
+            htmlFor="catalogue-sort"
+            className="shrink-0 whitespace-nowrap text-xs text-on-surface-muted"
+          >
             {t("catalogue.sort")}
           </label>
           <Select
@@ -116,7 +119,7 @@ function FilterPanel({
   };
 
   return (
-    <div className="flex flex-col gap-5 rounded-[16px] border border-outline bg-surface p-5">
+    <div className="flex flex-col gap-5 rounded-[2px] border border-outline bg-surface p-5">
       {sizes.length > 0 && (
         <FilterGroup
           label={t("catalogue.size")}
@@ -136,9 +139,7 @@ function FilterPanel({
       )}
 
       <div className="flex flex-col gap-2">
-        <span className="text-xs font-semibold uppercase tracking-[0.03em] text-on-surface-muted">
-          {t("catalogue.price")}
-        </span>
+        <span className="text-xs font-semibold text-on-surface-muted">{t("catalogue.price")}</span>
         <div className="flex flex-wrap items-end gap-3">
           <Field label={t("catalogue.priceFrom")} className="w-32">
             <Input
@@ -217,9 +218,7 @@ function FilterGroup({
 }) {
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="text-xs font-semibold uppercase tracking-[0.03em] text-on-surface-muted">
-        {label}
-      </legend>
+      <legend className="text-xs font-semibold text-on-surface-muted">{label}</legend>
       <div className="flex flex-wrap gap-2">
         {values.map((value) => {
           const isOn = selected.includes(value);

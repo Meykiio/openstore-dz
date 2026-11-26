@@ -113,23 +113,25 @@ and must never carry a `VITE_` prefix.
 
 ---
 
-## 7. Burnt orange palette, on the Commerce Storefront reference system
+## 7. Paper-and-ink palette on the Commerce Storefront reference system
 
 **Context.** A colour palette was required. The reference design system's own
 "Commerce Storefront" system (system 02) supplied the token vocabulary, component
-structure, motion, spacing, radius and elevation.
+structure, motion, spacing, radius and elevation. Its palette was burnt orange on
+cream, and the storefront initially carried it value-for-value.
 
-**Decision.** Carry the reference system and its palette: burnt orange primary
-(`#c2410c` light, `#fb923c` dark), a crimson secondary (`#e11d48`) and an amber
-tertiary (`#b45309`). Two values deviate from the reference for contrast, both
-measured rather than assumed. The reference primary `#d9480f` scores 4.29:1
-white-on-orange and 4.02:1 orange-on-cream, under the 4.5:1 AA floor for text below
-18.66px, so `#c2410c` is used: the same hue one step darker, at 5.18:1 and 4.85:1.
-Muted text was darkened from `#78716c` to `#6b6460` for the same reason.
+**Decision.** Keep the component system but replace the palette with paper and ink:
+cream `#f4efe6`, ink `#171512`, and one oxblood accent `#7b1e1e` for sale prices,
+links and the review quotation. Amber and teal remain for warnings and states. The
+demo photography is flat-lay on warm cream, so a cream page and an unframed product
+card let the photograph sit on the page instead of inside a box. Every value is
+measured: ink on paper 15.9:1, muted text 6.1:1, paper on oxblood 9.7:1.
 
-**Reason.** OpenStore is a platform, not a brand. Neutral-first chrome lets any
-seller's product photography lead, whatever the vertical. The palette is carried
-rather than invented, so the component CSS and the tokens do not fight.
+**Reason.** OpenStore is a platform, not a brand. Ink and paper are neutral enough
+for any seller's photography, and one accent is enough to mark a price. The
+reference's orange was a brand choice that competed with the product images; it has
+been replaced rather than adjusted. The owner's `brand_color` setting still overrides
+`--primary`, so a seller who wants their own colour keeps that path.
 
 **Correction.** This entry previously recorded an "Algerian Emerald" palette with
 `--primary: #047857` on a green-cast neutral ladder. That palette was never shipped

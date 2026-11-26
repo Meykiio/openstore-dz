@@ -28,7 +28,7 @@ export function SizeGuide({ productId }: { productId: string }) {
         {title}
       </h2>
 
-      <div className="overflow-x-auto rounded-[16px] border border-outline">
+      <div className="overflow-x-auto rounded-[2px] border border-outline">
         <table className="w-full border-collapse text-sm">
           <caption className="sr-only">{title}</caption>
           <thead>

@@ -13,6 +13,18 @@ the 70px rail; it is now a round language button that opens the same native pick
 Verified: `npm run check` (156 tests); the rail measured on the production build (40px
 button collapsed, full-width picker expanded).
 
+**Changed: storefront design system and home page.** Paper, ink and one oxblood accent
+replace the reference orange; the palette now comes from the demo photography's warm cream
+backing. Geist carries the wordmark, hero and headings, Outfit carries the interface, and
+Fraunces is removed (68 KB to 32 KB of display font). Product cards lose their frame and
+show a second photo on hover; shelves are three-up; the home page fetches one 24-product
+feed instead of two overlapping queries; category and universe rails hide when they would
+lead to nothing; the header and bottom bar gain search; form labels drop ALL CAPS. The
+product gallery sticks while the direct-order form scrolls. Verified: typecheck, ESLint,
+156 unit tests, production build against the live database at 1440 and 390 px, light and
+dark, AR/FR/EN. **Knip did not finish in the build sandbox** (oxc-parser `ArrayBuffer`
+allocation); run `npm run check` on the machine before release.
+
 ## [0.4.0] - 2026-11-14
 
 No database update needed.

@@ -1,19 +1,15 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { StoreLayout } from "@/components/storefront/store-layout";
-import { ProductGrid } from "@/components/storefront/product-card";
 import { HomeHero, TrustBar } from "@/components/storefront/home-hero";
-import {
-  CategoryStrip,
-  ClosingCta,
-  PromoBand,
-  ReviewWall,
-} from "@/components/storefront/home-sections";
+import { CategoryChips, ProductShelf } from "@/components/storefront/home-shelf";
+import { ClosingCta, PromoBand, ReviewWall, Ticker } from "@/components/storefront/home-sections";
 import { ErrorState, NoProducts, ProductSkeleton } from "@/components/ui/feedback";
 import { SetupCheck } from "@/components/setup-check";
 import { isEmptyDatabaseError } from "@/lib/supabase/health";
 import { supabaseConfigProblem } from "@/lib/supabase/client";
-import { reviewsQuery, storeSettingsQuery } from "@/lib/queries";
-import { EMPTY_FILTERS, cataloguePageQuery, useCataloguePage } from "@/lib/catalogue";
+import { localized } from "@/lib/i18n";
+import { reviewsQuery, storeSettingsQuery, useCategories } from "@/lib/queries";
+import { homeFeedQuery, useHomeFeed } from "@/lib/catalogue";
 import { useI18n } from "@/lib/i18n-context";
 
 export const Route = createFileRoute("/")({
@@ -28,9 +24,9 @@ export const Route = createFileRoute("/")({
       // Reviews feed the testimonial wall below the fold. Fetching them during
       // SSR avoids a visible pop-in and lets crawlers see the social proof.
       context.queryClient.ensureQueryData(reviewsQuery()).catch(() => null),
-      // The product grid is the page. Without this the server HTML ships an
-      // empty grid and the buyer waits for the browser to fill it in.
-      context.queryClient.ensureQueryData(cataloguePageQuery(EMPTY_FILTERS, 1)).catch(() => null),
+      // One feed feeds the hero, the chips and every shelf. Without this the
+      // server HTML ships an empty page and the buyer waits for the browser.
+      context.queryClient.ensureQueryData(homeFeedQuery()).catch(() => null),
     ]);
     return { settings };
   },
@@ -39,7 +35,14 @@ export const Route = createFileRoute("/")({
     const ar = match.context.locale === "ar";
     const name = s?.name?.trim();
     const tagline = (ar ? s?.tagline : s?.tagline_fr)?.trim();
-    const title = name ? `${name}${tagline ? ` — ${tagline}` : ""}` : "OpenStore DZ";
+    // Some owners sign the tagline with the shop name. Prefixing the name too
+    // produced titles like "DZ WEAR — NOTRE IDENTITÉ — DZ WEAR".
+    const title =
+      tagline && name && tagline.toLowerCase().includes(name.toLowerCase())
+        ? tagline
+        : name
+          ? `${name}${tagline ? ` — ${tagline}` : ""}`
+          : (tagline ?? "OpenStore DZ");
     const description =
       (ar ? s?.description : s?.description_fr)?.trim() ||
       (ar
@@ -58,16 +61,29 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
+/**
+ * Home page: hero, bulletin, trust bar, two rails, then shelves.
+ *
+ * The shop sells on two axes (garment and universe), so the page leads with both
+ * as rails and then shows a shelf per category. That is a change of shape from a
+ * single grid: a buyer looking for "a hoodie" or "an MCA jersey" should reach it
+ * in one click instead of scrolling the whole catalogue.
+ *
+ * A shelf is one row on desktop. Four products, not twelve: the category page is
+ * where the range lives, and a home page that repeats the catalogue is a home
+ * page with no point of view.
+ */
 function Home() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { settings } = Route.useLoaderData();
-  const catalogue = useCataloguePage(EMPTY_FILTERS, 1);
+  const feed = useHomeFeed();
+  const { data: categories } = useCategories();
   const configProblem = supabaseConfigProblem();
 
   // A shop that has not been connected to a database yet, or whose database is
   // still empty, must see the setup instructions, not an error boundary. This is
   // the first screen a new owner ever loads, so it has to be the most forgiving one.
-  if (configProblem || (catalogue.isError && isEmptyDatabaseError(catalogue.error))) {
+  if (configProblem || (feed.isError && isEmptyDatabaseError(feed.error))) {
     return (
       <main className="container-page flex min-h-dvh flex-col items-center justify-center gap-6 py-20 text-center">
         <h1 className="font-display text-3xl font-semibold">{settings?.name ?? "OpenStore DZ"}</h1>
@@ -76,52 +92,62 @@ function Home() {
     );
   }
 
-  const list = catalogue.data?.products ?? [];
-  const catalogueTotal = catalogue.data?.total ?? 0;
+  const all = feed.data ?? [];
+  const newest = all.slice(0, 3);
+
+  // A shelf earns its heading only when it has at least two products; a single
+  // card under a category title reads as a broken row, and on a two-product shop
+  // it repeats the same card three times down the page.
+  const shelves = (categories ?? [])
+    .filter((category) => category.product_count > 0)
+    .slice(0, 3)
+    .map((category) => ({
+      category,
+      products: all.filter((product) => product.category_id === category.id).slice(0, 3),
+    }))
+    .filter((shelf) => shelf.products.length >= 2);
 
   return (
     <StoreLayout>
-      <HomeHero settings={settings} products={list} />
+      {/* The bulletin sits above the hero, like a shop's opening line, so it
+          does not read as a divider repeating the trust bar right below it. */}
+      <Ticker returnsDays={settings?.returns_days ?? 14} />
+      <HomeHero settings={settings} products={newest} />
       <TrustBar returnsDays={settings?.returns_days ?? 14} />
+      <CategoryChips products={all} />
 
-      <section id="catalogue" className="container-page scroll-mt-20 py-12">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <span className="section-label">{t("home.featured")}</span>
-            <h2 className="mt-2 font-display text-xl font-semibold sm:text-2xl">{t("nav.shop")}</h2>
-          </div>
-          {catalogueTotal > 0 && (
-            <Link
-              to="/catalogue"
-              className="inline-flex min-h-9 items-center text-sm text-primary hover:underline"
-            >
-              {t("store.productCount", { count: catalogueTotal })}
-            </Link>
-          )}
+      {feed.isError ? (
+        <div className="mx-auto flex max-w-xl flex-col gap-4 py-12">
+          <ErrorState message={feed.error.message} onRetry={() => void feed.refetch()} />
+          <SetupCheck />
         </div>
-
-        {catalogue.isPending ? (
+      ) : feed.isPending ? (
+        <div className="container-page py-10">
           <div className="product-grid">
-            {Array.from({ length: 6 }, (_, index) => (
+            {Array.from({ length: 3 }, (_, index) => (
               <ProductSkeleton key={index} />
             ))}
           </div>
-        ) : catalogue.isError ? (
-          <div className="mx-auto flex max-w-xl flex-col gap-4">
-            <ErrorState
-              message={catalogue.error.message}
-              onRetry={() => void catalogue.refetch()}
-            />
-            <SetupCheck />
-          </div>
-        ) : list.length === 0 ? (
+        </div>
+      ) : all.length === 0 ? (
+        <div className="container-page py-10">
           <NoProducts />
-        ) : (
-          <ProductGrid products={list} />
-        )}
-      </section>
+        </div>
+      ) : (
+        <>
+          <ProductShelf id="catalogue" title={t("home.newArrivals")} products={newest} />
 
-      <CategoryStrip />
+          {shelves.map(({ category, products }) => (
+            <ProductShelf
+              key={category.id}
+              title={localized(locale, category.name, category.name_fr)}
+              products={products}
+              categorySlug={category.slug}
+            />
+          ))}
+        </>
+      )}
+
       <PromoBand threshold={settings?.free_shipping_threshold ?? 0} />
       <ReviewWall />
       <ClosingCta storeName={settings?.name ?? "OpenStore DZ"} />

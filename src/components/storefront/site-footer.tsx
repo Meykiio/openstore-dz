@@ -43,7 +43,7 @@ export function SiteFooter() {
     <footer className="mt-16 border-t border-outline bg-section-alt">
       <div className="container-page grid gap-8 py-10 sm:grid-cols-2 lg:grid-cols-3">
         <div className="flex flex-col gap-2">
-          <p className="font-display text-lg font-semibold">{settings?.name ?? t("app.name")}</p>
+          <p className="wordmark text-2xl">{settings?.name ?? t("app.name")}</p>
           {tagline && <p className="text-sm text-on-surface-muted">{tagline}</p>}
           {description && <p className="max-w-sm text-sm text-on-surface-muted">{description}</p>}
         </div>
@@ -51,7 +51,7 @@ export function SiteFooter() {
         {hasLegal && (
           <div className="flex flex-col gap-2">
             <p className="flex items-center gap-2 text-sm font-medium">
-              <ShieldCheck size={16} className="text-primary" aria-hidden="true" />
+              <ShieldCheck size={16} className="text-secondary" aria-hidden="true" />
               {t("admin.settings.legal")}
             </p>
             {identity.map((line) => (
@@ -113,10 +113,12 @@ export function SiteFooter() {
       </div>
 
       <div className="container-page flex flex-wrap items-center justify-between gap-3 border-t border-outline py-5 text-xs text-on-surface-muted">
-        <p>
-          {t("checkout.codTitle")} · {t("cart.delivery")}{" "}
-          {settings ? formatDzd(settings.delivery_fee_flat, locale) : "—"} ·{" "}
-          {t("admin.settings.returnsDays")} {settings?.returns_days ?? 0}
+        <p className="flex flex-wrap gap-x-5 gap-y-1">
+          <span>{t("checkout.codTitle")}</span>
+          <span>
+            {t("cart.delivery")} {settings ? formatDzd(settings.delivery_fee_flat, locale) : "—"}
+          </span>
+          <span>{t("home.trust.returns.title", { days: settings?.returns_days ?? 0 })}</span>
         </p>
       </div>
 

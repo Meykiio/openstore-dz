@@ -59,16 +59,21 @@ export function ProductDetail({ product }: { product: CatalogueProduct }) {
 
   return (
     <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-      <ProductGallery
-        images={images}
-        alt={choice.colour ? `${name} — ${choice.colour}` : name}
-        active={activeImage}
-        onSelect={setActiveImage}
-      />
+      {/* The direct-order form makes the right column taller than the gallery.
+          Keeping the photos in view while it scrolls is the difference between
+          a product page and a form with a photo at the top. */}
+      <div className="lg:sticky lg:top-20 lg:self-start">
+        <ProductGallery
+          images={images}
+          alt={choice.colour ? `${name} — ${choice.colour}` : name}
+          active={activeImage}
+          onSelect={setActiveImage}
+        />
+      </div>
 
       <div className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">
-          <h1 className="font-display text-2xl font-semibold sm:text-3xl">{name}</h1>
+          <h1 className="section-title text-2xl sm:text-3xl">{name}</h1>
           {reviews && reviews.length > 0 && (
             <span className="flex items-center gap-2">
               <StarRating value={rating ?? 0} />
@@ -98,12 +103,12 @@ export function ProductDetail({ product }: { product: CatalogueProduct }) {
 
         {description && (
           <div className="flex flex-col gap-2 border-t border-outline pt-5">
-            <h2 className="font-display text-base font-semibold">{t("store.description")}</h2>
+            <h2 className="section-title text-base">{t("store.description")}</h2>
             <p className="whitespace-pre-line text-sm text-on-surface-muted">{description}</p>
           </div>
         )}
 
-        <p className="flex items-center gap-2 rounded-[10px] bg-surface-mid px-4 py-3 text-xs text-on-surface-muted">
+        <p className="flex items-center gap-2 rounded-[2px] bg-surface-mid px-4 py-3 text-xs text-on-surface-muted">
           <ShieldCheck size={15} className="shrink-0 text-primary" aria-hidden="true" />
           {t("checkout.codBody")}
         </p>

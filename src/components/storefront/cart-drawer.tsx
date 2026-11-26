@@ -54,16 +54,13 @@ export function CartDrawer() {
       <div className="flex max-h-[92dvh] flex-col sm:h-full sm:max-h-none">
         <div className="sheet-grip" aria-hidden="true" />
         <div className="cart-head">
-          <h2
-            id="cart-title"
-            className="flex items-center gap-2 font-display text-[17px] font-semibold"
-          >
+          <h2 id="cart-title" className="section-title flex items-center gap-2 text-[17px]">
             <ShoppingBag size={18} className="text-primary" aria-hidden="true" />
             {t("cart.title")}
           </h2>
           <span className="flex items-center gap-3">
             <span className="font-mono text-xs text-on-surface-muted">
-              {count > 0 ? t("cart.itemMany", { count }) : ""}
+              {count > 0 ? (count === 1 ? t("cart.itemOne") : t("cart.itemMany", { count })) : ""}
             </span>
             <button
               type="button"

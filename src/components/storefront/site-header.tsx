@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, ShoppingBag, Store, X } from "lucide-react";
+import { Menu, Search, ShoppingBag, X } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useI18n } from "@/lib/i18n-context";
@@ -31,19 +31,14 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-outline bg-nav-bg/95 backdrop-blur supports-[backdrop-filter]:bg-nav-bg/80">
       <div className="container-page flex h-16 items-center gap-3">
-        <Link
-          to="/"
-          className="flex min-h-11 min-w-0 items-center gap-2 font-display text-lg font-semibold"
-        >
-          {settings?.logo_url ? (
-            <img
-              src={settings.logo_url}
-              alt=""
-              className="h-9 max-w-[120px] shrink-0 object-contain"
-            />
-          ) : (
-            <Store size={20} className="shrink-0 text-primary" aria-hidden="true" />
-          )}
+        <Link to="/" className="wordmark flex min-h-11 min-w-0 items-center gap-2 text-xl">
+          {/* The bundled mark is the fallback, so a fresh install shows a logo
+              instead of a generic icon. Setting logo_url in the admin replaces it. */}
+          <img
+            src={settings?.logo_url || "/logo.svg"}
+            alt=""
+            className="h-9 max-w-[120px] shrink-0 object-contain"
+          />
           <span className="truncate">{storeName}</span>
         </Link>
 
@@ -65,6 +60,14 @@ export function SiteHeader() {
           <LocaleSwitcher className="hidden sm:block" />
           <ThemeToggle />
 
+          <Link
+            to="/search"
+            className="inline-flex size-10 items-center justify-center rounded-full border border-outline text-on-surface transition-colors hover:bg-surface-mid"
+            aria-label={t("nav.search")}
+          >
+            <Search size={18} aria-hidden="true" />
+          </Link>
+
           <button
             type="button"
             onClick={openCart}
@@ -74,7 +77,7 @@ export function SiteHeader() {
           >
             <ShoppingBag size={18} aria-hidden="true" />
             <span className="sr-only" aria-live="polite">
-              {count > 0 ? t("cart.itemMany", { count }) : ""}
+              {count > 0 ? (count === 1 ? t("cart.itemOne") : t("cart.itemMany", { count })) : ""}
             </span>
             {count > 0 && (
               <span
@@ -101,10 +104,18 @@ export function SiteHeader() {
       <div
         className={cn(
           "overflow-hidden border-t border-outline transition-[max-height] duration-300 ease-out-soft md:hidden",
-          menuOpen ? "max-h-56" : "max-h-0",
+          menuOpen ? "max-h-80" : "max-h-0",
         )}
       >
         <nav className="container-page flex flex-col gap-1 py-3" aria-label="Mobile">
+          <Link
+            to="/search"
+            onClick={() => setMenuOpen(false)}
+            className="flex items-center gap-2 rounded-[10px] px-3 py-2.5 text-sm hover:bg-surface-mid"
+          >
+            <Search size={16} aria-hidden="true" />
+            {t("nav.search")}
+          </Link>
           {links.map((link) => (
             <Link
               key={link.to}

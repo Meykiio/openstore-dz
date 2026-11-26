@@ -22,7 +22,7 @@ export function ReviewList({ productId }: { productId: string }) {
   return (
     <ul className="flex flex-col gap-4">
       {reviews.map((review) => (
-        <li key={review.id} className="rounded-[16px] border border-outline bg-surface p-4">
+        <li key={review.id} className="rounded-[2px] border border-outline bg-surface p-4">
           <div className="flex items-start gap-3">
             <span
               aria-hidden="true"
@@ -46,7 +46,7 @@ export function ReviewList({ productId }: { productId: string }) {
                   src={review.image_url}
                   alt=""
                   loading="lazy"
-                  className="mt-3 max-h-40 rounded-[10px] object-cover"
+                  className="mt-3 max-h-40 rounded-[2px] object-cover"
                 />
               )}
             </div>
@@ -87,7 +87,7 @@ export function ReviewForm({ productId }: { productId: string }) {
 
   if (done) {
     return (
-      <div className="rounded-[16px] border border-positive/40 bg-positive/5 p-5">
+      <div className="rounded-[2px] border border-positive/40 bg-positive/5 p-5">
         <p className="font-medium text-positive">{t("reviews.thanks")}</p>
         <p className="mt-1 text-sm text-on-surface-muted">{t("reviews.thanksBody")}</p>
       </div>
@@ -96,7 +96,7 @@ export function ReviewForm({ productId }: { productId: string }) {
 
   return (
     <form
-      className="flex flex-col gap-4 rounded-[16px] border border-outline bg-surface p-5"
+      className="flex flex-col gap-4 rounded-[2px] border border-outline bg-surface p-5"
       onSubmit={(event) => {
         event.preventDefault();
         mutation.mutate(form);

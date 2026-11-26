@@ -195,15 +195,28 @@ export function sortVariants(variants: CatalogueVariant[]): CatalogueVariant[] {
     .sort((a, b) => a.sort_order - b.sort_order || a.price - b.price);
 }
 
-function primaryImage(variant: CatalogueVariant | undefined): string | null {
+function imageAt(variant: CatalogueVariant | undefined, index: number): string | null {
   if (!variant) return null;
   const sorted = [...variant.variant_images].sort((a, b) => a.sort_order - b.sort_order);
-  return sorted[0]?.url ?? null;
+  return sorted[index]?.url ?? null;
 }
 
 export function productImage(product: CatalogueProduct): string | null {
   for (const variant of sortVariants(product.product_variants)) {
-    const image = primaryImage(variant);
+    const image = imageAt(variant, 0);
+    if (image) return image;
+  }
+  return null;
+}
+
+/**
+ * The second photo of the first variant that has one, for the card's hover
+ * swap. Null when the shop has only one shot per product, so the card simply
+ * does not animate.
+ */
+export function productSecondImage(product: CatalogueProduct): string | null {
+  for (const variant of sortVariants(product.product_variants)) {
+    const image = imageAt(variant, 1);
     if (image) return image;
   }
   return null;
