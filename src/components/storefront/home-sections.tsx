@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { Quote } from "lucide-react";
+import { ArrowUpRight, Quote } from "lucide-react";
 import { useI18n } from "@/lib/i18n-context";
-import { formatRelative } from "@/lib/format";
+import { formatDzd, formatRelative } from "@/lib/format";
 import { useReviews } from "@/lib/queries";
 import { StarRating } from "./star-rating";
 
@@ -9,9 +9,9 @@ import { StarRating } from "./star-rating";
  * Shop bulletin.
  *
  * The four promises the shop actually keeps, repeated in an ink band. It is the
- * only moving element on the page, so it stays slow and stops entirely under
- * prefers-reduced-motion. Hidden from assistive tech: the trust bar says the
- * same things in reading order, and a screen reader should not hear them twice.
+ * only continuously moving element on the page, so it stays slow and stops
+ * entirely under prefers-reduced-motion. Hidden from assistive tech: the trust
+ * bar says the same things in reading order.
  */
 export function Ticker({ returnsDays }: { returnsDays: number }) {
   const { t } = useI18n();
@@ -21,7 +21,6 @@ export function Ticker({ returnsDays }: { returnsDays: number }) {
     t("home.ticker.returns", { days: returnsDays }),
     t("home.ticker.noAccount"),
   ];
-  // Six copies: two halves for a seamless -50% loop, wide enough on a desktop.
   const run = Array.from({ length: 6 }, () => items).flat();
 
   return (
@@ -37,30 +36,25 @@ export function Ticker({ returnsDays }: { returnsDays: number }) {
   );
 }
 
-/**
- * Promo band. Oxblood, because it is the one colour in the system and this is
- * the one place on the page that asks for a decision.
- */
+/** The one decision band on the page, in the system's acid accent. */
 export function PromoBand({ threshold }: { threshold: number }) {
   const { t, locale } = useI18n();
   if (threshold <= 0) return null;
 
-  const formatted = new Intl.NumberFormat("en-US").format(threshold);
-
   return (
-    <section className="container-page py-7">
-      <div className="promo-bar">
-        <span className="p-text">
-          {t("home.promo.title")} —{" "}
-          <span dir="ltr" className="font-mono font-semibold">
-            {formatted}
-          </span>{" "}
-          {locale === "ar" ? "دج" : "DA"}
-        </span>
-        <span className="p-text opacity-90">{t("home.promo.body")}</span>
-        <a href="#catalogue" className="promo-cta">
+    <section className="store-promo">
+      <div className="container-page store-promo-inner">
+        <div>
+          <h2 className="store-promo-title">{t("home.promo.title")}</h2>
+          <p className="store-promo-body">
+            {t("home.promo.threshold", { amount: formatDzd(threshold, locale) })} ·{" "}
+            {t("home.promo.body")}
+          </p>
+        </div>
+        <Link to="/catalogue" className="store-btn store-btn--fill">
           {t("home.promo.cta")}
-        </a>
+          <ArrowUpRight size={15} aria-hidden="true" />
+        </Link>
       </div>
     </section>
   );
@@ -75,27 +69,32 @@ export function ReviewWall() {
   if (top.length === 0) return null;
 
   return (
-    <section className="section-alt border-y border-outline py-14">
+    <section className="store-section">
       <div className="container-page">
-        <div className="mb-8 flex flex-col gap-2 sm:mb-10">
-          <h2 className="section-title text-xl sm:text-2xl">{t("home.reviews.title")}</h2>
-          <p className="max-w-lg text-sm text-on-surface-muted">{t("home.reviews.body")}</p>
+        <div className="store-section-head">
+          <div>
+            <p className="store-eyebrow">{t("home.reviews.eyebrow")}</p>
+            <h2 className="store-section-title">{t("home.reviews.title")}</h2>
+            <p className="store-section-lede">{t("home.reviews.body")}</p>
+          </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="store-review-grid">
           {top.map((review) => (
-            <figure key={review.id} className="review-card">
-              <Quote size={18} className="mb-3 text-secondary" aria-hidden="true" />
-              <StarRating value={review.rating} className="mb-3" />
-              <blockquote className="review-body">{review.comment}</blockquote>
-              <figcaption className="mt-4 flex items-center gap-2.5">
-                <span className="review-ava" aria-hidden="true">
-                  {review.customer_name.trim().charAt(0)}
-                </span>
-                <span>
-                  <span className="block text-sm font-medium">{review.customer_name}</span>
-                  <span className="text-xs text-on-surface-muted">
-                    {formatRelative(review.created_at, locale)}
+            <figure key={review.id} className="store-review-card">
+              <Quote size={18} aria-hidden="true" />
+              <StarRating value={review.rating} />
+              <blockquote>{review.comment}</blockquote>
+              <figcaption>
+                <span className="flex items-center gap-2.5">
+                  <span className="ava" aria-hidden="true">
+                    {review.customer_name.trim().charAt(0)}
+                  </span>
+                  <span>
+                    <span className="block font-medium">{review.customer_name}</span>
+                    <span className="text-on-surface-muted">
+                      {formatRelative(review.created_at, locale)}
+                    </span>
                   </span>
                 </span>
               </figcaption>
@@ -111,19 +110,25 @@ export function ReviewWall() {
 export function ClosingCta({ storeName }: { storeName: string }) {
   const { t } = useI18n();
   return (
-    <section className="container-page py-14">
-      <div className="flex flex-col items-center gap-4 rounded-[2px] border border-outline bg-surface px-6 py-12 text-center">
-        <h2 className="section-title text-xl sm:text-2xl">{t("home.cta.title")}</h2>
-        <p className="max-w-md text-sm text-on-surface-muted">{t("home.cta.body")}</p>
-        <div className="flex flex-wrap justify-center gap-3">
-          <Link to="/catalogue" className="btn btn-primary btn-lg">
+    <section className="store-closing">
+      <div className="container-page">
+        <div className="flex justify-center">
+          <p className="store-eyebrow">{t("home.cta.eyebrow")}</p>
+        </div>
+        <h2>{t("home.cta.title")}</h2>
+        <p className="store-section-lede mx-auto">{t("home.cta.body")}</p>
+        <div className="store-closing-actions">
+          <Link to="/catalogue" className="store-btn store-btn--fill">
             {t("home.browseAll")}
+            <ArrowUpRight size={15} aria-hidden="true" />
           </Link>
-          <Link to="/track" className="btn btn-secondary btn-lg">
+          <Link to="/track" className="store-btn store-btn--ghost">
             {t("nav.trackOrder")}
           </Link>
         </div>
-        <p className="mt-2 font-mono text-[11px] text-on-surface-muted">{storeName}</p>
+        <p className="mt-8 font-mono text-[10px] uppercase tracking-[0.2em] text-on-surface-muted">
+          {storeName}
+        </p>
       </div>
     </section>
   );

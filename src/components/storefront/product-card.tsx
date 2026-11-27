@@ -14,13 +14,16 @@ import { localized } from "@/lib/i18n";
 import { saleOf } from "@/lib/sale";
 import { StarRating } from "./star-rating";
 
+const NEW_FOR_DAYS = 30;
+
 /**
  * Catalogue card.
  *
- * A photograph on the page, then four lines of type. No frame, no surface, no
- * button: the whole card is the link, and the only chrome is a sale tag or a
- * sold-out band when one applies. The second photo crossfades on hover, which
- * shows the cut or the back of the garment without opening the product.
+ * A photograph, then the product's own facts: category, name, available
+ * colours, price. The whole card is the link, so there is no nested button to
+ * fight with the anchor. Sale and new flags are printed labels rather than
+ * floating pills, and the second photo crossfades on hover to show the cut or
+ * the back without opening the product.
  */
 function ProductCard({ product }: { product: CatalogueProduct }) {
   const { t, locale } = useI18n();
@@ -28,27 +31,34 @@ function ProductCard({ product }: { product: CatalogueProduct }) {
   const image = productImage(product);
   const secondImage = productSecondImage(product);
   const range = priceRange(product);
-  // The cheapest variant sets the headline price, so its sale is the one shown.
-  const cheapest = sortVariants(product.product_variants).find((v) => v.price === range?.min);
+  const variants = sortVariants(product.product_variants);
+  const cheapest = variants.find((variant) => variant.price === range?.min);
   const sale = cheapest ? saleOf(cheapest) : null;
   const stock = totalStock(product);
   const soldOut = stock <= 0;
   const rating = product.rating_avg ?? null;
   const ratingCount = product.rating_count ?? 0;
-  // Display only, not a link: the whole card is already an anchor, and a nested
-  // anchor is invalid HTML.
+  const isNew = product.published_at
+    ? Date.now() - new Date(product.published_at).getTime() < NEW_FOR_DAYS * 86_400_000
+    : false;
+
   const category = product.categories
     ? localized(locale, product.categories.name, product.categories.name_fr)
     : undefined;
   const name = localized(locale, product.name, product.name_fr);
+
+  const colours: { name: string; hex: string | null }[] = [];
+  for (const variant of variants) {
+    if (!variant.color_name) continue;
+    if (colours.some((colour) => colour.name === variant.color_name)) continue;
+    colours.push({ name: variant.color_name, hex: variant.color_hex });
+  }
 
   return (
     <Link to="/product/$slug" params={{ slug: product.slug }} className="product-card">
       <div className="pc-media">
         {image ? (
           <>
-            {/* The card's own title is the accessible name; a second copy of it
-                in the image alt would be read twice inside the same link. */}
             <img src={image} alt="" loading="lazy" decoding="async" />
             {secondImage && secondImage !== image && (
               <img
@@ -64,6 +74,11 @@ function ProductCard({ product }: { product: CatalogueProduct }) {
         ) : (
           <ImageOff size={44} aria-hidden="true" />
         )}
+        {isNew && !soldOut && (
+          <span className="pc-flag new" dir="ltr">
+            {t("store.new")}
+          </span>
+        )}
         {sale && !soldOut && (
           <span className="pc-flag sale" dir="ltr">
             −{sale.percent}%
@@ -76,6 +91,19 @@ function ProductCard({ product }: { product: CatalogueProduct }) {
         {category && <span className="pc-brand">{category}</span>}
 
         <h3 className="pc-title">{name}</h3>
+
+        {colours.length > 0 && (
+          <span className="pc-colours" aria-hidden="true">
+            {colours.slice(0, 4).map((colour) => (
+              <span
+                key={colour.name}
+                className="pc-colour"
+                style={{ background: colour.hex ?? "var(--surface-highest)" }}
+              />
+            ))}
+            {colours.length > 4 && <span className="pc-colour-more">+{colours.length - 4}</span>}
+          </span>
+        )}
 
         {rating !== null && ratingCount > 0 && (
           <span className="pc-rating">

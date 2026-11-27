@@ -11,14 +11,17 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AnimeRouteImport } from './routes/anime'
 import { Route as CatalogueRouteImport } from './routes/catalogue'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as FootballRouteImport } from './routes/football'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as SetupRouteImport } from './routes/setup'
+import { Route as StreetwearRouteImport } from './routes/streetwear'
 import { Route as TrackRouteImport } from './routes/track'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAccountRouteImport } from './routes/admin.account'
@@ -50,6 +53,11 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AnimeRoute = AnimeRouteImport.update({
+  id: '/anime',
+  path: '/anime',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CatalogueRoute = CatalogueRouteImport.update({
   id: '/catalogue',
   path: '/catalogue',
@@ -58,6 +66,11 @@ const CatalogueRoute = CatalogueRouteImport.update({
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FootballRoute = FootballRouteImport.update({
+  id: '/football',
+  path: '/football',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -88,6 +101,11 @@ const SearchRoute = SearchRouteImport.update({
 const SetupRoute = SetupRouteImport.update({
   id: '/setup',
   path: '/setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StreetwearRoute = StreetwearRouteImport.update({
+  id: '/streetwear',
+  path: '/streetwear',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrackRoute = TrackRouteImport.update({
@@ -195,14 +213,17 @@ const AdminUploadCodeRoute = AdminUploadCodeRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/anime': typeof AnimeRoute
   '/catalogue': typeof CatalogueRoute
   '/checkout': typeof CheckoutRoute
+  '/football': typeof FootballRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
+  '/streetwear': typeof StreetwearRoute
   '/track': typeof TrackRoute
   '/admin/account': typeof AdminAccountRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -226,14 +247,17 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/anime': typeof AnimeRoute
   '/catalogue': typeof CatalogueRoute
   '/checkout': typeof CheckoutRoute
+  '/football': typeof FootballRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
+  '/streetwear': typeof StreetwearRoute
   '/track': typeof TrackRoute
   '/admin/account': typeof AdminAccountRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -259,14 +283,17 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/anime': typeof AnimeRoute
   '/catalogue': typeof CatalogueRoute
   '/checkout': typeof CheckoutRoute
+  '/football': typeof FootballRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
+  '/streetwear': typeof StreetwearRoute
   '/track': typeof TrackRoute
   '/admin/account': typeof AdminAccountRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -293,14 +320,17 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/anime'
     | '/catalogue'
     | '/checkout'
+    | '/football'
     | '/forgot-password'
     | '/login'
     | '/mcp'
     | '/reset-password'
     | '/search'
     | '/setup'
+    | '/streetwear'
     | '/track'
     | '/admin/account'
     | '/admin/categories'
@@ -324,14 +354,17 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/anime'
     | '/catalogue'
     | '/checkout'
+    | '/football'
     | '/forgot-password'
     | '/login'
     | '/mcp'
     | '/reset-password'
     | '/search'
     | '/setup'
+    | '/streetwear'
     | '/track'
     | '/admin/account'
     | '/admin/categories'
@@ -356,14 +389,17 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/anime'
     | '/catalogue'
     | '/checkout'
+    | '/football'
     | '/forgot-password'
     | '/login'
     | '/mcp'
     | '/reset-password'
     | '/search'
     | '/setup'
+    | '/streetwear'
     | '/track'
     | '/admin/account'
     | '/admin/categories'
@@ -389,14 +425,17 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AnimeRoute: typeof AnimeRoute
   CatalogueRoute: typeof CatalogueRoute
   CheckoutRoute: typeof CheckoutRoute
+  FootballRoute: typeof FootballRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   McpRoute: typeof McpRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SearchRoute: typeof SearchRoute
   SetupRoute: typeof SetupRoute
+  StreetwearRoute: typeof StreetwearRoute
   TrackRoute: typeof TrackRoute
   ApiAiDriveRoute: typeof ApiAiDriveRoute
   ApiTelegramRoute: typeof ApiTelegramRoute
@@ -423,6 +462,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/anime': {
+      id: '/anime'
+      path: '/anime'
+      fullPath: '/anime'
+      preLoaderRoute: typeof AnimeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/catalogue': {
       id: '/catalogue'
       path: '/catalogue'
@@ -435,6 +481,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout'
       fullPath: '/checkout'
       preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/football': {
+      id: '/football'
+      path: '/football'
+      fullPath: '/football'
+      preLoaderRoute: typeof FootballRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -477,6 +530,13 @@ declare module '@tanstack/react-router' {
       path: '/setup'
       fullPath: '/setup'
       preLoaderRoute: typeof SetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/streetwear': {
+      id: '/streetwear'
+      path: '/streetwear'
+      fullPath: '/streetwear'
+      preLoaderRoute: typeof StreetwearRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/track': {
@@ -657,14 +717,17 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  AnimeRoute: AnimeRoute,
   CatalogueRoute: CatalogueRoute,
   CheckoutRoute: CheckoutRoute,
+  FootballRoute: FootballRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   McpRoute: McpRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SearchRoute: SearchRoute,
   SetupRoute: SetupRoute,
+  StreetwearRoute: StreetwearRoute,
   TrackRoute: TrackRoute,
   ApiAiDriveRoute: ApiAiDriveRoute,
   ApiTelegramRoute: ApiTelegramRoute,

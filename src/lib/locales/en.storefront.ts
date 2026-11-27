@@ -234,4 +234,7 @@ export const enStorefront = {
   "order.copyHint": "Copy your order number and keep it: you need it to track your order.",
   "quick.title": "Order now, pay on delivery",
   "quick.submit": "Confirm order",
+  "home.promo.threshold": "Free delivery over {amount}",
+  "home.reviews.eyebrow": "Real reviews",
+  "home.cta.eyebrow": "Final step",
 };

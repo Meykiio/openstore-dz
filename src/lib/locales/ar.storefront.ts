@@ -230,4 +230,7 @@ export const arStorefront = {
   "order.copyHint": "انسخ رقم طلبك واحتفظ به: ستحتاجه لتتبع طلبك.",
   "quick.title": "اطلب الآن، وادفع عند الاستلام",
   "quick.submit": "تأكيد الطلب",
+  "home.promo.threshold": "توصيل مجاني فوق {amount}",
+  "home.reviews.eyebrow": "تقييمات حقيقية",
+  "home.cta.eyebrow": "الخطوة الأخيرة",
 };

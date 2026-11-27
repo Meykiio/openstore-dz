@@ -239,4 +239,7 @@ export const frStorefront = {
     "Copiez votre numéro de commande et gardez-le : il sert à suivre votre commande.",
   "quick.title": "Commandez maintenant, payez à la livraison",
   "quick.submit": "Confirmer la commande",
+  "home.promo.threshold": "Livraison offerte dès {amount}",
+  "home.reviews.eyebrow": "Avis réels",
+  "home.cta.eyebrow": "Dernière étape",
 };

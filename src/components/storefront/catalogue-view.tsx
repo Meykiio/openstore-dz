@@ -13,24 +13,22 @@ import { SetupCheck } from "@/components/setup-check";
 /**
  * A browsable catalogue: heading, filters, grid, pages.
  *
- * Shared by the category page and the search page so the two cannot drift into two
- * different shopping experiences. It owns its query rather than receiving
- * products, because filtering and paging happen in the database now: a component
- * that receives a list can only ever filter the list it was given, which is the
- * bug this replaced.
- *
- * Filter state is local because it is a view concern. Changing a filter resets to
- * page one, because staying on page 4 of a different result set shows nothing.
+ * Shared by the category page and the search page so the two cannot drift into
+ * two different shopping experiences. It owns its query because filtering and
+ * paging happen in the database: a component that receives a list can only ever
+ * filter the list it was given.
  */
 export function CatalogueView({
   heading,
   subheading,
+  eyebrow,
   initialFilters,
   emptyTitle,
   emptyBody,
 }: {
   heading: string;
   subheading?: string;
+  eyebrow?: string;
   initialFilters?: Partial<CatalogueFilters>;
   emptyTitle?: string;
   emptyBody?: string;
@@ -42,9 +40,6 @@ export function CatalogueView({
   });
   const [page, setPage] = useState(1);
 
-  // Only the price fields are debounced. They are text inputs, so every keystroke
-  // would otherwise be a query. Chips and sort change once per interaction and
-  // stay immediate.
   const debouncedMin = useDebouncedValue(filters.minPrice);
   const debouncedMax = useDebouncedValue(filters.maxPrice);
   const effectiveFilters = useMemo(
@@ -55,6 +50,7 @@ export function CatalogueView({
   const catalogue = useCataloguePage(effectiveFilters, page);
   const products = catalogue.data?.products ?? [];
   const facets = catalogue.data?.facets ?? { sizes: [], colors: [], priceMin: 0, priceMax: 0 };
+  const total = catalogue.data?.total ?? 0;
 
   const applyFilters = (next: CatalogueFilters) => {
     setFilters(next);
@@ -63,16 +59,18 @@ export function CatalogueView({
 
   const goToPage = (next: number) => {
     setPage(next);
-    // A page change is a new set of products, so the buyer should start at the top
-    // rather than halfway down the previous page's scroll position.
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-2">
-        <h1 className="section-title text-2xl sm:text-3xl">{heading}</h1>
-        {subheading && <p className="max-w-2xl text-sm text-on-surface-muted">{subheading}</p>}
+    <div className="flex flex-col">
+      <header className="store-page-head">
+        <p className="store-eyebrow">{eyebrow ?? t("catalogue.eyebrow")}</p>
+        <div className="store-page-head-row">
+          <h1 className="store-display store-page-title">{heading}</h1>
+          <span className="store-page-count">{t("catalogue.resultsCount", { count: total })}</span>
+        </div>
+        {subheading && <p className="store-page-lede">{subheading}</p>}
       </header>
 
       <CatalogueToolbar
@@ -82,42 +80,42 @@ export function CatalogueView({
         colors={facets.colors}
         priceMin={facets.priceMin}
         priceMax={facets.priceMax}
-        resultCount={catalogue.data?.total ?? 0}
       />
 
-      {catalogue.isPending ? (
-        <CatalogueLoading />
-      ) : catalogue.isError ? (
-        <CatalogueError
-          message={catalogue.error.message}
-          onRetry={() => void catalogue.refetch()}
-        />
-      ) : products.length === 0 ? (
-        <EmptyState
-          icon={<PackageSearch size={28} />}
-          title={emptyTitle ?? t("catalogue.noResults")}
-          body={emptyBody ?? t("catalogue.noResultsBody")}
-        />
-      ) : (
-        <>
-          <ProductGrid products={products} />
-          <Pagination
-            page={page}
-            pageCount={catalogue.data?.pageCount ?? 1}
-            onPageChange={goToPage}
-            testId="catalogue-pagination"
+      <div className="py-10">
+        {catalogue.isPending ? (
+          <CatalogueLoading />
+        ) : catalogue.isError ? (
+          <CatalogueError
+            message={catalogue.error.message}
+            onRetry={() => void catalogue.refetch()}
           />
-        </>
-      )}
+        ) : products.length === 0 ? (
+          <EmptyState
+            icon={<PackageSearch size={28} />}
+            title={emptyTitle ?? t("catalogue.noResults")}
+            body={emptyBody ?? t("catalogue.noResultsBody")}
+          />
+        ) : (
+          <>
+            <ProductGrid products={products} />
+            <Pagination
+              page={page}
+              pageCount={catalogue.data?.pageCount ?? 1}
+              onPageChange={goToPage}
+              testId="catalogue-pagination"
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 }
 
-/** Loading and error wrappers so both catalogue pages behave identically. */
 function CatalogueLoading() {
   return (
     <div className="product-grid">
-      {Array.from({ length: 6 }, (_, index) => (
+      {Array.from({ length: 8 }, (_, index) => (
         <ProductSkeleton key={index} />
       ))}
     </div>
@@ -125,7 +123,6 @@ function CatalogueLoading() {
 }
 
 function CatalogueError({ message, onRetry }: { message: string; onRetry: () => void }) {
-  // A database that was never set up is not a glitch to retry: say what to do.
   if (isEmptyDatabaseError({ message })) return <SetupCheck className="mx-auto" />;
   return <ErrorState message={message} onRetry={onRetry} />;
 }

@@ -12,7 +12,6 @@ export const Route = createFileRoute("/category/$slug")({
     const categories = await context.queryClient.ensureQueryData(categoriesQuery()).catch(() => []);
     const category = categories.find((entry) => entry.slug === params.slug);
     if (!category) throw notFound();
-    // Prefetched so the server sends products rather than an empty grid.
     await context.queryClient
       .ensureQueryData(cataloguePageQuery({ ...EMPTY_FILTERS, categorySlug: category.slug }, 1))
       .catch(() => null);
@@ -50,34 +49,30 @@ function CategoryPage() {
   return (
     <StoreLayout>
       <CategoryChips />
-      <div className="container-page py-10">
-        {/* The view owns its own query, loading and empty states now: filtering and
-            paging happen in the database, so a component handed a list could only
-            ever filter the list it was given. */}
+      <div className="container-page pb-16">
         <CatalogueView
           heading={heading}
+          eyebrow={t("catalogue.collection")}
           subheading={category.description ?? undefined}
           initialFilters={{ ...EMPTY_FILTERS, categorySlug: category.slug }}
         />
 
-        {/* Other categories, so a buyer who landed here from search can keep
-            browsing instead of hitting a dead end. */}
         {others.length > 0 && (
           <nav
-            className="mt-12 flex flex-col gap-3 border-t border-outline pt-8"
+            className="mt-10 flex flex-col gap-3 border-t border-outline pt-8"
             aria-label={t("home.categories")}
           >
-            <h2 className="section-title text-base">{t("home.categories")}</h2>
+            <h2 className="store-eyebrow">{t("home.categories")}</h2>
             <div className="flex flex-wrap gap-2">
               {others.map((entry) => (
                 <Link
                   key={entry.id}
                   to="/category/$slug"
                   params={{ slug: entry.slug }}
-                  className="chip"
+                  className="store-chip"
                 >
                   {localized(locale, entry.name, entry.name_fr)}
-                  <span className="font-mono text-xs opacity-70">{entry.product_count}</span>
+                  <b>{entry.product_count}</b>
                 </Link>
               ))}
             </div>
