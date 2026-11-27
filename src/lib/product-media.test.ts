@@ -9,22 +9,26 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const state = vi.hoisted(() => ({
   /** Rows returned for each table, keyed by the filter value. */
   variants: {} as Record<string, { data: unknown; error: { message: string } | null }>,
-  /** How many variant_images rows still point at a URL. */
-  references: {} as Record<string, number>,
+  /** variant_images URLs that live in a storage folder, keyed by that folder. */
+  stored: {} as Record<string, string[]>,
   deleted: [] as string[],
 }));
 
 vi.mock("./supabase/client", () => ({
   getSupabase: () => ({
-    from: (table: string) => ({
+    from: () => ({
       select: () => ({
         eq: (_column: string, value: string) => {
-          if (table === "variant_images") {
-            return Promise.resolve({ count: state.references[value] ?? 0, error: null });
-          }
           const row = state.variants[value] ?? { data: null, error: null };
           return Object.assign(Promise.resolve(row), {
             maybeSingle: async () => row,
+          });
+        },
+        like: (_column: string, pattern: string) => {
+          const folder = pattern.replace(/^%/, "").replace(/%$/, "");
+          return Promise.resolve({
+            data: (state.stored[folder] ?? []).map((url) => ({ url })),
+            error: null,
           });
         },
       }),
@@ -36,6 +40,16 @@ vi.mock("./image", () => ({
   deleteProductImage: async (url: string) => {
     state.deleted.push(url);
   },
+  storageKey: (url: string) => {
+    const marker = "/product-media/";
+    const index = url.indexOf(marker);
+    if (index === -1) return null;
+    try {
+      return decodeURIComponent(url.slice(index + marker.length));
+    } catch {
+      return null;
+    }
+  },
 }));
 
 import { ownsUrl, productPhotoUrls, removeOwnedFiles, variantPhotoUrls } from "./product-media";
@@ -43,10 +57,11 @@ import { ownsUrl, productPhotoUrls, removeOwnedFiles, variantPhotoUrls } from ".
 const PRODUCT = "product-1";
 const owned = (name: string, productId = PRODUCT) =>
   `https://example.supabase.co/storage/v1/object/public/product-media/products/${productId}/${name}`;
+const folder = (productId = PRODUCT) => `products/${productId}/`;
 
 beforeEach(() => {
   state.variants = {};
-  state.references = {};
+  state.stored = {};
   state.deleted = [];
 });
 
@@ -75,7 +90,14 @@ describe("removeOwnedFiles", () => {
   });
 
   it("keeps an owned file another size still shows", async () => {
-    state.references[owned("a.webp")] = 2;
+    state.stored[folder()] = [owned("a.webp")];
+    await removeOwnedFiles([owned("a.webp")], PRODUCT);
+    expect(state.deleted).toEqual([]);
+  });
+
+  it("keeps a file another row names with a different percent-escape", async () => {
+    // `a%2Ewebp` decodes to the same storage key as `a.webp`.
+    state.stored[folder()] = [owned("a%2Ewebp")];
     await removeOwnedFiles([owned("a.webp")], PRODUCT);
     expect(state.deleted).toEqual([]);
   });
@@ -85,6 +107,11 @@ describe("removeOwnedFiles", () => {
       [owned("a.webp", "product-2"), "https://cdn.example.com/x.jpg"],
       PRODUCT,
     );
+    expect(state.deleted).toEqual([]);
+  });
+
+  it("skips a malformed address instead of failing the delete", async () => {
+    await expect(removeOwnedFiles([owned("%E0%A4%A")], PRODUCT)).resolves.toBeUndefined();
     expect(state.deleted).toEqual([]);
   });
 });

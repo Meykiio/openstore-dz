@@ -98,6 +98,8 @@ export const enAdmin = {
     "This deletes the size with its photos and stored image files. It cannot be undone.",
   "admin.confirm.deleteImage":
     "This removes the photo from every size that shows it. It cannot be undone.",
+  "admin.confirm.deleteImageOne":
+    "This removes the photo from this size only. It cannot be undone.",
   "admin.confirm.deletePackItem": "This removes the item from the pack. It cannot be undone.",
   "admin.delivery.etaDays": "Delivery time (days)",
   "admin.nav.manage": "Manage",

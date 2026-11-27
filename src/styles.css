@@ -1863,7 +1863,42 @@ html[dir="rtl"] {
 /* The shop bulletin: an ink band of promises. The only moving thing on the
    storefront. Two identical halves, so a -50% translate lands exactly on the
    start of the second and the loop is seamless. Stopped entirely for anyone who
-   asked for less motion. */
+   asked for less motion, and pausable by anyone else. */
+.ticker-shell {
+  position: relative;
+}
+
+.ticker-shell[data-paused] .ticker-track {
+  animation-play-state: paused;
+}
+
+.ticker-pause {
+  position: absolute;
+  inset-inline-end: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(247, 244, 236, 0.4);
+  background: var(--primary-solid);
+  color: var(--on-primary);
+  cursor: pointer;
+}
+
+.ticker-pause:hover {
+  border-color: var(--on-primary);
+}
+
+.ticker-pause:focus-visible {
+  outline: 2px solid var(--on-primary);
+  outline-offset: 2px;
+}
+
 .ticker {
   overflow: hidden;
   background: var(--primary-solid);
@@ -2608,11 +2643,15 @@ html[dir="rtl"] .store-wordmark {
 
 /* Full-screen mobile menu */
 .store-mobile-menu {
-  /* Portalled to <body>, outside the `.store` token scope. */
+  /* Portalled to <body>, outside the `.store` token scope, so every store token
+     it reads is declared here with the same value as `.store`. */
   --store-ink: #0b0b0c;
   --store-paper: #f7f4ec;
+  --store-accent: #c9f000;
   --store-on-ink-muted: #b7b2a6;
   --store-line-on-ink: rgba(247, 244, 236, 0.17);
+  --store-gutter: 28px;
+  --store-ease: cubic-bezier(0.22, 1, 0.36, 1);
   position: fixed;
   inset: 0;
   z-index: 300;
@@ -2621,6 +2660,16 @@ html[dir="rtl"] .store-wordmark {
   background: var(--store-ink);
   color: var(--store-paper);
   animation: store-menu-in 0.28s var(--store-ease) both;
+}
+
+[data-theme="dark"] .store-mobile-menu {
+  --store-accent: #d7ff3e;
+}
+
+@media (max-width: 767px) {
+  .store-mobile-menu {
+    --store-gutter: 16px;
+  }
 }
 
 @keyframes store-menu-in {
@@ -3730,7 +3779,9 @@ html[dir="rtl"] .store-closing h2 {
 .store .form-select,
 .store .form-textarea {
   border-radius: 0;
-  background: var(--surface);
+  /* `background-color`, not the `background` shorthand: the shorthand would
+     reset the SVG arrow the shared select rule draws with `background-image`. */
+  background-color: var(--surface);
   border-color: var(--outline);
 }
 

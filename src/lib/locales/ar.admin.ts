@@ -95,6 +95,7 @@ export const arAdmin = {
     "سيُحذف المنتج مع مقاساته وصوره وملفات الصور المخزّنة. لا يمكن التراجع.",
   "admin.confirm.deleteVariant": "سيُحذف المقاس مع صوره وملفات الصور المخزّنة. لا يمكن التراجع.",
   "admin.confirm.deleteImage": "ستُحذف الصورة من كل المقاسات التي تعرضها. لا يمكن التراجع.",
+  "admin.confirm.deleteImageOne": "ستُحذف الصورة من هذا المقاس فقط. لا يمكن التراجع.",
   "admin.confirm.deletePackItem": "ستُحذف المادة من الباقة. لا يمكن التراجع.",
   "admin.delivery.etaDays": "مدة (أيام)",
   "admin.nav.manage": "الإدارة",

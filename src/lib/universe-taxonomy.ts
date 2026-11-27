@@ -119,11 +119,15 @@ export function normalize(value: string): string {
     .trim();
 }
 
-/** Whole-word match for Latin tokens, substring for Arabic phrases. */
+/** Whole-word match for Latin phrases, substring for Arabic ones. */
 export function hasAlias(haystack: string, alias: string): boolean {
   const needle = normalize(alias);
   if (!needle) return false;
-  if (/^[a-z0-9 ]+$/.test(needle) && !needle.includes(" ")) {
+  // Latin aliases match on word boundaries, multi-word ones included: a bare
+  // `includes` would find "t shirt" inside "sweat shirt" and file a sweatshirt
+  // on the tee shelf. Arabic joins its letters, so an Arabic phrase is matched
+  // as it is written.
+  if (/^[a-z0-9 ]+$/.test(needle)) {
     return new RegExp(`(^|[^a-z0-9])${needle}([^a-z0-9]|$)`).test(haystack);
   }
   return haystack.includes(needle);

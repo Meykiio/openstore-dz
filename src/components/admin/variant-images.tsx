@@ -205,7 +205,7 @@ export function VariantImages({ variant }: { variant: AdminVariant }) {
       {pending && (
         <ConfirmDialog
           title={t("common.delete")}
-          message={t("admin.confirm.deleteImage")}
+          message={t("admin.confirm.deleteImageOne")}
           onConfirm={() => remove.mutateAsync(pending)}
           onClose={() => setPending(null)}
         />

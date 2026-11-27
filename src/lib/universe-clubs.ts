@@ -50,7 +50,9 @@ export const CLUBS: Club[] = [
     ar: "مولودية وهران",
     fr: "MC Oran",
     en: "MC Oran",
-    aliases: ["mco", "mc oran", "مولودية وهران", "وهران"],
+    // The bare city name is not a club: an Oran design belongs to the Oran
+    // theme of Algeria Design, not to MCO.
+    aliases: ["mco", "mc oran", "مولودية وهران"],
   },
   {
     key: "ess",
@@ -66,7 +68,8 @@ export const CLUBS: Club[] = [
     ar: "شباب قسنطينة",
     fr: "CS Constantine",
     en: "CS Constantine",
-    aliases: ["csc", "cs constantine", "شباب قسنطينة", "قسنطينة"],
+    // As above: "قسنطينة" alone is the Constantine theme, not a club.
+    aliases: ["csc", "cs constantine", "شباب قسنطينة"],
   },
 
   // European clubs
@@ -76,7 +79,7 @@ export const CLUBS: Club[] = [
     ar: "برشلونة",
     fr: "Barcelone",
     en: "Barcelona",
-    aliases: ["barcelona", "barca", "برشلونة", "برسا"],
+    aliases: ["barcelona", "barcelone", "barca", "برشلونة", "برسا"],
   },
   {
     key: "real-madrid",

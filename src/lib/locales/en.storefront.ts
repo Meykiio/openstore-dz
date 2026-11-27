@@ -181,6 +181,8 @@ export const enStorefront = {
   "home.ticker.cod": "Cash on delivery",
   "home.ticker.returns": "Returns in {days} days",
   "home.ticker.noAccount": "No account needed",
+  "home.ticker.pause": "Pause the bulletin",
+  "home.ticker.resume": "Resume the bulletin",
   "home.reviews.title": "What our customers say",
   "home.reviews.body": "Real reviews from customers who received their order.",
   "home.promo.title": "Free delivery on larger orders",

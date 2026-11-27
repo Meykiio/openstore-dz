@@ -179,6 +179,8 @@ export const arStorefront = {
   "home.ticker.cod": "الدفع عند الاستلام",
   "home.ticker.returns": "إرجاع خلال {days} يوماً",
   "home.ticker.noAccount": "بلا حساب",
+  "home.ticker.pause": "إيقاف الشريط مؤقتاً",
+  "home.ticker.resume": "متابعة الشريط",
   "home.reviews.title": "ماذا يقول عملاؤنا",
   "home.reviews.body": "تقييمات من زبائن استلموا طلباتهم فعلاً.",
   "home.promo.title": "توصيل مجاني للطلبات الكبيرة",

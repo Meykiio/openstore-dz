@@ -49,6 +49,7 @@ export function ConfirmDialog({
   return (
     <Dialog
       open
+      dismissible={!busy}
       onClose={busy ? () => {} : onClose}
       title={title}
       className="w-[min(92vw,26rem)]"

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { CatalogueProduct } from "./queries";
 import { UNIVERSE_SECTIONS } from "./universe-sections";
+import { hasAlias, normalize } from "./universe-taxonomy";
 import { buildUniverse, matchesEntry, productFacets } from "./universes";
 
 function product(overrides: Partial<CatalogueProduct> = {}): CatalogueProduct {
@@ -167,5 +168,46 @@ describe("one universe per product", () => {
       categories: { slug: "algeria-design", name: "تصميم جزائري", name_fr: "Algeria Design" },
     });
     expect(productFacets(algeria).universes).toEqual(["algeria"]);
+  });
+});
+
+describe("alias matching", () => {
+  it("matches a multi-word Latin alias only on word boundaries", () => {
+    expect(hasAlias(normalize("oversize t-shirt"), "t-shirt")).toBe(true);
+    // "t shirt" sits inside "sweat shirt": a substring match would file a
+    // sweatshirt on the tee shelf.
+    expect(hasAlias(normalize("oversize sweat shirt"), "t-shirt")).toBe(false);
+  });
+
+  it("keeps Arabic phrases matched as written", () => {
+    expect(hasAlias(normalize("هودي القصبة"), "القصبة")).toBe(true);
+  });
+});
+
+describe("a city name is a theme, not a club", () => {
+  it("files a bare Oran piece under the Oran theme", () => {
+    const hoodie = product({ slug: "oran", name: "هودي وهران" });
+    expect(productFacets(hoodie).universes).toEqual(["algeria"]);
+    expect(productFacets(hoodie).themes).toEqual(["oran"]);
+    expect(productFacets(hoodie).clubs).toEqual([]);
+  });
+
+  it("files a bare Constantine piece under the Constantine theme", () => {
+    const hoodie = product({ slug: "constantine", name: "هودي قسنطينة" });
+    expect(productFacets(hoodie).universes).toEqual(["algeria"]);
+    expect(productFacets(hoodie).themes).toEqual(["constantine"]);
+    expect(productFacets(hoodie).clubs).toEqual([]);
+  });
+
+  it("still files the full club name under Football", () => {
+    const hoodie = product({ slug: "mco", name: "هودي مولودية وهران" });
+    expect(productFacets(hoodie).universes).toEqual(["football"]);
+    expect(productFacets(hoodie).clubs).toEqual(["mco"]);
+  });
+
+  it("recognises the French club name", () => {
+    const hoodie = product({ slug: "barca", name: "Hoodie Barcelone" });
+    expect(productFacets(hoodie).universes).toEqual(["football"]);
+    expect(productFacets(hoodie).clubs).toEqual(["barcelona"]);
   });
 });

@@ -113,25 +113,23 @@ and must never carry a `VITE_` prefix.
 
 ---
 
-## 7. Paper-and-ink palette on the Commerce Storefront reference system
+## 7. Burnt orange palette, on the Commerce Storefront reference system
 
 **Context.** A colour palette was required. The reference design system's own
 "Commerce Storefront" system (system 02) supplied the token vocabulary, component
-structure, motion, spacing, radius and elevation. Its palette was burnt orange on
-cream, and the storefront initially carried it value-for-value.
+structure, motion, spacing, radius and elevation.
 
-**Decision.** Keep the component system but replace the palette with paper and ink:
-cream `#f4efe6`, ink `#171512`, and one oxblood accent `#7b1e1e` for sale prices,
-links and the review quotation. Amber and teal remain for warnings and states. The
-demo photography is flat-lay on warm cream, so a cream page and an unframed product
-card let the photograph sit on the page instead of inside a box. Every value is
-measured: ink on paper 15.9:1, muted text 6.1:1, paper on oxblood 9.7:1.
+**Decision.** Carry the reference system and its palette: burnt orange primary
+(`#c2410c` light, `#fb923c` dark), a crimson secondary (`#e11d48`) and an amber
+tertiary (`#b45309`). Two values deviate from the reference for contrast, both
+measured rather than assumed. The reference primary `#d9480f` scores 4.29:1
+white-on-orange and 4.02:1 orange-on-cream, under the 4.5:1 AA floor for text below
+18.66px, so `#c2410c` is used: the same hue one step darker, at 5.18:1 and 4.85:1.
+Muted text was darkened from `#78716c` to `#6b6460` for the same reason.
 
-**Reason.** OpenStore is a platform, not a brand. Ink and paper are neutral enough
-for any seller's photography, and one accent is enough to mark a price. The
-reference's orange was a brand choice that competed with the product images; it has
-been replaced rather than adjusted. The owner's `brand_color` setting still overrides
-`--primary`, so a seller who wants their own colour keeps that path.
+**Reason.** OpenStore is a platform, not a brand. Neutral-first chrome lets any
+seller's product photography lead, whatever the vertical. The palette is carried
+rather than invented, so the component CSS and the tokens do not fight.
 
 **Correction.** This entry previously recorded an "Algerian Emerald" palette with
 `--primary: #047857` on a green-cast neutral ladder. That palette was never shipped
@@ -329,3 +327,27 @@ owner chose (Arabic by default) and start with the shop name. Off until connecte
 **Rejected.** Supabase Vault for the token: its docs do not state it is enabled on every
 project, and a no-grant table keeps the token out of every API path. Arabic-only
 messages (as on JOAT-store): OpenStore shops are run in all three languages.
+
+## 16. Paper and ink supersedes the burnt orange palette (0.5.0)
+
+**Context.** The burnt orange of Decision 7 was the reference system's own brand
+colour. On this shop it competed with the product photography rather than serving it,
+and the lookbook identity needed a palette that could sit under a photograph instead
+of beside it.
+
+**Decision.** Keep the component system of Decision 7 — token vocabulary, structure,
+motion, spacing, radius and elevation are unchanged — and replace only its colours:
+cream `#f4efe6`, ink `#171512`, and one oxblood accent `#7b1e1e` for sale prices,
+links and the review quotation. Amber and teal remain for warnings and states. Every
+value is measured: ink on paper 15.9:1, muted text 6.1:1, paper on oxblood 9.7:1.
+
+**Reason.** OpenStore is a platform, not a brand. Ink and paper are neutral enough for
+any seller's photography, and one accent is enough to mark a price. The reference's
+orange was a brand choice that competed with the images; it was replaced rather than
+adjusted. The owner's `brand_color` setting still overrides `--primary`, so a seller
+who wants their own colour keeps that path.
+
+**Consequences.** The reference's three fonts were Latin-only, so Cairo stays as the
+Arabic fallback with the Arabic density override; both remain additive. Decision 7 is
+left as recorded: it describes what was shipped at the time, and this entry is what
+superseded it.

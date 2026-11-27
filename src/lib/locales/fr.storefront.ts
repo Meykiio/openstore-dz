@@ -184,6 +184,8 @@ export const frStorefront = {
   "home.ticker.cod": "Paiement à la livraison",
   "home.ticker.returns": "Retours sous {days} jours",
   "home.ticker.noAccount": "Sans compte",
+  "home.ticker.pause": "Mettre le bandeau en pause",
+  "home.ticker.resume": "Reprendre le bandeau",
   "home.reviews.title": "Ce que disent nos clients",
   "home.reviews.body": "De vrais avis de clients ayant reçu leur commande.",
   "home.promo.title": "Livraison offerte dès un certain montant",

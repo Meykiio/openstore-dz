@@ -1,4 +1,4 @@
-import { deleteProductImage } from "./image";
+import { deleteProductImage, storageKey } from "./image";
 import { getSupabase } from "./supabase/client";
 
 /**
@@ -32,12 +32,26 @@ export async function detachFromVariants(variantIds: string[], url: string): Pro
   await removeIfUnused(url);
 }
 
-/** Delete the stored file only when no variant still shows it. */
+/**
+ * Delete the stored file only when no variant still shows it.
+ *
+ * Two rows can name one object with different percent-escapes (`a.webp` and
+ * `a%2Ewebp` decode to the same key), so the reference check compares decoded
+ * keys rather than raw spellings: otherwise deleting one row would break a
+ * photo the other row still displays. The lookup is scoped to the object's own
+ * folder, so it never reads the whole table.
+ */
 export async function removeIfUnused(url: string): Promise<void> {
-  const { count, error } = await getSupabase()
+  const key = storageKey(url);
+  // A pasted address from another host names no object of ours.
+  if (!key) return;
+  const folder = key.slice(0, key.lastIndexOf("/") + 1);
+  const { data, error } = await getSupabase()
     .from("variant_images")
-    .select("id", { count: "exact", head: true })
-    .eq("url", url);
-  if (error || (count ?? 0) > 0) return;
+    .select("url")
+    .like("url", `%${folder}%`);
+  if (error) return;
+  const stillShown = ((data ?? []) as { url: string }[]).some((row) => storageKey(row.url) === key);
+  if (stillShown) return;
   await deleteProductImage(url);
 }

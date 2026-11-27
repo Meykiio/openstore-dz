@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, X } from "lucide-react";
@@ -24,22 +24,58 @@ export function SiteMobileMenu({
   onClose: () => void;
 }) {
   const { t } = useI18n();
+  const menu = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // The menu covers the page, so the page behind it is locked and the
+    // keyboard is moved inside: Tab must not reach controls the menu hides.
+    const opener = document.activeElement as HTMLElement | null;
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
+    const focusable = () =>
+      Array.from(
+        menu.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      );
+    focusable()[0]?.focus();
+
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const items = focusable();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => {
       document.body.style.overflow = previous;
       window.removeEventListener("keydown", onKeyDown);
+      // Closing returns the keyboard to the button that opened the menu.
+      opener?.focus();
     };
   }, [onClose]);
 
   return createPortal(
-    <div className="store-mobile-menu" role="dialog" aria-modal="true" aria-label={t("nav.menu")}>
+    <div
+      ref={menu}
+      className="store-mobile-menu"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("nav.menu")}
+    >
       <div className="store-mobile-menu-top">
         <span className="store-wordmark">
           <span className="mark" aria-hidden="true" />

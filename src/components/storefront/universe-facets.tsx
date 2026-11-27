@@ -65,6 +65,7 @@ function ChipRow({
           key={entry.id}
           type="button"
           className="store-chip"
+          aria-pressed={selection === entry.id}
           data-active={selection === entry.id || undefined}
           data-empty={count === 0 || undefined}
           onClick={() => onToggle(entry.id)}
@@ -94,6 +95,7 @@ function ClubRow({
           key={entry.id}
           type="button"
           className="store-club-card"
+          aria-pressed={selection === entry.id}
           data-active={selection === entry.id || undefined}
           data-empty={count === 0 || undefined}
           onClick={() => onToggle(entry.id)}

@@ -166,11 +166,27 @@ export async function uploadProductImage(
  * Failure is swallowed on purpose: a leftover object costs fractions of a
  * dinar, and blocking the user's delete on a storage hiccup would be worse.
  */
-export async function deleteProductImage(publicUrl: string): Promise<void> {
+/**
+ * The storage key a public URL names.
+ *
+ * Returns null when the address is not one of ours, or when it carries an
+ * invalid percent escape: such a string cannot name a stored object, and
+ * `decodeURIComponent` throws on it rather than returning one.
+ */
+export function storageKey(publicUrl: string): string | null {
   const marker = `/${BUCKET}/`;
   const index = publicUrl.indexOf(marker);
-  if (index === -1) return;
-  const path = decodeURIComponent(publicUrl.slice(index + marker.length));
+  if (index === -1) return null;
+  try {
+    return decodeURIComponent(publicUrl.slice(index + marker.length));
+  } catch {
+    return null;
+  }
+}
+
+export async function deleteProductImage(publicUrl: string): Promise<void> {
+  const path = storageKey(publicUrl);
+  if (!path) return;
   await getSupabase()
     .storage.from(BUCKET)
     .remove([path])

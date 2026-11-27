@@ -72,11 +72,22 @@ export async function setProductStatus(id: string, status: ProductStatus): Promi
     throw new ProductCannotPublishError();
   }
 
-  const patch: { status: ProductStatus; published_at?: string } = { status };
+  // The first stamp is written in the same statement as the status, and only
+  // while the row is still unstamped, so two concurrent first-publishes cannot
+  // overwrite each other's date and move the product in the storefront order.
   if (status === "published" && !row.published_at) {
-    patch.published_at = new Date().toISOString();
+    const { data: stamped, error: stampError } = await supabase
+      .from("products")
+      .update({ status, published_at: new Date().toISOString() })
+      .eq("id", id)
+      .is("published_at", null)
+      .select("id");
+    if (stampError) throw new Error(stampError.message);
+    // A request that lost the race still changes the status; the second
+    // statement leaves the winner's date untouched.
+    if ((stamped ?? []).length > 0) return;
   }
 
-  const { error: updateError } = await supabase.from("products").update(patch).eq("id", id);
+  const { error: updateError } = await supabase.from("products").update({ status }).eq("id", id);
   if (updateError) throw new Error(updateError.message);
 }

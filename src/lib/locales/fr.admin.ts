@@ -99,6 +99,8 @@ export const frAdmin = {
     "La taille sera supprimée avec ses photos et ses fichiers images. Action irréversible.",
   "admin.confirm.deleteImage":
     "La photo sera retirée de toutes les tailles qui l’affichent. Action irréversible.",
+  "admin.confirm.deleteImageOne":
+    "La photo sera retirée de cette taille uniquement. Action irréversible.",
   "admin.confirm.deletePackItem": "L’article sera retiré du pack. Action irréversible.",
   "admin.delivery.etaDays": "Délai (jours)",
   "admin.nav.manage": "Gestion",

@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowUpRight, Quote } from "lucide-react";
+import { ArrowUpRight, Pause, Play, Quote } from "lucide-react";
 import { useI18n } from "@/lib/i18n-context";
 import { formatDzd, formatRelative } from "@/lib/format";
 import { useReviews } from "@/lib/queries";
@@ -15,6 +16,7 @@ import { StarRating } from "./star-rating";
  */
 export function Ticker({ returnsDays }: { returnsDays: number }) {
   const { t } = useI18n();
+  const [paused, setPaused] = useState(false);
   const items = [
     t("home.ticker.delivery"),
     t("home.ticker.cod"),
@@ -24,14 +26,28 @@ export function Ticker({ returnsDays }: { returnsDays: number }) {
   const run = Array.from({ length: 6 }, () => items).flat();
 
   return (
-    <div className="ticker" aria-hidden="true">
-      <div className="ticker-track">
-        {run.map((item, index) => (
-          <span key={index} className="ticker-item">
-            {item}
-          </span>
-        ))}
+    // The strip is decorative for assistive tech, so the pause control is a
+    // sibling rather than a child: a control inside `aria-hidden` would be
+    // unreachable. WCAG 2.2.2 asks for exactly this on moving content.
+    <div className="ticker-shell" data-paused={paused || undefined}>
+      <div className="ticker" aria-hidden="true">
+        <div className="ticker-track">
+          {run.map((item, index) => (
+            <span key={index} className="ticker-item">
+              {item}
+            </span>
+          ))}
+        </div>
       </div>
+      <button
+        type="button"
+        className="ticker-pause"
+        onClick={() => setPaused((value) => !value)}
+        aria-pressed={paused}
+        aria-label={paused ? t("home.ticker.resume") : t("home.ticker.pause")}
+      >
+        {paused ? <Play size={11} aria-hidden="true" /> : <Pause size={11} aria-hidden="true" />}
+      </button>
     </div>
   );
 }
