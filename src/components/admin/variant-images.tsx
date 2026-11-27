@@ -3,6 +3,7 @@ import { Camera, ImagePlus, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form";
 import { useI18n } from "@/lib/i18n-context";
@@ -49,6 +50,49 @@ async function uploadBatch(
 }
 
 /**
+ * The link field, for an owner importing a catalogue that already exists.
+ *
+ * Apart from the camera button because they are different journeys: one
+ * photographs stock on a phone, the other pastes what a supplier sent.
+ */
+function PasteUrlForm({ variantId, onAdded }: { variantId: string; onAdded: () => void }) {
+  const { t } = useI18n();
+  const [url, setUrl] = useState("");
+  const add = useMutation({
+    mutationFn: (value: string) => addVariantImage(variantId, value),
+    onSuccess: () => {
+      onAdded();
+      setUrl("");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  return (
+    <form
+      className="flex flex-wrap items-end gap-2"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (url.trim()) add.mutate(url.trim());
+      }}
+    >
+      <Field label={t("admin.images.pasteUrl")} className="min-w-56 flex-1">
+        <Input
+          value={url}
+          onChange={(event) => setUrl(event.target.value)}
+          dir="ltr"
+          type="url"
+          placeholder="https://…"
+        />
+      </Field>
+      <Button type="submit" variant="ghost" size="sm" disabled={add.isPending}>
+        <ImagePlus size={15} aria-hidden="true" />
+        {t("common.add")}
+      </Button>
+    </form>
+  );
+}
+
+/**
  * Variant image manager.
  *
  * The primary control is a camera button, not a file picker: on a phone
@@ -65,19 +109,10 @@ export function VariantImages({ variant }: { variant: AdminVariant }) {
   const fileInput = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [focus, setFocus] = useState(0.5);
-  const [url, setUrl] = useState("");
+  const [pending, setPending] = useState<{ id: string; url: string } | null>(null);
 
   const invalidate = () =>
     void queryClient.invalidateQueries({ queryKey: ["admin_product", variant.product_id] });
-
-  const addUrl = useMutation({
-    mutationFn: (value: string) => addVariantImage(variant.id, value),
-    onSuccess: () => {
-      invalidate();
-      setUrl("");
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
 
   const remove = useMutation({
     mutationFn: async (image: { id: string; url: string }) => {
@@ -152,7 +187,7 @@ export function VariantImages({ variant }: { variant: AdminVariant }) {
               />
               <button
                 type="button"
-                onClick={() => remove.mutate({ id: image.id, url: image.url })}
+                onClick={() => setPending({ id: image.id, url: image.url })}
                 aria-label={t("common.delete")}
                 className="absolute -top-1.5 -end-1.5 grid size-5 place-items-center rounded-full bg-error text-white"
               >
@@ -165,27 +200,16 @@ export function VariantImages({ variant }: { variant: AdminVariant }) {
         <Badge tone="neutral">{t("common.none")}</Badge>
       )}
 
-      <form
-        className="flex flex-wrap items-end gap-2"
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (url.trim()) addUrl.mutate(url.trim());
-        }}
-      >
-        <Field label={t("admin.images.pasteUrl")} className="min-w-56 flex-1">
-          <Input
-            value={url}
-            onChange={(event) => setUrl(event.target.value)}
-            dir="ltr"
-            type="url"
-            placeholder="https://…"
-          />
-        </Field>
-        <Button type="submit" variant="ghost" size="sm" disabled={addUrl.isPending}>
-          <ImagePlus size={15} aria-hidden="true" />
-          {t("common.add")}
-        </Button>
-      </form>
+      <PasteUrlForm variantId={variant.id} onAdded={invalidate} />
+
+      {pending && (
+        <ConfirmDialog
+          title={t("common.delete")}
+          message={t("admin.confirm.deleteImage")}
+          onConfirm={() => remove.mutateAsync(pending)}
+          onClose={() => setPending(null)}
+        />
+      )}
     </div>
   );
 }

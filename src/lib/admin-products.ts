@@ -1,6 +1,8 @@
-import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSupabase } from "./supabase/client";
 import { slugify } from "./format";
+import type { ProductStatus } from "./product-status";
+import { productPhotoUrls, removeOwnedFiles, variantPhotoUrls } from "./product-media";
 
 /**
  * Product administration.
@@ -35,7 +37,7 @@ export type AdminProduct = {
   description: string | null;
   description_fr: string | null;
   kind: "single" | "pack";
-  status: string;
+  status: ProductStatus;
   category_id: string | null;
   /** Joined for display; the admin form edits category_id. */
   categories: { slug: string; name: string } | null;
@@ -97,6 +99,20 @@ async function fetchAdminProductsPage(page: number): Promise<AdminProductsPage> 
   };
 }
 
+/**
+ * Drop every cached copy of the catalogue: the admin list, the admin detail and
+ * the storefront queries. The list row and the create dialog both need it, and
+ * they live in different files now, so it belongs here rather than in either.
+ */
+export function useInvalidateAdminProducts() {
+  const queryClient = useQueryClient();
+  return () => {
+    for (const key of [["admin_products"], ["products"], ["admin_product"]]) {
+      void queryClient.invalidateQueries({ queryKey: key });
+    }
+  };
+}
+
 export function useAdminProductsPage(page: number) {
   return useQuery({
     queryKey: ["admin_products", page] as const,
@@ -153,45 +169,30 @@ export async function createProduct(input: {
   return data.id as string;
 }
 
+/**
+ * Update the edited fields of a product.
+ *
+ * Deliberately cannot change `status` or `published_at`: those belong to
+ * `setProductStatus`, which refuses to publish a product with nothing to sell.
+ */
 export async function updateProduct(
   id: string,
   patch: Partial<
-    Pick<
-      AdminProduct,
-      | "name"
-      | "name_fr"
-      | "description"
-      | "description_fr"
-      | "category_id"
-      | "status"
-      | "published_at"
-    >
+    Pick<AdminProduct, "name" | "name_fr" | "description" | "description_fr" | "category_id">
   >,
 ): Promise<void> {
   const { error } = await getSupabase().from("products").update(patch).eq("id", id);
   if (error) throw new Error(error.message);
 }
 
-/**
- * Publish or unpublish. `published_at` is stamped on first publish only, so
- * republishing does not reorder the storefront.
- */
-export async function setProductStatus(
-  id: string,
-  status: "draft" | "published" | "archived",
-  hasPublishedAt: boolean,
-): Promise<void> {
-  await updateProduct(id, {
-    status,
-    ...(status === "published" && !hasPublishedAt
-      ? { published_at: new Date().toISOString() }
-      : {}),
-  });
-}
-
 export async function deleteProduct(id: string): Promise<void> {
+  // The rows about to be cascaded are the only record of which files they used,
+  // so the list is read first. A failed read must not block the delete: the
+  // worst case is the leftover file this cleanup exists to prevent.
+  const urls = await productPhotoUrls(id).catch(() => []);
   const { error } = await getSupabase().from("products").delete().eq("id", id);
   if (error) throw new Error(error.message);
+  await removeOwnedFiles(urls, id);
 }
 
 export type VariantInput = {
@@ -229,8 +230,11 @@ export async function insertVariants(
 }
 
 export async function deleteVariant(id: string): Promise<void> {
+  // Same order as above: read the photos while the rows still name them.
+  const photos = await variantPhotoUrls(id).catch(() => null);
   const { error } = await getSupabase().from("product_variants").delete().eq("id", id);
   if (error) throw new Error(error.message);
+  if (photos) await removeOwnedFiles(photos.urls, photos.productId);
 }
 
 export async function addVariantImage(variantId: string, url: string): Promise<void> {

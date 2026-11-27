@@ -15,6 +15,12 @@ import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState, LoadingState } from "@/components/ui/feedback";
 import { useI18n } from "@/lib/i18n-context";
 import { updateProduct, useAdminProduct } from "@/lib/admin-products";
+import {
+  canPublish,
+  setProductStatus,
+  statusErrorMessage,
+  type ProductStatus,
+} from "@/lib/product-status";
 import { useProductPicker } from "@/lib/product-picker";
 
 export const Route = createFileRoute("/admin/product/$id")({
@@ -22,6 +28,20 @@ export const Route = createFileRoute("/admin/product/$id")({
 });
 
 type Patch = Parameters<typeof updateProduct>[1];
+
+/**
+ * Publishing is a guarded transition, so it gets its own mutation rather than
+ * riding along with the field patch.
+ */
+function useStatusTransition(id: string, onDone: () => void) {
+  const { t } = useI18n();
+  return useMutation({
+    mutationFn: (status: ProductStatus) => setProductStatus(id, status),
+    onSuccess: onDone,
+    onError: (error: Error) =>
+      toast.error(statusErrorMessage(error, t("admin.products.noVariants"))),
+  });
+}
 
 function ProductEditPage() {
   const { id } = Route.useParams();
@@ -67,6 +87,8 @@ function ProductEditPage() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const setStatus = useStatusTransition(id, invalidate);
+
   if (isPending) return <LoadingState />;
   if (!product) return <EmptyState title={t("order.notFound")} />;
   if (!draft) return <LoadingState />;
@@ -74,14 +96,11 @@ function ProductEditPage() {
   const set = <K extends keyof ProductDraft>(key: K, value: ProductDraft[K]) =>
     setDraft({ ...draft, [key]: value });
 
-  const publishable = product.product_variants.length > 0;
+  const publishable = canPublish(product.product_variants);
   const published = product.status === "published";
+  const busy = save.isPending || setStatus.isPending;
 
-  const togglePublish = () =>
-    save.mutate({
-      status: published ? "draft" : "published",
-      ...(published || product.published_at ? {} : { published_at: new Date().toISOString() }),
-    });
+  const togglePublish = () => setStatus.mutate(published ? "draft" : "published");
 
   const saveFields = () =>
     save.mutate({
@@ -99,7 +118,7 @@ function ProductEditPage() {
         slug={product.slug}
         published={published}
         publishable={publishable}
-        busy={save.isPending}
+        busy={busy}
         onTogglePublish={togglePublish}
         onSaveFields={saveFields}
       />
@@ -114,7 +133,7 @@ function ProductEditPage() {
         draft={draft}
         set={set}
         status={product.status}
-        onStatusChange={(status) => save.mutate({ status })}
+        onStatusChange={(status) => setStatus.mutate(status)}
       />
 
       {product.product_variants.length > 0 && (
@@ -202,8 +221,8 @@ function ProductHeader({
       <div className="flex items-center gap-2">
         <Button
           variant="secondary"
-          disabled={!publishable || busy}
-          title={publishable ? undefined : t("admin.products.noVariants")}
+          disabled={busy || (!published && !publishable)}
+          title={!published && !publishable ? t("admin.products.noVariants") : undefined}
           onClick={onTogglePublish}
         >
           {published ? t("admin.products.unpublish") : t("admin.products.publish")}
