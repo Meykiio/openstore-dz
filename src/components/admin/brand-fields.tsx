@@ -77,7 +77,7 @@ export function LogoField({
 }
 
 // Colours that read well as buttons on both light and dark backgrounds.
-const PRESETS = ["#c2410c", "#be123c", "#7c3aed", "#1d4ed8", "#0f766e", "#15803d", "#111111"];
+const PRESETS = ["#171512", "#7b1e1e", "#7c3aed", "#1d4ed8", "#0f766e", "#15803d", "#111111"];
 
 export function ColorField({
   value,
@@ -107,7 +107,7 @@ export function ColorField({
         ))}
         <input
           type="color"
-          value={value ?? "#c2410c"}
+          value={value ?? "#171512"}
           onChange={(event) => onChange(event.target.value)}
           aria-label={t("admin.brand.custom")}
           className="size-9 cursor-pointer rounded-full border border-outline bg-transparent"

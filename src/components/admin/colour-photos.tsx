@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Camera, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useI18n } from "@/lib/i18n-context";
 import { PRODUCT_ASPECT, uploadProductImage } from "@/lib/image";
 import { attachToVariants, detachFromVariants } from "@/lib/colour-photos";
@@ -72,6 +73,7 @@ function ColourRow({ productId, group }: { productId: string; group: Group }) {
   const input = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [focus, setFocus] = useState(0.5);
+  const [pending, setPending] = useState<string | null>(null);
   const ids = group.variants.map((v) => v.id);
   const invalidate = () =>
     void queryClient.invalidateQueries({ queryKey: ["admin_product", productId] });
@@ -161,7 +163,7 @@ function ColourRow({ productId, group }: { productId: string; group: Group }) {
               />
               <button
                 type="button"
-                onClick={() => remove.mutate(url)}
+                onClick={() => setPending(url)}
                 disabled={remove.isPending}
                 aria-label={t("common.delete")}
                 className="absolute -end-1.5 -top-1.5 grid size-6 place-items-center rounded-full bg-error text-white"
@@ -171,6 +173,15 @@ function ColourRow({ productId, group }: { productId: string; group: Group }) {
             </span>
           ))}
         </div>
+      )}
+
+      {pending && (
+        <ConfirmDialog
+          title={group.colour ?? t("admin.photos.noColour")}
+          message={t("admin.confirm.deleteImage")}
+          onConfirm={() => remove.mutateAsync(pending)}
+          onClose={() => setPending(null)}
+        />
       )}
     </section>
   );

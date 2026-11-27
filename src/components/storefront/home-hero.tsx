@@ -1,22 +1,20 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Banknote, Headphones, RotateCcw, Truck } from "lucide-react";
+import { ArrowUpRight, Banknote, Headphones, RotateCcw, Truck } from "lucide-react";
 import { useI18n } from "@/lib/i18n-context";
 import type { CatalogueProduct, StoreSettings } from "@/lib/queries";
-import { productImage } from "@/lib/queries";
+import { priceRange, productImage, sortVariants } from "@/lib/queries";
 import { localized } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
+import { formatDzd } from "@/lib/format";
+import { saleOf } from "@/lib/sale";
 
 /**
  * Storefront hero.
  *
- * Photography sells clothing, so the visual is the shop's own products: three
- * portrait photos in a staggered row, each a link to that product. Portrait
- * crops on purpose; the catalogue is shot 4:5, and a landscape frame cut the
- * model's head off.
- *
- * The headline is interface copy in the buyer's language. The owner's tagline
- * is written in one language, so it is shown only to readers of that language
- * (Arabic, the default) instead of greeting an English reader in Arabic.
+ * The visual is the shop's own newest product, at full height, with a second
+ * piece printed over the corner like a lookbook page. The headline is interface
+ * copy rather than the owner's tagline: a storefront needs a point of view even
+ * before the owner has written one, and the tagline belongs in the lede where it
+ * can change without breaking the layout.
  */
 export function HomeHero({
   settings,
@@ -29,79 +27,116 @@ export function HomeHero({
   const shots = products
     .map((product) => ({ product, image: productImage(product) }))
     .filter((shot): shot is { product: CatalogueProduct; image: string } => shot.image !== null)
-    .slice(0, 3);
-  const tagline = settings?.tagline?.trim();
+    .slice(0, 2);
+  const [main, side] = shots;
+
+  const tagline = settings?.tagline
+    ? localized(locale, settings.tagline, settings.tagline_fr)
+    : null;
+  const description = settings?.description
+    ? localized(locale, settings.description, settings.description_fr)
+    : null;
+  const lede = description || tagline || t("home.hero.body");
+
+  const price = (product: CatalogueProduct) => {
+    const range = priceRange(product);
+    if (!range) return null;
+    const cheapest = sortVariants(product.product_variants).find(
+      (variant) => variant.price === range.min,
+    );
+    const sale = cheapest ? saleOf(cheapest) : null;
+    return { now: formatDzd(range.min, locale), was: sale ? formatDzd(sale.was, locale) : null };
+  };
+  const mainPrice = main ? price(main.product) : null;
+  const sidePrice = side ? price(side.product) : null;
+  const mainName = main ? localized(locale, main.product.name, main.product.name_fr) : null;
+  const sideName = side ? localized(locale, side.product.name, side.product.name_fr) : null;
 
   return (
-    <section className="overflow-hidden border-b border-outline bg-gradient-to-b from-bg to-bg-dim">
-      <div className="container-page grid items-center gap-10 py-10 sm:py-14 lg:grid-cols-[1fr_1.1fr] lg:gap-14 lg:py-20">
-        <div className="flex flex-col items-start">
-          <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-outline bg-surface px-3.5 py-1.5 text-xs font-semibold text-secondary">
-            <span className="size-[7px] shrink-0 rounded-full bg-secondary" aria-hidden="true" />
-            {settings?.name ?? "OpenStore DZ"}
-          </span>
-
-          <h1 className="mb-4 max-w-xl font-display text-[clamp(32px,5.2vw,60px)] font-semibold leading-[1.06] tracking-[-0.02em]">
-            {(locale === "ar" ? tagline : settings?.tagline_fr?.trim()) || t("home.hero.title")}
+    <section className="store-hero">
+      <div className="container-page store-hero-grid">
+        <div className="store-hero-copy">
+          <p className="store-eyebrow">{t("home.hero.eyebrow")}</p>
+          <h1 className="store-display store-hero-title">
+            <span>{t("home.hero.line1")}</span>{" "}
+            <span className="outline">{t("home.hero.line2")}</span>
           </h1>
+          <p className="store-hero-lede">{lede}</p>
 
-          <p className="mb-7 max-w-[480px] text-base leading-[1.7] text-on-surface-muted">
-            {t("home.hero.body")}
-          </p>
-
-          <div className="flex w-full flex-wrap gap-3 sm:w-auto">
-            <Link to="/catalogue" className="btn btn-primary btn-lg flex-1 sm:flex-none">
-              {t("home.promo.cta")}
-              <ArrowRight size={18} className="rtl:rotate-180" aria-hidden="true" />
+          <div className="store-hero-actions">
+            <Link to="/catalogue" className="store-btn store-btn--fill">
+              {t("home.hero.cta")}
+              <ArrowUpRight size={15} aria-hidden="true" />
             </Link>
-            <Link to="/track" className="btn btn-secondary btn-lg flex-1 sm:flex-none">
-              {t("nav.trackOrder")}
-            </Link>
+            <a href="#universes" className="store-btn store-btn--ghost">
+              {t("home.hero.secondary")}
+            </a>
           </div>
 
-          <ul className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-xs text-on-surface-muted">
-            <li className="inline-flex items-center gap-1.5">
-              <Banknote size={15} className="text-primary" aria-hidden="true" />
-              {t("home.trust.cod.title")}
-            </li>
-            <li className="inline-flex items-center gap-1.5">
-              <RotateCcw size={15} className="text-primary" aria-hidden="true" />
-              {t("home.trust.returns.title", { days: settings?.returns_days ?? 14 })}
-            </li>
-          </ul>
+          <dl className="store-hero-meta">
+            <div>
+              <dt>{t("home.hero.meta.cod")}</dt>
+              <dd>{t("home.hero.meta.codValue")}</dd>
+            </div>
+            <div>
+              <dt>{t("home.hero.meta.delivery")}</dt>
+              <dd>{t("home.hero.meta.deliveryValue")}</dd>
+            </div>
+            <div>
+              <dt>{t("home.hero.meta.returns")}</dt>
+              <dd>{t("home.hero.meta.returnsValue", { days: settings?.returns_days ?? 14 })}</dd>
+            </div>
+            <div>
+              <dt>{t("home.hero.meta.help")}</dt>
+              <dd>{t("home.hero.meta.helpValue")}</dd>
+            </div>
+          </dl>
         </div>
 
-        {shots.length > 0 && (
-          <div className="grid grid-cols-3 items-start gap-3 sm:gap-4">
-            {shots.map(({ product, image }, index) => {
-              const name = localized(locale, product.name, product.name_fr);
-              return (
-                <Link
-                  key={product.id}
-                  to="/product/$slug"
-                  params={{ slug: product.slug }}
-                  className={cn(
-                    "group relative block overflow-hidden rounded-[18px] border border-outline bg-surface-high shadow-sm",
-                    index === 1 && "mt-8 sm:mt-12",
-                  )}
-                >
-                  <img
-                    src={image}
-                    alt={name}
-                    // The first photo is the largest paint above the fold.
-                    loading={index === 0 ? "eager" : "lazy"}
-                    fetchPriority={index === 0 ? "high" : "auto"}
-                    decoding="async"
-                    className="aspect-[4/5] w-full object-cover transition-transform duration-500 ease-out-soft group-hover:scale-[1.04]"
-                  />
-                  <span className="absolute inset-x-0 bottom-0 hidden bg-gradient-to-t from-black/65 to-transparent px-3 pt-8 pb-3 text-xs font-medium text-white sm:block">
-                    <span className="line-clamp-1">{name}</span>
+        <div className="store-hero-media">
+          {main ? (
+            <Link
+              to="/product/$slug"
+              params={{ slug: main.product.slug }}
+              className="store-hero-main"
+            >
+              <img src={main.image} alt="" loading="eager" fetchPriority="high" decoding="async" />
+              {mainName && (
+                <span className="store-hero-name">
+                  <strong>{mainName}</strong>
+                  {mainPrice && <span dir="ltr">{mainPrice.now}</span>}
+                </span>
+              )}
+            </Link>
+          ) : (
+            <div className="store-hero-fallback">
+              <strong>01</strong>
+              <span>{t("home.hero.fallback")}</span>
+            </div>
+          )}
+
+          {side && sideName && (
+            <Link
+              to="/product/$slug"
+              params={{ slug: side.product.slug }}
+              className="store-hero-side"
+            >
+              <img src={side.image} alt="" loading="lazy" decoding="async" />
+              <span>
+                <span className="hs-name">{sideName}</span>
+                {sidePrice && (
+                  <span className="hs-price" dir="ltr">
+                    {sidePrice.now}
                   </span>
-                </Link>
-              );
-            })}
-          </div>
-        )}
+                )}
+              </span>
+            </Link>
+          )}
+
+          <span className="store-hero-vertical" aria-hidden="true">
+            {settings?.name ?? "OPENSTORE DZ"}
+          </span>
+        </div>
       </div>
     </section>
   );
@@ -119,11 +154,7 @@ export function TrustBar({ returnsDays }: { returnsDays: number }) {
 
   const items = [
     { icon: Banknote, title: t("home.trust.cod.title"), body: t("home.trust.cod.body") },
-    {
-      icon: Truck,
-      title: t("home.trust.delivery.title"),
-      body: t("home.trust.delivery.body"),
-    },
+    { icon: Truck, title: t("home.trust.delivery.title"), body: t("home.trust.delivery.body") },
     {
       icon: RotateCcw,
       title: t("home.trust.returns.title", { days: returnsDays }),
@@ -133,19 +164,13 @@ export function TrustBar({ returnsDays }: { returnsDays: number }) {
   ] as const;
 
   return (
-    <section className="border-b border-outline bg-surface">
-      <div className="container-page grid gap-6 py-8 sm:grid-cols-2 lg:grid-cols-4">
+    <section className="store-trust">
+      <div className="container-page store-trust-grid">
         {items.map((item) => (
-          <div key={item.title} className="flex items-start gap-3">
-            <span className="grid size-10 shrink-0 place-items-center rounded-[10px] border border-outline bg-primary/5 text-primary">
-              <item.icon size={18} aria-hidden="true" />
-            </span>
-            <span className="min-w-0">
-              <span className="block text-sm font-semibold">{item.title}</span>
-              <span className="mt-0.5 block text-xs leading-relaxed text-on-surface-muted">
-                {item.body}
-              </span>
-            </span>
+          <div key={item.title} className="store-trust-item">
+            <item.icon size={20} aria-hidden="true" />
+            <h3>{item.title}</h3>
+            <p>{item.body}</p>
           </div>
         ))}
       </div>

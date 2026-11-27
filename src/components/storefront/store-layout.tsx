@@ -18,7 +18,7 @@ import { BrandStyle } from "./brand-style";
  */
 export function StoreLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="store flex min-h-dvh flex-col">
       <BrandStyle />
       <DemoBanner />
       <AnnouncementBar />

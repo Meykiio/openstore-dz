@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { StoreLayout } from "@/components/storefront/store-layout";
 import { CatalogueView } from "@/components/storefront/catalogue-view";
+import { CategoryChips } from "@/components/storefront/home-shelf";
 import { EMPTY_FILTERS, cataloguePageQuery } from "@/lib/catalogue";
 import { translate } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-context";
 
 export const Route = createFileRoute("/catalogue")({
-  // Prefetched so the server sends products rather than an empty grid.
   loader: async ({ context }) => {
     await context.queryClient
       .ensureQueryData(cataloguePageQuery(EMPTY_FILTERS, 1))
@@ -24,21 +24,19 @@ export const Route = createFileRoute("/catalogue")({
   component: CatalogueRoute,
 });
 
-/**
- * The whole catalogue, unfiltered and paged.
- *
- * Exists because the home page used to render every product in one grid. Once
- * that grid shows a page, there has to be somewhere to see the rest, and neither
- * a category page nor a search page is that place: one narrows by category and the
- * other needs a query before it shows anything.
- */
+/** The whole catalogue, unfiltered and paged. */
 function CatalogueRoute() {
   const { t } = useI18n();
 
   return (
     <StoreLayout>
-      <div className="container-page py-10">
-        <CatalogueView heading={t("nav.products")} />
+      <CategoryChips />
+      <div className="container-page pb-16">
+        <CatalogueView
+          heading={t("nav.products")}
+          eyebrow={t("catalogue.eyebrow")}
+          subheading={t("catalogue.description")}
+        />
       </div>
     </StoreLayout>
   );

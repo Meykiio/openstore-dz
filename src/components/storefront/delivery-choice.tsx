@@ -97,7 +97,7 @@ export function DeliveryChoice({
           </Field>
         ) : (
           !offices.isPending && (
-            <p className="rounded-[10px] bg-surface-mid px-3 py-2 text-xs text-on-surface-muted">
+            <p className="rounded-[2px] bg-surface-mid px-3 py-2 text-xs text-on-surface-muted">
               {t("checkout.stopdesk.later")}
             </p>
           )

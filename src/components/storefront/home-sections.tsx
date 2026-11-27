@@ -1,95 +1,76 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Quote } from "lucide-react";
+import { ArrowUpRight, Pause, Play, Quote } from "lucide-react";
 import { useI18n } from "@/lib/i18n-context";
-import { formatRelative } from "@/lib/format";
-import { useCategories, useReviews } from "@/lib/queries";
+import { formatDzd, formatRelative } from "@/lib/format";
+import { useReviews } from "@/lib/queries";
 import { StarRating } from "./star-rating";
-import { localized } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
 
 /**
- * Category strip.
+ * Shop bulletin.
  *
- * Real links to real category pages, built from the categories table rather than
- * derived from whatever text happens to be on products. A category with no
- * published products is not rendered, because an empty category page is a dead
- * end and makes a small shop look broken.
+ * The four promises the shop actually keeps, repeated in an ink band. It is the
+ * only continuously moving element on the page, so it stays slow and stops
+ * entirely under prefers-reduced-motion. Hidden from assistive tech: the trust
+ * bar says the same things in reading order.
  */
-export function CategoryStrip() {
-  const { t, locale } = useI18n();
-  const { data: categories } = useCategories();
-
-  const visible = (categories ?? []).filter((category) => category.product_count > 0);
-  if (visible.length === 0) return null;
+export function Ticker({ returnsDays }: { returnsDays: number }) {
+  const { t } = useI18n();
+  const [paused, setPaused] = useState(false);
+  const items = [
+    t("home.ticker.delivery"),
+    t("home.ticker.cod"),
+    t("home.ticker.returns", { days: returnsDays }),
+    t("home.ticker.noAccount"),
+  ];
+  const run = Array.from({ length: 6 }, () => items).flat();
 
   return (
-    <section className="container-page py-10">
-      <h2 className="mb-5 font-display text-xl font-semibold sm:text-2xl">
-        {t("home.categories")}
-      </h2>
-
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {visible.map((category) => (
-          <Link
-            key={category.id}
-            to="/category/$slug"
-            params={{ slug: category.slug }}
-            className="group flex items-center justify-between gap-3 rounded-[16px] border border-outline bg-surface transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-outline-hi hover:shadow-sm"
-          >
-            {category.image_url && (
-              <span className="size-16 shrink-0 overflow-hidden rounded-s-[16px] bg-surface-high">
-                <img
-                  src={category.image_url}
-                  alt=""
-                  loading="lazy"
-                  className="size-full object-cover"
-                />
-              </span>
-            )}
-            <span className="min-w-0 flex-1 px-4 py-3.5">
-              <span className="block truncate text-sm font-medium">
-                {localized(locale, category.name, category.name_fr)}
-              </span>
-              <span className="font-mono text-xs text-on-surface-muted">
-                {category.product_count} {t("nav.products")}
-              </span>
+    // The strip is decorative for assistive tech, so the pause control is a
+    // sibling rather than a child: a control inside `aria-hidden` would be
+    // unreachable. WCAG 2.2.2 asks for exactly this on moving content.
+    <div className="ticker-shell" data-paused={paused || undefined}>
+      <div className="ticker" aria-hidden="true">
+        <div className="ticker-track">
+          {run.map((item, index) => (
+            <span key={index} className="ticker-item">
+              {item}
             </span>
-            <ArrowRight
-              size={16}
-              className="me-4 shrink-0 text-on-surface-muted transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
-              aria-hidden="true"
-            />
-          </Link>
-        ))}
+          ))}
+        </div>
       </div>
-    </section>
+      <button
+        type="button"
+        className="ticker-pause"
+        onClick={() => setPaused((value) => !value)}
+        aria-pressed={paused}
+        aria-label={paused ? t("home.ticker.resume") : t("home.ticker.pause")}
+      >
+        {paused ? <Play size={11} aria-hidden="true" /> : <Pause size={11} aria-hidden="true" />}
+      </button>
+    </div>
   );
 }
 
-/**
- * Promo band. Berry, per the reference's "sale/secondary action" colour, so it
- * reads as a time-limited offer rather than as another primary button.
- */
+/** The one decision band on the page, in the system's acid accent. */
 export function PromoBand({ threshold }: { threshold: number }) {
   const { t, locale } = useI18n();
   if (threshold <= 0) return null;
 
-  const formatted = new Intl.NumberFormat("en-US").format(threshold);
-
   return (
-    <section className="container-page py-6">
-      <div className="promo-bar">
-        <span className="p-text">
-          {t("home.promo.title")} -{" "}
-          <span dir="ltr" className="font-mono">
-            {formatted}
-          </span>{" "}
-          {locale === "ar" ? "دج" : "DA"}
-        </span>
-        <span className="p-text opacity-90">{t("home.promo.body")}</span>
-        <a href="#catalogue" className="promo-cta">
+    <section className="store-promo">
+      <div className="container-page store-promo-inner">
+        <div>
+          <h2 className="store-promo-title">{t("home.promo.title")}</h2>
+          <p className="store-promo-body">
+            {t("home.promo.threshold", { amount: formatDzd(threshold, locale) })} ·{" "}
+            {t("home.promo.body")}
+          </p>
+        </div>
+        <Link to="/catalogue" className="store-btn store-btn--fill">
           {t("home.promo.cta")}
-        </a>
+          <ArrowUpRight size={15} aria-hidden="true" />
+        </Link>
       </div>
     </section>
   );
@@ -104,29 +85,32 @@ export function ReviewWall() {
   if (top.length === 0) return null;
 
   return (
-    <section className="section-alt border-y border-outline py-14">
+    <section className="store-section">
       <div className="container-page">
-        <div className="mb-8 flex flex-col items-center text-center">
-          <h2 className="font-display text-xl font-semibold sm:text-2xl">
-            {t("home.reviews.title")}
-          </h2>
-          <p className="mt-2 max-w-lg text-sm text-on-surface-muted">{t("home.reviews.body")}</p>
+        <div className="store-section-head">
+          <div>
+            <p className="store-eyebrow">{t("home.reviews.eyebrow")}</p>
+            <h2 className="store-section-title">{t("home.reviews.title")}</h2>
+            <p className="store-section-lede">{t("home.reviews.body")}</p>
+          </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="store-review-grid">
           {top.map((review) => (
-            <figure key={review.id} className="review-card">
-              <Quote size={18} className="mb-3 text-outline-hi" aria-hidden="true" />
-              <StarRating value={review.rating} className="mb-3" />
-              <blockquote className="review-body">{review.comment}</blockquote>
-              <figcaption className="mt-4 flex items-center gap-2.5">
-                <span className="review-ava" aria-hidden="true">
-                  {review.customer_name.trim().charAt(0)}
-                </span>
-                <span>
-                  <span className="block text-sm font-medium">{review.customer_name}</span>
-                  <span className="text-xs text-on-surface-muted">
-                    {formatRelative(review.created_at, locale)}
+            <figure key={review.id} className="store-review-card">
+              <Quote size={18} aria-hidden="true" />
+              <StarRating value={review.rating} />
+              <blockquote>{review.comment}</blockquote>
+              <figcaption>
+                <span className="flex items-center gap-2.5">
+                  <span className="ava" aria-hidden="true">
+                    {review.customer_name.trim().charAt(0)}
+                  </span>
+                  <span>
+                    <span className="block font-medium">{review.customer_name}</span>
+                    <span className="text-on-surface-muted">
+                      {formatRelative(review.created_at, locale)}
+                    </span>
                   </span>
                 </span>
               </figcaption>
@@ -142,23 +126,25 @@ export function ReviewWall() {
 export function ClosingCta({ storeName }: { storeName: string }) {
   const { t } = useI18n();
   return (
-    <section className="container-page py-14">
-      <div
-        className={cn(
-          "flex flex-col items-center gap-4 rounded-[24px] border border-outline bg-surface px-6 py-12 text-center",
-        )}
-      >
-        <h2 className="font-display text-xl font-semibold sm:text-2xl">{t("home.cta.title")}</h2>
-        <p className="max-w-md text-sm text-on-surface-muted">{t("home.cta.body")}</p>
-        <div className="flex flex-wrap justify-center gap-3">
-          <a href="#catalogue" className="btn btn-primary btn-lg">
+    <section className="store-closing">
+      <div className="container-page">
+        <div className="flex justify-center">
+          <p className="store-eyebrow">{t("home.cta.eyebrow")}</p>
+        </div>
+        <h2>{t("home.cta.title")}</h2>
+        <p className="store-section-lede mx-auto">{t("home.cta.body")}</p>
+        <div className="store-closing-actions">
+          <Link to="/catalogue" className="store-btn store-btn--fill">
             {t("home.browseAll")}
-          </a>
-          <Link to="/track" className="btn btn-secondary btn-lg">
+            <ArrowUpRight size={15} aria-hidden="true" />
+          </Link>
+          <Link to="/track" className="store-btn store-btn--ghost">
             {t("nav.trackOrder")}
           </Link>
         </div>
-        <p className="mt-2 text-xs text-on-surface-muted">{storeName}</p>
+        <p className="mt-8 font-mono text-[10px] uppercase tracking-[0.2em] text-on-surface-muted">
+          {storeName}
+        </p>
       </div>
     </section>
   );

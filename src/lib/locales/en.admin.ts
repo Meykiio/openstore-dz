@@ -92,6 +92,15 @@ export const enAdmin = {
   "admin.settings.etaDays": "Delivery time (days)",
   "admin.products.slug": "URL (slug)",
   "admin.products.created": "Product created",
+  "admin.confirm.deleteProduct":
+    "This deletes the product with its sizes, photos and stored image files. It cannot be undone.",
+  "admin.confirm.deleteVariant":
+    "This deletes the size with its photos and stored image files. It cannot be undone.",
+  "admin.confirm.deleteImage":
+    "This removes the photo from every size that shows it. It cannot be undone.",
+  "admin.confirm.deleteImageOne":
+    "This removes the photo from this size only. It cannot be undone.",
+  "admin.confirm.deletePackItem": "This removes the item from the pack. It cannot be undone.",
   "admin.delivery.etaDays": "Delivery time (days)",
   "admin.nav.manage": "Manage",
   "admin.nav.collapse": "Collapse menu",

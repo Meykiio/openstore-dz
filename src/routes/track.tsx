@@ -41,9 +41,7 @@ function TrackPage() {
     <StoreLayout>
       <div className="container-page flex max-w-xl flex-col gap-6 py-12 sm:py-20">
         <div className="flex flex-col gap-2">
-          <h1 className="font-display text-2xl font-semibold sm:text-3xl">
-            {t("order.lookupTitle")}
-          </h1>
+          <h1 className="section-title text-2xl sm:text-3xl">{t("order.lookupTitle")}</h1>
           <p className="text-sm text-on-surface-muted">{t("order.lookupBody")}</p>
         </div>
 

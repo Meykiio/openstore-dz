@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, LayoutGrid, ShoppingBag, Truck } from "lucide-react";
+import { Flag, Shirt, ShoppingBag, Sparkles, Trophy } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { useI18n } from "@/lib/i18n-context";
 import { cn } from "@/lib/utils";
@@ -7,13 +7,13 @@ import { cn } from "@/lib/utils";
 /**
  * Bottom tab bar.
  *
- * The reference system's "Phone Feelings" directive: under 1024px the storefront
- * behaves like an app and primary navigation moves into the thumb zone, because
- * a shop that buries its cart behind a hamburger loses mobile orders. Hidden at
- * 1024px and above by the `.bottom-nav` rule in styles.css.
+ * Under 1024px the storefront behaves like an app and the four universes move
+ * into the thumb zone: Anime, Streetwear, Algeria Design and Football Design are
+ * the shop's primary structure, so they are one tap away rather than buried
+ * behind a hamburger. The wordmark in the header is the way home. The cart stays
+ * visible because that is where mobile orders complete.
  *
- * The cart count is announced politely so adding an item is not a silent change
- * for a screen-reader user.
+ * Hidden at 1024px and above by the `.bottom-nav` rule in styles.css.
  */
 export function BottomNav() {
   const { t } = useI18n();
@@ -21,24 +21,16 @@ export function BottomNav() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   const tabs = [
-    { key: "home", to: "/", label: t("nav.home"), icon: Home },
-    { key: "shop", to: "/catalogue", label: t("nav.shop"), icon: LayoutGrid },
-    { key: "track", to: "/track", label: t("nav.trackOrder"), icon: Truck },
+    { key: "anime", to: "/anime", label: t("nav.anime"), icon: Sparkles },
+    { key: "streetwear", to: "/streetwear", label: t("nav.streetwear"), icon: Shirt },
+    { key: "algeria", to: "/algeria-design", label: t("nav.algeriaDesign"), icon: Flag },
+    { key: "football", to: "/football", label: t("nav.football"), icon: Trophy },
   ] as const;
 
-  // The owner reaches the dashboard from the footer. A buyer's tab bar is for
-  // buying, and a "Dashboard" tab there reads as a broken link.
-  const shopPaths = ["/catalogue", "/category", "/product", "/search"];
-
   return (
-    <nav className="bottom-nav" aria-label={t("nav.shop")}>
+    <nav className="bottom-nav" aria-label={t("nav.menu")}>
       {tabs.map((tab) => {
-        const active =
-          tab.key === "home"
-            ? pathname === "/"
-            : tab.key === "shop"
-              ? shopPaths.some((path) => pathname.startsWith(path))
-              : pathname.startsWith(tab.to);
+        const active = pathname.startsWith(tab.to);
         return (
           <Link key={tab.key} to={tab.to} className={cn("bn-item", active && "active")}>
             <tab.icon aria-hidden="true" />
@@ -51,7 +43,7 @@ export function BottomNav() {
         <ShoppingBag aria-hidden="true" />
         <span>{t("nav.cart")}</span>
         <span className="sr-only" aria-live="polite">
-          {count > 0 ? t("cart.itemMany", { count }) : ""}
+          {count > 0 ? (count === 1 ? t("cart.itemOne") : t("cart.itemMany", { count })) : ""}
         </span>
         {count > 0 && (
           <span className="bn-badge" aria-hidden="true">

@@ -88,7 +88,7 @@ export function QuickOrder({
       {isDemoShop && (
         <p
           role="note"
-          className="rounded-[10px] border border-tertiary/40 bg-tertiary/10 px-4 py-3 text-sm font-medium"
+          className="rounded-[2px] border border-tertiary/40 bg-tertiary/10 px-4 py-3 text-sm font-medium"
         >
           {t("demo.checkout")}
         </p>
@@ -119,7 +119,7 @@ export function QuickOrder({
         {row(t("common.total"), formatDzd(subtotal + (wilaya ? delivery.fee : 0), locale), true)}
       </dl>
       {error && (
-        <p className="rounded-[10px] bg-error/10 px-3 py-2 text-sm text-error" role="alert">
+        <p className="rounded-[2px] bg-error/10 px-3 py-2 text-sm text-error" role="alert">
           {error}
         </p>
       )}
@@ -134,7 +134,7 @@ export function QuickOrder({
 function QuickOrderPlaced({ token, phone }: { token: string; phone: string }) {
   const { t } = useI18n();
   return (
-    <div className="flex flex-col items-center gap-4 rounded-[16px] border border-outline bg-surface p-6 text-center">
+    <div className="flex flex-col items-center gap-4 rounded-[2px] border border-outline bg-surface p-6 text-center">
       <CheckCircle2 size={36} className="text-positive" aria-hidden="true" />
       <h2 className="font-display text-xl font-semibold">{t("checkout.orderPlaced")}</h2>
       <p className="text-sm text-on-surface-muted">{t("checkout.orderPlacedBody", { phone })}</p>

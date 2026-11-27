@@ -18,57 +18,57 @@
        * reference whose value is being readable in a single scroll.
        */
       :root {
-        --bg: #faf7f4;
-        --bg-dim: #f3efeb;
-        --surface: #ffffff;
-        --surface-mid: #faf7f4;
-        --surface-high: #f0ebe6;
-        --surface-highest: #e6dfd7;
-        --on-surface: #1c1917;
-        --on-surface-muted: #6b6460;
-        --outline: #e7e0d8;
-        --outline-hi: #c9beb2;
+        --bg: #f4efe6;
+        --bg-dim: #ece4d6;
+        --surface: #fffdf8;
+        --surface-mid: #f4efe6;
+        --surface-high: #e9e0d1;
+        --surface-highest: #ddd1bd;
+        --on-surface: #171512;
+        --on-surface-muted: #5f5851;
+        --outline: #ddd2c1;
+        --outline-hi: #b6a78f;
 
-        --primary: #c2410c;
-        --on-primary: #ffffff;
-        --brand-orange: #ea580c;
-        --secondary: #e11d48;
-        --secondary-dim: #be123c;
-        --tertiary: #b45309;
-        --quaternary: #0d9488;
+        --primary: #171512;
+        --on-primary: #fbf7f0;
+        --brand-orange: #7b1e1e;
+        --secondary: #7b1e1e;
+        --secondary-dim: #5c1414;
+        --tertiary: #8a5306;
+        --quaternary: #0f5f66;
         --positive: #166534;
-        --error: #dc2626;
+        --error: #b3261e;
 
-        --font-display: "Fraunces Variable", "Cairo Variable", Georgia, serif;
+        --font-display: "Geist Variable", "Cairo Variable", system-ui, sans-serif;
         --font-body: "Outfit Variable", "Cairo Variable", system-ui, sans-serif;
-        --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+        --font-mono: "IBM Plex Mono", "Cairo Variable", ui-monospace, monospace;
 
-        --radius: 16px;
-        --shadow-sm: 0 1px 3px rgba(28, 25, 23, 0.08);
-        --shadow-md: 0 6px 20px rgba(28, 25, 23, 0.1);
+        --radius: 2px;
+        --shadow-sm: 0 1px 3px rgba(45, 32, 20, 0.08);
+        --shadow-md: 0 6px 16px rgba(45, 32, 20, 0.1);
       }
 
       [data-theme="dark"] {
-        --bg: #16110c;
-        --bg-dim: #100c08;
-        --surface: #1d1712;
-        --surface-mid: #241d16;
-        --surface-high: #2b231b;
-        --surface-highest: #352b21;
-        --on-surface: #f2ece5;
-        --on-surface-muted: #a8a29e;
-        --outline: #332a21;
-        --outline-hi: #4a3e31;
+        --bg: #121110;
+        --bg-dim: #0c0b0a;
+        --surface: #1a1815;
+        --surface-mid: #201d19;
+        --surface-high: #292520;
+        --surface-highest: #342f28;
+        --on-surface: #f3ece2;
+        --on-surface-muted: #a9a096;
+        --outline: #322d26;
+        --outline-hi: #4b4339;
 
-        --primary: #fb923c;
-        --on-primary: #271204;
-        --brand-orange: #fb923c;
-        --secondary: #fb7185;
-        --secondary-dim: #f43f5e;
-        --tertiary: #fbbf24;
-        --quaternary: #2dd4bf;
-        --positive: #4ade80;
-        --error: #f87171;
+        --primary: #f3ece2;
+        --on-primary: #171512;
+        --brand-orange: #d9777a;
+        --secondary: #d9777a;
+        --secondary-dim: #e89093;
+        --tertiary: #f0b45e;
+        --quaternary: #67c3c9;
+        --positive: #63c98a;
+        --error: #f28b84;
       }
 
       * {
@@ -309,40 +309,39 @@
       <header>
         <h1>OpenStore DZ — Design System</h1>
         <p class="lede">
-          The palette, type scale and components the storefront ships. Ported value-for-value
-          from the Commerce Storefront reference system (system 02), which is a component-CSS
-          system rather than a utility system.
+          The palette, type scale and components the storefront ships. The shop's photography
+          sets the palette: warm paper, ink type, one oxblood accent. Product cards carry no
+          frame so the photograph sits on the page instead of inside a box.
         </p>
         <div class="row">
           <button class="toggle" id="toggle" type="button">Switch to dark</button>
         </div>
         <div class="note">
-          <strong>Two values deviate from the reference, both for WCAG AA.</strong> The
-          reference primary <code>#d9480f</code> measures 4.29:1 white-on-orange and 4.02:1
-          orange-on-cream, under the 4.5:1 floor for text below 18.66px, so it fails on every
-          button label. <code>#c2410c</code> is the same hue one step darker and passes both.
-          Muted text was likewise darkened from <code>#78716c</code> to
-          <code>#6b6460</code>. Both are asserted by <code>e2e/accessibility.spec.ts</code>.
+          <strong>Every value is measured for WCAG AA.</strong> Ink on paper is 15.9:1; muted
+          text on paper is 6.1:1; paper on oxblood is 9.7:1. Prices and identifiers use IBM
+          Plex Mono so a figure cannot reflow inside an Arabic sentence. Both themes are
+          asserted by <code>e2e/accessibility.spec.ts</code>.
         </div>
       </header>
 
       <h2>Colour</h2>
       <p>
-        One accent carries the brand: burnt orange. Berry and amber exist for emphasis and
-        for states, not as a second brand colour.
+        One colour carries the brand: oxblood. Ink and paper do the rest. Amber and teal
+        exist for warnings and states, not as second brand colours.
       </p>
       <div class="swatches" id="swatches"></div>
 
       <h2>Typography</h2>
       <p>
-        Display is Fraunces, body is Outfit, both variable, both self-hosted. Cairo is added
-        to every stack because the reference is Latin-only and would otherwise fall back to
-        whatever Arabic face the operating system happens to have.
+        One Latin family: Geist, at three registers. Heavy and tight for the wordmark and the
+        hero, regular for body, and nothing decorative in between. Outfit sets the interface;
+        IBM Plex Mono sets money. Cairo is added to every stack because a Latin-only stack
+        would otherwise fall back to whatever Arabic face the operating system has.
       </p>
 
       <div class="type-sample">
-        <div class="label">--font-display · Fraunces Variable, Cairo Variable, serif</div>
-        <div style="font-family: var(--font-display); font-size: 1.6rem; font-weight: 600">
+        <div class="label">--font-display · Geist Variable, Cairo Variable, sans-serif</div>
+        <div style="font-family: var(--font-display); font-size: 1.6rem; font-weight: 800; letter-spacing: -0.045em">
           قميص قطني كلاسيكي
         </div>
       </div>
@@ -350,7 +349,7 @@
       <div class="type-sample">
         <div class="label">--font-body · Outfit Variable, Cairo Variable, sans-serif</div>
         <div style="font-size: 1rem">
-          الدفع عند الاستلام · التوصيل إلى 58 ولاية
+          الدفع عند الاستلام · التوصيل إلى 69 ولاية
         </div>
       </div>
 
@@ -361,7 +360,8 @@
 
       <h3>Arabic density override</h3>
       <p>
-        Arabic is set at 17px / 1.75 against Latin's 15px / 1.5. Arabic has a smaller
+        Arabic is set at 17px / 1.75 against Latin's 15px / 1.6, and loses Latin
+        letter-spacing on display type. Arabic has a smaller
         x-height at the same nominal size, so the Latin value reads cramped. This is
         legibility, not decoration.
       </p>
@@ -438,34 +438,34 @@
       // The palette is rendered from data so the swatch list cannot drift from the
       // token list next to it in this file.
       const LIGHT = {
-        primary: "#c2410c",
-        "brand-orange": "#ea580c",
-        secondary: "#e11d48",
-        "secondary-dim": "#be123c",
-        tertiary: "#b45309",
-        quaternary: "#0d9488",
-        "on-surface": "#1c1917",
-        "on-surface-muted": "#6b6460",
-        outline: "#e7e0d8",
-        "outline-hi": "#c9beb2",
-        "surface-high": "#f0ebe6",
+        primary: "#171512",
+        "brand-orange": "#7b1e1e",
+        secondary: "#7b1e1e",
+        "secondary-dim": "#5c1414",
+        tertiary: "#8a5306",
+        quaternary: "#0f5f66",
+        "on-surface": "#171512",
+        "on-surface-muted": "#5f5851",
+        outline: "#ddd2c1",
+        "outline-hi": "#b6a78f",
+        "surface-high": "#e9e0d1",
         positive: "#166534",
-        error: "#dc2626",
+        error: "#b3261e",
       };
       const DARK = {
-        primary: "#fb923c",
-        "brand-orange": "#fb923c",
-        secondary: "#fb7185",
-        "secondary-dim": "#f43f5e",
-        tertiary: "#fbbf24",
-        quaternary: "#2dd4bf",
-        "on-surface": "#f2ece5",
-        "on-surface-muted": "#a8a29e",
-        outline: "#332a21",
-        "outline-hi": "#4a3e31",
-        "surface-high": "#2b231b",
-        positive: "#4ade80",
-        error: "#f87171",
+        primary: "#f3ece2",
+        "brand-orange": "#d9777a",
+        secondary: "#d9777a",
+        "secondary-dim": "#e89093",
+        tertiary: "#f0b45e",
+        quaternary: "#67c3c9",
+        "on-surface": "#f3ece2",
+        "on-surface-muted": "#a9a096",
+        outline: "#322d26",
+        "outline-hi": "#4b4339",
+        "surface-high": "#292520",
+        positive: "#63c98a",
+        error: "#f28b84",
       };
 
       const host = document.getElementById("swatches");

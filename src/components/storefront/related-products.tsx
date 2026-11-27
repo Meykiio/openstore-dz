@@ -19,14 +19,14 @@ export function RelatedProducts({ product }: { product: CatalogueProduct }) {
   // products in the shop. Usually already cached from the home page.
   const newest = useCataloguePage(EMPTY_FILTERS, 1);
   const without = (list: CatalogueProduct[] | undefined) =>
-    (list ?? []).filter((p) => p.id !== product.id).slice(0, 4);
+    (list ?? []).filter((p) => p.id !== product.id).slice(0, 3);
   const fromCategory = without(sameCategory.data?.products);
   const others = fromCategory.length > 0 ? fromCategory : without(newest.data?.products);
   if (others.length === 0) return null;
 
   return (
     <section className="flex flex-col gap-5" aria-labelledby="related-title">
-      <h2 id="related-title" className="font-display text-xl font-semibold">
+      <h2 id="related-title" className="section-title text-xl">
         {t("store.related")}
       </h2>
       <ProductGrid products={others} />

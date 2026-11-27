@@ -31,8 +31,8 @@ export function AddressFields({
     allowed.length === 0 ? WILAYAS : WILAYAS.filter((w) => allowed.includes(w.fr));
 
   return (
-    <div className="flex flex-col gap-4 rounded-[16px] border border-outline bg-surface p-6">
-      <h2 className="font-display text-lg font-semibold">{t("checkout.yourInfo")}</h2>
+    <div className="flex flex-col gap-4 rounded-[2px] border border-outline bg-surface p-6">
+      <h2 className="section-title text-lg">{t("checkout.yourInfo")}</h2>
 
       <Field label={t("checkout.fullName")} required>
         <Input
@@ -136,7 +136,7 @@ export function AddressFields({
 export function CodNotice() {
   const { t } = useI18n();
   return (
-    <p className="flex items-start gap-3 rounded-[16px] border border-primary/30 bg-primary/5 p-4 text-sm">
+    <p className="flex items-start gap-3 rounded-[2px] border border-primary/30 bg-primary/5 p-4 text-sm">
       <Banknote size={18} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
       <span>
         <strong className="block font-medium">{t("checkout.codTitle")}</strong>
@@ -162,8 +162,8 @@ export function CheckoutSummary({
   const total = subtotal + deliveryFee;
 
   return (
-    <aside className="flex flex-col gap-4 self-start rounded-[16px] border border-outline bg-surface p-6 lg:sticky lg:top-24">
-      <h2 className="font-display text-lg font-semibold">{t("checkout.summary")}</h2>
+    <aside className="flex flex-col gap-4 self-start rounded-[2px] border border-outline bg-surface p-6 lg:sticky lg:top-24">
+      <h2 className="section-title text-lg">{t("checkout.summary")}</h2>
 
       <ul className="flex flex-col gap-3">
         {items.map((line) => (
@@ -203,7 +203,7 @@ export function CheckoutSummary({
       </dl>
 
       {error && (
-        <p className="rounded-[10px] bg-error/10 px-3 py-2 text-sm text-error" role="alert">
+        <p className="rounded-[2px] bg-error/10 px-3 py-2 text-sm text-error" role="alert">
           {error}
         </p>
       )}

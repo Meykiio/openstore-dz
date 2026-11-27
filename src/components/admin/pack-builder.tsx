@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useI18n } from "@/lib/i18n-context";
 import type { PickerVariant } from "@/lib/product-picker";
 import { fetchPackItems, removePackItem, upsertPackItem, type PackItem } from "@/lib/admin-content";
@@ -39,6 +40,7 @@ export function PackBuilder({
     queryKey: ["pack_items", productId],
     queryFn: () => fetchPackItems(productId),
   });
+  const [pending, setPending] = useState<PackItem | null>(null);
 
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: ["pack_items", productId] });
@@ -82,7 +84,7 @@ export function PackBuilder({
                   <Badge tone="primary">×{item.quantity}</Badge>
                   <button
                     type="button"
-                    onClick={() => remove.mutate(item.id)}
+                    onClick={() => setPending(item)}
                     aria-label={t("common.delete")}
                     className="text-on-surface-muted hover:text-error"
                   >
@@ -100,6 +102,15 @@ export function PackBuilder({
         onAdd={(input) => save.mutate(input)}
         busy={save.isPending}
       />
+
+      {pending && (
+        <ConfirmDialog
+          title={label(byId.get(pending.variant_id))}
+          message={t("admin.confirm.deletePackItem")}
+          onConfirm={() => remove.mutateAsync(pending.id)}
+          onClose={() => setPending(null)}
+        />
+      )}
     </div>
   );
 }

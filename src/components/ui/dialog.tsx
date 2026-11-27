@@ -19,6 +19,7 @@ export function Dialog({
   children,
   footer,
   className,
+  dismissible = true,
 }: {
   open: boolean;
   onClose: () => void;
@@ -27,6 +28,8 @@ export function Dialog({
   children?: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
+  /** When false, a native close request such as Esc is refused. */
+  dismissible?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const t = useT();
@@ -43,6 +46,11 @@ export function Dialog({
       ref={ref}
       // `onClose` also fires when Esc closes it, so state never drifts from DOM.
       onClose={onClose}
+      onCancel={(event) => {
+        // `onClose` returning early cannot stop the native close; the cancel
+        // event must be cancelled before the dialog shuts itself.
+        if (!dismissible) event.preventDefault();
+      }}
       onClick={(event) => {
         // Only a click on the backdrop itself reaches the dialog element.
         if (event.target === ref.current) onClose();

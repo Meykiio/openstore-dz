@@ -1,36 +1,24 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { StoreLayout } from "@/components/storefront/store-layout";
-import { ProductGrid } from "@/components/storefront/product-card";
 import { HomeHero, TrustBar } from "@/components/storefront/home-hero";
-import {
-  CategoryStrip,
-  ClosingCta,
-  PromoBand,
-  ReviewWall,
-} from "@/components/storefront/home-sections";
+import { CollectionGrid, ProductRail, UniverseGrid } from "@/components/storefront/home-rails";
+import { ClosingCta, PromoBand, ReviewWall, Ticker } from "@/components/storefront/home-sections";
 import { ErrorState, NoProducts, ProductSkeleton } from "@/components/ui/feedback";
 import { SetupCheck } from "@/components/setup-check";
 import { isEmptyDatabaseError } from "@/lib/supabase/health";
 import { supabaseConfigProblem } from "@/lib/supabase/client";
-import { reviewsQuery, storeSettingsQuery } from "@/lib/queries";
-import { EMPTY_FILTERS, cataloguePageQuery, useCataloguePage } from "@/lib/catalogue";
+import { productImage, reviewsQuery, storeSettingsQuery, useCategories } from "@/lib/queries";
+import { homeFeedQuery, useHomeFeed } from "@/lib/catalogue";
 import { useI18n } from "@/lib/i18n-context";
 
 export const Route = createFileRoute("/")({
   loader: async ({ context }) => {
-    // Prefetch both so SSR emits the store name and the catalogue instead of an
-    // empty shell. Failures are swallowed: a missing database must render the
-    // setup guidance, not a 500.
     const settings = await context.queryClient
       .ensureQueryData(storeSettingsQuery())
       .catch(() => null);
     await Promise.all([
-      // Reviews feed the testimonial wall below the fold. Fetching them during
-      // SSR avoids a visible pop-in and lets crawlers see the social proof.
       context.queryClient.ensureQueryData(reviewsQuery()).catch(() => null),
-      // The product grid is the page. Without this the server HTML ships an
-      // empty grid and the buyer waits for the browser to fill it in.
-      context.queryClient.ensureQueryData(cataloguePageQuery(EMPTY_FILTERS, 1)).catch(() => null),
+      context.queryClient.ensureQueryData(homeFeedQuery()).catch(() => null),
     ]);
     return { settings };
   },
@@ -39,7 +27,12 @@ export const Route = createFileRoute("/")({
     const ar = match.context.locale === "ar";
     const name = s?.name?.trim();
     const tagline = (ar ? s?.tagline : s?.tagline_fr)?.trim();
-    const title = name ? `${name}${tagline ? ` — ${tagline}` : ""}` : "OpenStore DZ";
+    const title =
+      tagline && name && tagline.toLowerCase().includes(name.toLowerCase())
+        ? tagline
+        : name
+          ? `${name}${tagline ? ` — ${tagline}` : ""}`
+          : (tagline ?? "OpenStore DZ");
     const description =
       (ar ? s?.description : s?.description_fr)?.trim() ||
       (ar
@@ -58,71 +51,99 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
+/**
+ * Home page.
+ *
+ * A fashion front page rather than a product dump: one editorial hero, the three
+ * universes, the newest pieces, the category doorways, one decision band, then
+ * social proof. Every shelf is driven by the catalogue that exists; a shelf with
+ * nothing to show is omitted instead of rendered as an empty heading.
+ */
 function Home() {
   const { t } = useI18n();
   const { settings } = Route.useLoaderData();
-  const catalogue = useCataloguePage(EMPTY_FILTERS, 1);
+  const feed = useHomeFeed();
+  const { data: categories } = useCategories();
   const configProblem = supabaseConfigProblem();
 
-  // A shop that has not been connected to a database yet, or whose database is
-  // still empty, must see the setup instructions, not an error boundary. This is
-  // the first screen a new owner ever loads, so it has to be the most forgiving one.
-  if (configProblem || (catalogue.isError && isEmptyDatabaseError(catalogue.error))) {
+  if (configProblem || (feed.isError && isEmptyDatabaseError(feed.error))) {
     return (
-      <main className="container-page flex min-h-dvh flex-col items-center justify-center gap-6 py-20 text-center">
+      <main className="store container-page flex min-h-dvh flex-col items-center justify-center gap-6 py-20 text-center">
         <h1 className="font-display text-3xl font-semibold">{settings?.name ?? "OpenStore DZ"}</h1>
         <SetupCheck />
       </main>
     );
   }
 
-  const list = catalogue.data?.products ?? [];
-  const catalogueTotal = catalogue.data?.total ?? 0;
+  const all = feed.data ?? [];
+  const newest = all.slice(0, 8);
+  const topRated = all
+    .filter((product) => (product.rating_count ?? 0) > 0)
+    .sort((a, b) => (b.rating_avg ?? 0) - (a.rating_avg ?? 0))
+    .slice(0, 4);
+
+  const collections = (categories ?? [])
+    .filter((category) => category.product_count > 0)
+    .slice(0, 4)
+    .map((category) => {
+      const first = all.find(
+        (product) => product.category_id === category.id && productImage(product),
+      );
+      return {
+        ...category,
+        count: category.product_count,
+        image: category.image_url ?? (first ? productImage(first) : null),
+      };
+    });
 
   return (
     <StoreLayout>
-      <HomeHero settings={settings} products={list} />
-      <TrustBar returnsDays={settings?.returns_days ?? 14} />
+      <HomeHero settings={settings} products={newest} />
+      <Ticker returnsDays={settings?.returns_days ?? 14} />
+      <UniverseGrid products={all} />
 
-      <section id="catalogue" className="container-page scroll-mt-20 py-12">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <span className="section-label">{t("home.featured")}</span>
-            <h2 className="mt-2 font-display text-xl font-semibold sm:text-2xl">{t("nav.shop")}</h2>
+      {feed.isError ? (
+        <div className="container-page py-14">
+          <div className="mx-auto flex max-w-xl flex-col gap-4">
+            <ErrorState message={feed.error.message} onRetry={() => void feed.refetch()} />
+            <SetupCheck />
           </div>
-          {catalogueTotal > 0 && (
-            <Link
-              to="/catalogue"
-              className="inline-flex min-h-9 items-center text-sm text-primary hover:underline"
-            >
-              {t("store.productCount", { count: catalogueTotal })}
-            </Link>
-          )}
         </div>
-
-        {catalogue.isPending ? (
+      ) : feed.isPending ? (
+        <div className="container-page py-14">
           <div className="product-grid">
-            {Array.from({ length: 6 }, (_, index) => (
+            {Array.from({ length: 4 }, (_, index) => (
               <ProductSkeleton key={index} />
             ))}
           </div>
-        ) : catalogue.isError ? (
-          <div className="mx-auto flex max-w-xl flex-col gap-4">
-            <ErrorState
-              message={catalogue.error.message}
-              onRetry={() => void catalogue.refetch()}
-            />
-            <SetupCheck />
-          </div>
-        ) : list.length === 0 ? (
+        </div>
+      ) : all.length === 0 ? (
+        <div className="container-page py-14">
           <NoProducts />
-        ) : (
-          <ProductGrid products={list} />
-        )}
-      </section>
+        </div>
+      ) : (
+        <>
+          <ProductRail
+            id="new"
+            eyebrow={t("home.new.eyebrow")}
+            title={t("home.new.title")}
+            body={t("home.new.body")}
+            products={newest}
+          />
+          <CollectionGrid collections={collections} />
+          <PromoBand threshold={settings?.free_shipping_threshold ?? 0} />
+          {topRated.length >= 2 && (
+            <ProductRail
+              eyebrow={t("home.topRated.eyebrow")}
+              title={t("home.topRated.title")}
+              body={t("home.topRated.body")}
+              products={topRated}
+            />
+          )}
+        </>
+      )}
 
-      <CategoryStrip />
-      <PromoBand threshold={settings?.free_shipping_threshold ?? 0} />
+      <TrustBar returnsDays={settings?.returns_days ?? 14} />
       <ReviewWall />
       <ClosingCta storeName={settings?.name ?? "OpenStore DZ"} />
     </StoreLayout>

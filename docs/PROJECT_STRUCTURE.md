@@ -34,6 +34,7 @@ openstore-dz/
 ├── src/
 │   ├── components/
 │   │   ├── ui/                  vendored primitives, shadcn-style
+│   │   ├── storefront/          the public shop: header, cards, universes, product page
 │   │   ├── setup-check.tsx      first-run health check
 │   │   └── theme-toggle.tsx
 │   ├── lib/
@@ -53,8 +54,15 @@ openstore-dz/
 │   │   ├── checkout-form.ts     the order form shape, checkout and product page
 │   │   ├── version.ts           app and schema versions, latest release check
 │   │   ├── theme.ts             data-theme handling, pre-paint bootstrap
-│   │   └── utils.ts             cn()
+│   │   ├── utils.ts             cn()
+│   │   ├── universes.ts         the four universes: declaration, assembly, shelves
+│   │   ├── product-facets.ts    one universe per product, derived from catalogue text
+│   │   ├── universe-taxonomy.ts, universe-series.ts, universe-clubs.ts,
+│   │   │   universe-algeria.ts   the vocabulary
+│   │   └── universe-feed.ts     one 96-product feed shared by the four universes
 │   ├── routes/                  file-based routes, one file per screen
+│   │   ├── anime.tsx, anime_.$series.tsx   Anime collections grid and one collection
+│   │   ├── streetwear.tsx, algeria-design.tsx, football.tsx   the other three universes
 │   │   ├── mcp.ts               the AI assistant endpoint (0.3.0)
 │   │   ├── oauth.consent.tsx    Supabase OAuth authorization path
 │   │   ├── admin.integrations.tsx, admin.upload.$code.tsx, api.ai-drive.ts, api.telegram.ts

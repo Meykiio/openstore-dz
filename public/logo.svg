@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="DZWEAR">
+  <rect width="64" height="64" rx="15" fill="#0F0F0F"/>
+  <path d="M13 19h10a13 13 0 0 1 0 26H13z" fill="none" stroke="#FAF7F4" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M38 19h13L38 45h13" fill="none" stroke="#BE185D" stroke-width="6" stroke-linecap="square" stroke-linejoin="miter"/>
+</svg>

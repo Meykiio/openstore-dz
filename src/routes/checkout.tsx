@@ -92,16 +92,14 @@ function CheckoutPage() {
           {t("cart.continueShopping")}
         </Link>
 
-        <h1 className="mb-6 font-display text-2xl font-semibold sm:text-3xl">
-          {t("checkout.title")}
-        </h1>
+        <h1 className="section-title mb-6 text-2xl sm:text-3xl">{t("checkout.title")}</h1>
 
         <form onSubmit={submit} className="grid gap-8 lg:grid-cols-[1.3fr_1fr]">
           <div className="flex flex-col gap-5">
             {isDemoShop && (
               <p
                 role="note"
-                className="rounded-[10px] border border-tertiary/40 bg-tertiary/10 px-4 py-3 text-sm font-medium"
+                className="rounded-[2px] border border-tertiary/40 bg-tertiary/10 px-4 py-3 text-sm font-medium"
               >
                 {t("demo.checkout")}
               </p>
@@ -144,7 +142,7 @@ function OrderPlaced({ token, phone }: { token: string; phone: string }) {
     <StoreLayout>
       <div className="container-page flex flex-col items-center gap-5 py-20 text-center">
         <CheckCircle2 size={40} className="text-positive" aria-hidden="true" />
-        <h1 className="font-display text-2xl font-semibold">{t("checkout.orderPlaced")}</h1>
+        <h1 className="section-title text-2xl">{t("checkout.orderPlaced")}</h1>
         <p className="max-w-md text-on-surface-muted">{t("checkout.orderPlacedBody", { phone })}</p>
         <div className="flex w-full max-w-md flex-col gap-2 text-start">
           <p className="text-sm font-medium">{t("order.copyHint")}</p>
@@ -165,7 +163,7 @@ function NothingToCheckOut({ title, body }: { title: string; body?: string }) {
   const { t } = useI18n();
   return (
     <StoreLayout>
-      <div className="container-page py-16">
+      <div className="container-page flex min-h-[55dvh] flex-col justify-center py-16">
         <EmptyState
           title={title}
           body={body}

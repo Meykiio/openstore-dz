@@ -93,6 +93,15 @@ export const frAdmin = {
   "admin.settings.etaDays": "Délai de livraison (jours)",
   "admin.products.slug": "URL (slug)",
   "admin.products.created": "Produit créé",
+  "admin.confirm.deleteProduct":
+    "Le produit sera supprimé avec ses tailles, ses photos et ses fichiers images. Action irréversible.",
+  "admin.confirm.deleteVariant":
+    "La taille sera supprimée avec ses photos et ses fichiers images. Action irréversible.",
+  "admin.confirm.deleteImage":
+    "La photo sera retirée de toutes les tailles qui l’affichent. Action irréversible.",
+  "admin.confirm.deleteImageOne":
+    "La photo sera retirée de cette taille uniquement. Action irréversible.",
+  "admin.confirm.deletePackItem": "L’article sera retiré du pack. Action irréversible.",
   "admin.delivery.etaDays": "Délai (jours)",
   "admin.nav.manage": "Gestion",
   "admin.nav.collapse": "Réduire le menu",

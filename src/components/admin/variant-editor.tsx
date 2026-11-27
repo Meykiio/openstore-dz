@@ -3,10 +3,16 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useI18n } from "@/lib/i18n-context";
 import { deleteVariant, upsertVariant, type AdminVariant } from "@/lib/admin-products";
 import { VariantRow } from "./variant-row";
 import { DraftFields, EMPTY_DRAFT, type VariantDraft } from "./variant-fields";
+
+/** "M / أبيض", the way the storefront labels a variant. */
+function variantLabel(variant: AdminVariant): string {
+  return [variant.size, variant.color_name].filter(Boolean).join(" / ");
+}
 
 /**
  * Variant editor.
@@ -64,6 +70,7 @@ export function VariantEditor({
 
   const [adding, setAdding] = useState(false);
   const [newDraft, setNewDraft] = useState<VariantDraft>(EMPTY_DRAFT);
+  const [confirming, setConfirming] = useState<AdminVariant | null>(null);
 
   return (
     <div className="flex flex-col gap-4">
@@ -76,10 +83,19 @@ export function VariantEditor({
             onSave={(draft, is_active) =>
               save.mutate({ id: variant.id, draft, is_active, sort_order: variant.sort_order })
             }
-            onDelete={() => remove.mutate(variant.id)}
+            onDelete={() => setConfirming(variant)}
           />
         ))}
       </ul>
+
+      {confirming && (
+        <ConfirmDialog
+          title={variantLabel(confirming) || t("admin.products.variants")}
+          message={t("admin.confirm.deleteVariant")}
+          onConfirm={() => remove.mutateAsync(confirming.id)}
+          onClose={() => setConfirming(null)}
+        />
+      )}
 
       {adding ? (
         <div className="flex flex-col gap-3 rounded-[16px] border border-primary/40 bg-primary/5 p-4">

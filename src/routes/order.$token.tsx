@@ -36,7 +36,7 @@ function OrderPage() {
   return (
     <StoreLayout>
       <div className="container-page flex max-w-3xl flex-col gap-6 py-8 sm:py-12">
-        <h1 className="font-display text-2xl font-semibold sm:text-3xl">{t("order.title")}</h1>
+        <h1 className="section-title text-2xl sm:text-3xl">{t("order.title")}</h1>
 
         {isPending ? (
           <LoadingState />
@@ -53,7 +53,7 @@ function OrderPage() {
           />
         ) : (
           <>
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[16px] border border-outline bg-surface p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[2px] border border-outline bg-surface p-5">
               <div className="flex min-w-0 flex-1 flex-col gap-2">
                 <p className="text-xs text-on-surface-muted">{t("order.tokenLabel")}</p>
                 <CopyBox value={data.token} />
@@ -62,14 +62,14 @@ function OrderPage() {
             </div>
 
             {data.status === "pending" && (
-              <p className="rounded-[16px] border border-tertiary/40 bg-tertiary/5 px-5 py-4 text-sm">
+              <p className="rounded-[2px] border border-tertiary/40 bg-tertiary/5 px-5 py-4 text-sm">
                 {t("order.confirmNote")}
               </p>
             )}
 
             <Timeline status={data.status} />
 
-            <section className="flex flex-col gap-3 rounded-[16px] border border-outline bg-surface p-5">
+            <section className="flex flex-col gap-3 rounded-[2px] border border-outline bg-surface p-5">
               <h2 className="flex items-center gap-2 font-medium">
                 <Package size={16} className="text-primary" aria-hidden="true" />
                 {t("order.items")}
@@ -102,7 +102,7 @@ function OrderPage() {
               </dl>
             </section>
 
-            <section className="flex flex-col gap-3 rounded-[16px] border border-outline bg-surface p-5 text-sm">
+            <section className="flex flex-col gap-3 rounded-[2px] border border-outline bg-surface p-5 text-sm">
               <h2 className="flex items-center gap-2 font-medium">
                 <MapPin size={16} className="text-primary" aria-hidden="true" />
                 {t("order.customer")}
@@ -166,7 +166,7 @@ function Timeline({ status }: { status: string }) {
   const currentIndex = ORDER_FLOW.indexOf(status as (typeof ORDER_FLOW)[number]);
 
   return (
-    <ol className="flex flex-col gap-0 rounded-[16px] border border-outline bg-surface p-5">
+    <ol className="flex flex-col gap-0 rounded-[2px] border border-outline bg-surface p-5">
       {ORDER_FLOW.map((stage, index) => {
         const done = currentIndex >= 0 && index < currentIndex;
         const active = currentIndex === index;

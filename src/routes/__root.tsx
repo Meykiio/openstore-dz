@@ -5,14 +5,14 @@ import { Toaster } from "sonner";
 import { AlertTriangle } from "lucide-react";
 
 import "@fontsource-variable/cairo";
+import "@fontsource-variable/geist";
 import "@fontsource-variable/outfit";
-import "@fontsource-variable/fraunces/opsz.css";
 import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
 import "../styles.css";
 import cairoArabic from "@fontsource-variable/cairo/files/cairo-arabic-wght-normal.woff2?url";
+import geistLatin from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
 import outfitLatin from "@fontsource-variable/outfit/files/outfit-latin-wght-normal.woff2?url";
-import frauncesLatin from "@fontsource-variable/fraunces/files/fraunces-latin-opsz-normal.woff2?url";
 
 import { themeBootstrapScript } from "@/lib/theme";
 import { localeBootstrapScript } from "@/lib/i18n";
@@ -31,7 +31,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#c2410c" },
+      { name: "theme-color", content: "#171512" },
       // Default title, overridden by whichever route matches. Without this a
       // route that forgets one — or the 404 page — ships an empty <title>, which
       // axe flags and which browsers render as the raw URL.
@@ -64,7 +64,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function fontPreloads(locale: "ar" | "fr" | "en"): string[] {
-  return locale === "ar" ? [cairoArabic] : [outfitLatin, frauncesLatin];
+  // The display face ships first: it carries the headline in the first paint.
+  return locale === "ar" ? [cairoArabic] : [geistLatin, outfitLatin];
 }
 
 function RootShell({ children }: { children: React.ReactNode }) {

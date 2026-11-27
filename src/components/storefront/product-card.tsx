@@ -6,6 +6,7 @@ import {
   priceRange,
   sortVariants,
   productImage,
+  productSecondImage,
   totalStock,
   type CatalogueProduct,
 } from "@/lib/queries";
@@ -13,47 +14,96 @@ import { localized } from "@/lib/i18n";
 import { saleOf } from "@/lib/sale";
 import { StarRating } from "./star-rating";
 
+const NEW_FOR_DAYS = 30;
+
 /**
  * Catalogue card.
  *
- * Full-bleed 1:1 media, then a deliberately small text block: brand line, title,
- * rating, mono price, CTA. The thesis is that the photograph sells and the card
- * should not compete with it, so the only coloured element is the price.
+ * A photograph, then the product's own facts: category, name, available
+ * colours, price. The whole card is the link, so there is no nested button to
+ * fight with the anchor. Sale and new flags are printed labels rather than
+ * floating pills, and the second photo crossfades on hover to show the cut or
+ * the back without opening the product.
  */
 function ProductCard({ product }: { product: CatalogueProduct }) {
   const { t, locale } = useI18n();
 
   const image = productImage(product);
+  const secondImage = productSecondImage(product);
   const range = priceRange(product);
-  // The cheapest variant sets the headline price, so its sale is the one shown.
-  const cheapest = sortVariants(product.product_variants).find((v) => v.price === range?.min);
+  const variants = sortVariants(product.product_variants);
+  const cheapest = variants.find((variant) => variant.price === range?.min);
   const sale = cheapest ? saleOf(cheapest) : null;
   const stock = totalStock(product);
   const soldOut = stock <= 0;
   const rating = product.rating_avg ?? null;
   const ratingCount = product.rating_count ?? 0;
-  // Display only, not a link: the whole card is already an anchor, and a nested
-  // anchor is invalid HTML. Category navigation lives on the category pages and
-  // the category strip.
+  const isNew = product.published_at
+    ? Date.now() - new Date(product.published_at).getTime() < NEW_FOR_DAYS * 86_400_000
+    : false;
+
   const category = product.categories
     ? localized(locale, product.categories.name, product.categories.name_fr)
     : undefined;
+  const name = localized(locale, product.name, product.name_fr);
+
+  const colours: { name: string; hex: string | null }[] = [];
+  for (const variant of variants) {
+    if (!variant.color_name) continue;
+    if (colours.some((colour) => colour.name === variant.color_name)) continue;
+    colours.push({ name: variant.color_name, hex: variant.color_hex });
+  }
 
   return (
     <Link to="/product/$slug" params={{ slug: product.slug }} className="product-card">
       <div className="pc-media">
         {image ? (
-          <img src={image} alt="" loading="lazy" decoding="async" />
+          <>
+            <img src={image} alt="" loading="lazy" decoding="async" />
+            {secondImage && secondImage !== image && (
+              <img
+                className="pc-alt"
+                src={secondImage}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                aria-hidden="true"
+              />
+            )}
+          </>
         ) : (
           <ImageOff size={44} aria-hidden="true" />
         )}
-        {soldOut ? <span className="pc-flag out">{t("store.outOfStock")}</span> : null}
+        {isNew && !soldOut && (
+          <span className="pc-flag new" dir="ltr">
+            {t("store.new")}
+          </span>
+        )}
+        {sale && !soldOut && (
+          <span className="pc-flag sale" dir="ltr">
+            −{sale.percent}%
+          </span>
+        )}
+        {soldOut && <span className="pc-flag out">{t("store.outOfStock")}</span>}
       </div>
 
       <div className="pc-body">
         {category && <span className="pc-brand">{category}</span>}
 
-        <h3 className="pc-title">{localized(locale, product.name, product.name_fr)}</h3>
+        <h3 className="pc-title">{name}</h3>
+
+        {colours.length > 0 && (
+          <span className="pc-colours" aria-hidden="true">
+            {colours.slice(0, 4).map((colour) => (
+              <span
+                key={colour.name}
+                className="pc-colour"
+                style={{ background: colour.hex ?? "var(--surface-highest)" }}
+              />
+            ))}
+            {colours.length > 4 && <span className="pc-colour-more">+{colours.length - 4}</span>}
+          </span>
+        )}
 
         {rating !== null && ratingCount > 0 && (
           <span className="pc-rating">
@@ -70,21 +120,12 @@ function ProductCard({ product }: { product: CatalogueProduct }) {
                 : `${t("store.from")} ${formatDzd(range.min, locale)}`}
             </span>
             {sale && (
-              <>
-                <span className="pc-price-old" dir="ltr">
-                  {formatDzd(sale.was, locale)}
-                </span>
-                <span className="pc-price-save" dir="ltr">
-                  −{sale.percent}%
-                </span>
-              </>
+              <span className="pc-price-old" dir="ltr">
+                {formatDzd(sale.was, locale)}
+              </span>
             )}
           </span>
         )}
-
-        <span className="pc-cta">
-          <span className="btn btn-secondary btn-sm btn-block">{t("store.viewDetails")}</span>
-        </span>
       </div>
     </Link>
   );

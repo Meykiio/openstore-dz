@@ -327,3 +327,27 @@ owner chose (Arabic by default) and start with the shop name. Off until connecte
 **Rejected.** Supabase Vault for the token: its docs do not state it is enabled on every
 project, and a no-grant table keeps the token out of every API path. Arabic-only
 messages (as on JOAT-store): OpenStore shops are run in all three languages.
+
+## 16. Paper and ink supersedes the burnt orange palette (0.5.0)
+
+**Context.** The burnt orange of Decision 7 was the reference system's own brand
+colour. On this shop it competed with the product photography rather than serving it,
+and the lookbook identity needed a palette that could sit under a photograph instead
+of beside it.
+
+**Decision.** Keep the component system of Decision 7 — token vocabulary, structure,
+motion, spacing, radius and elevation are unchanged — and replace only its colours:
+cream `#f4efe6`, ink `#171512`, and one oxblood accent `#7b1e1e` for sale prices,
+links and the review quotation. Amber and teal remain for warnings and states. Every
+value is measured: ink on paper 15.9:1, muted text 6.1:1, paper on oxblood 9.7:1.
+
+**Reason.** OpenStore is a platform, not a brand. Ink and paper are neutral enough for
+any seller's photography, and one accent is enough to mark a price. The reference's
+orange was a brand choice that competed with the images; it was replaced rather than
+adjusted. The owner's `brand_color` setting still overrides `--primary`, so a seller
+who wants their own colour keeps that path.
+
+**Consequences.** The reference's three fonts were Latin-only, so Cairo stays as the
+Arabic fallback with the Arabic density override; both remain additive. Decision 7 is
+left as recorded: it describes what was shipped at the time, and this entry is what
+superseded it.

@@ -1,86 +1,87 @@
-import { Link } from "@tanstack/react-router";
-import { Menu, ShoppingBag, Store, X } from "lucide-react";
 import { useState } from "react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { Menu, Search, ShoppingBag } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { useI18n } from "@/lib/i18n-context";
 import { useStoreSettings } from "@/lib/queries";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { cn } from "@/lib/utils";
+import { SiteMobileMenu } from "./site-mobile-menu";
+import { isStoreNavActive, useStoreNavLinks } from "./site-nav";
 
 /**
  * Storefront header.
  *
- * The cart count is an aria-live region so a screen-reader user hears the basket
- * change when they add something, which is otherwise a silent state change.
+ * A three-part editorial masthead: wordmark, universe navigation, actions.
+ * Under 1024px the navigation becomes a full-screen menu rather than a cramped
+ * dropdown, because the four universes are the shop's primary structure. The
+ * cart count is announced politely so adding an item is not a silent change.
  */
 export function SiteHeader() {
   const { t } = useI18n();
   const { count, openCart } = useCart();
   const { data: settings } = useStoreSettings();
   const [menuOpen, setMenuOpen] = useState(false);
+  const links = useStoreNavLinks();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   const storeName = settings?.name?.trim() || t("app.tagline");
-
-  const links = [
-    { to: "/", label: t("nav.home") },
-    { to: "/catalogue", label: t("nav.shop") },
-    { to: "/track", label: t("nav.trackOrder") },
-  ] as const;
+  const isActive = (link: (typeof links)[number]) => isStoreNavActive(link, pathname);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-outline bg-nav-bg/95 backdrop-blur supports-[backdrop-filter]:bg-nav-bg/80">
-      <div className="container-page flex h-16 items-center gap-3">
-        <Link
-          to="/"
-          className="flex min-h-11 min-w-0 items-center gap-2 font-display text-lg font-semibold"
-        >
-          {settings?.logo_url ? (
-            <img
-              src={settings.logo_url}
-              alt=""
-              className="h-9 max-w-[120px] shrink-0 object-contain"
-            />
-          ) : (
-            <Store size={20} className="shrink-0 text-primary" aria-hidden="true" />
-          )}
+    <header className="store-header">
+      <div className="container-page store-header-inner">
+        <Link to="/" className="store-wordmark" aria-label={storeName}>
+          <span className="mark" aria-hidden="true" />
+          {settings?.logo_url && <img src={settings.logo_url} alt="" />}
           <span className="truncate">{storeName}</span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
+        <nav className="store-nav" aria-label={t("nav.menu")}>
           {links.map((link) => (
             <Link
               key={link.to}
               to={link.to}
-              className="rounded-full px-3 py-2 text-sm text-on-surface-muted transition-colors hover:bg-surface-mid hover:text-on-surface"
-              activeOptions={{ exact: link.to === "/" }}
-              activeProps={{ className: "text-on-surface font-medium" }}
+              className={cn("store-nav-link", isActive(link) && "is-active")}
+              aria-current={isActive(link) ? "page" : undefined}
             >
               {link.label}
             </Link>
           ))}
         </nav>
 
-        <div className="ms-auto flex items-center gap-2">
-          <LocaleSwitcher className="hidden sm:block" />
-          <ThemeToggle />
+        <div className="store-header-actions">
+          <Link
+            to="/search"
+            className="store-icon-btn"
+            aria-label={t("nav.search")}
+            title={t("nav.search")}
+          >
+            <Search size={18} aria-hidden="true" />
+          </Link>
+
+          <span className="store-locale hidden lg:inline-flex">
+            <LocaleSwitcher />
+          </span>
+
+          <span className="store-theme hidden lg:inline-flex">
+            <ThemeToggle />
+          </span>
 
           <button
             type="button"
             onClick={openCart}
             data-testid="cart-open"
-            className="relative inline-flex size-10 items-center justify-center rounded-full border border-outline text-on-surface transition-colors hover:bg-surface-mid"
+            className="store-icon-btn relative"
             aria-label={t("cart.title")}
           >
             <ShoppingBag size={18} aria-hidden="true" />
             <span className="sr-only" aria-live="polite">
-              {count > 0 ? t("cart.itemMany", { count }) : ""}
+              {count > 0 ? (count === 1 ? t("cart.itemOne") : t("cart.itemMany", { count })) : ""}
             </span>
             {count > 0 && (
-              <span
-                aria-hidden="true"
-                className="absolute -top-1 -end-1 grid size-5 place-items-center rounded-full bg-primary font-mono text-[0.65rem] font-semibold text-on-primary"
-              >
+              <span className="store-cart-count" aria-hidden="true">
                 {count > 99 ? "99+" : count}
               </span>
             )}
@@ -88,36 +89,19 @@ export function SiteHeader() {
 
           <button
             type="button"
-            onClick={() => setMenuOpen((open) => !open)}
-            className="inline-flex size-10 items-center justify-center rounded-full border border-outline text-on-surface transition-colors hover:bg-surface-mid md:hidden"
+            onClick={() => setMenuOpen(true)}
+            className="store-icon-btn store-menu-toggle"
             aria-expanded={menuOpen}
-            aria-label={menuOpen ? t("common.close") : t("nav.shop")}
+            aria-label={t("nav.menu")}
           >
-            {menuOpen ? <X size={18} aria-hidden="true" /> : <Menu size={18} aria-hidden="true" />}
+            <Menu size={18} aria-hidden="true" />
           </button>
         </div>
       </div>
 
-      <div
-        className={cn(
-          "overflow-hidden border-t border-outline transition-[max-height] duration-300 ease-out-soft md:hidden",
-          menuOpen ? "max-h-56" : "max-h-0",
-        )}
-      >
-        <nav className="container-page flex flex-col gap-1 py-3" aria-label="Mobile">
-          {links.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              onClick={() => setMenuOpen(false)}
-              className="rounded-[10px] px-3 py-2.5 text-sm hover:bg-surface-mid"
-            >
-              {link.label}
-            </Link>
-          ))}
-          <LocaleSwitcher className="mt-2 sm:hidden" />
-        </nav>
-      </div>
+      {menuOpen && (
+        <SiteMobileMenu links={links} storeName={storeName} onClose={() => setMenuOpen(false)} />
+      )}
     </header>
   );
 }

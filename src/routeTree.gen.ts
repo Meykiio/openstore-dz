@@ -11,14 +11,18 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AlgeriaDesignRouteImport } from './routes/algeria-design'
+import { Route as AnimeRouteImport } from './routes/anime'
 import { Route as CatalogueRouteImport } from './routes/catalogue'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as FootballRouteImport } from './routes/football'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as SetupRouteImport } from './routes/setup'
+import { Route as StreetwearRouteImport } from './routes/streetwear'
 import { Route as TrackRouteImport } from './routes/track'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAccountRouteImport } from './routes/admin.account'
@@ -30,6 +34,7 @@ import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSlipsRouteImport } from './routes/admin.slips'
 import { Route as AdminWelcomeRouteImport } from './routes/admin.welcome'
+import { Route as AnimeSeriesRouteImport } from './routes/anime_.$series'
 import { Route as ApiAiDriveRouteImport } from './routes/api.ai-drive'
 import { Route as ApiTelegramRouteImport } from './routes/api.telegram'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
@@ -50,6 +55,16 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlgeriaDesignRoute = AlgeriaDesignRouteImport.update({
+  id: '/algeria-design',
+  path: '/algeria-design',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnimeRoute = AnimeRouteImport.update({
+  id: '/anime',
+  path: '/anime',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CatalogueRoute = CatalogueRouteImport.update({
   id: '/catalogue',
   path: '/catalogue',
@@ -58,6 +73,11 @@ const CatalogueRoute = CatalogueRouteImport.update({
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FootballRoute = FootballRouteImport.update({
+  id: '/football',
+  path: '/football',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -88,6 +108,11 @@ const SearchRoute = SearchRouteImport.update({
 const SetupRoute = SetupRouteImport.update({
   id: '/setup',
   path: '/setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StreetwearRoute = StreetwearRouteImport.update({
+  id: '/streetwear',
+  path: '/streetwear',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrackRoute = TrackRouteImport.update({
@@ -145,6 +170,11 @@ const AdminWelcomeRoute = AdminWelcomeRouteImport.update({
   path: '/welcome',
   getParentRoute: () => AdminRoute,
 } as any)
+const AnimeSeriesRoute = AnimeSeriesRouteImport.update({
+  id: '/anime_/$series',
+  path: '/anime/$series',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAiDriveRoute = ApiAiDriveRouteImport.update({
   id: '/api/ai-drive',
   path: '/api/ai-drive',
@@ -195,14 +225,18 @@ const AdminUploadCodeRoute = AdminUploadCodeRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/algeria-design': typeof AlgeriaDesignRoute
+  '/anime': typeof AnimeRoute
   '/catalogue': typeof CatalogueRoute
   '/checkout': typeof CheckoutRoute
+  '/football': typeof FootballRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
+  '/streetwear': typeof StreetwearRoute
   '/track': typeof TrackRoute
   '/admin/account': typeof AdminAccountRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -213,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/slips': typeof AdminSlipsRoute
   '/admin/welcome': typeof AdminWelcomeRoute
+  '/anime/$series': typeof AnimeSeriesRoute
   '/api/ai-drive': typeof ApiAiDriveRoute
   '/api/telegram': typeof ApiTelegramRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -226,14 +261,18 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/algeria-design': typeof AlgeriaDesignRoute
+  '/anime': typeof AnimeRoute
   '/catalogue': typeof CatalogueRoute
   '/checkout': typeof CheckoutRoute
+  '/football': typeof FootballRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
+  '/streetwear': typeof StreetwearRoute
   '/track': typeof TrackRoute
   '/admin/account': typeof AdminAccountRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -244,6 +283,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/slips': typeof AdminSlipsRoute
   '/admin/welcome': typeof AdminWelcomeRoute
+  '/anime/$series': typeof AnimeSeriesRoute
   '/api/ai-drive': typeof ApiAiDriveRoute
   '/api/telegram': typeof ApiTelegramRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -259,14 +299,18 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/algeria-design': typeof AlgeriaDesignRoute
+  '/anime': typeof AnimeRoute
   '/catalogue': typeof CatalogueRoute
   '/checkout': typeof CheckoutRoute
+  '/football': typeof FootballRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/setup': typeof SetupRoute
+  '/streetwear': typeof StreetwearRoute
   '/track': typeof TrackRoute
   '/admin/account': typeof AdminAccountRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -277,6 +321,7 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/slips': typeof AdminSlipsRoute
   '/admin/welcome': typeof AdminWelcomeRoute
+  '/anime_/$series': typeof AnimeSeriesRoute
   '/api/ai-drive': typeof ApiAiDriveRoute
   '/api/telegram': typeof ApiTelegramRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -293,14 +338,18 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/algeria-design'
+    | '/anime'
     | '/catalogue'
     | '/checkout'
+    | '/football'
     | '/forgot-password'
     | '/login'
     | '/mcp'
     | '/reset-password'
     | '/search'
     | '/setup'
+    | '/streetwear'
     | '/track'
     | '/admin/account'
     | '/admin/categories'
@@ -311,6 +360,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/slips'
     | '/admin/welcome'
+    | '/anime/$series'
     | '/api/ai-drive'
     | '/api/telegram'
     | '/category/$slug'
@@ -324,14 +374,18 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/algeria-design'
+    | '/anime'
     | '/catalogue'
     | '/checkout'
+    | '/football'
     | '/forgot-password'
     | '/login'
     | '/mcp'
     | '/reset-password'
     | '/search'
     | '/setup'
+    | '/streetwear'
     | '/track'
     | '/admin/account'
     | '/admin/categories'
@@ -342,6 +396,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/slips'
     | '/admin/welcome'
+    | '/anime/$series'
     | '/api/ai-drive'
     | '/api/telegram'
     | '/category/$slug'
@@ -356,14 +411,18 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/algeria-design'
+    | '/anime'
     | '/catalogue'
     | '/checkout'
+    | '/football'
     | '/forgot-password'
     | '/login'
     | '/mcp'
     | '/reset-password'
     | '/search'
     | '/setup'
+    | '/streetwear'
     | '/track'
     | '/admin/account'
     | '/admin/categories'
@@ -374,6 +433,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/slips'
     | '/admin/welcome'
+    | '/anime_/$series'
     | '/api/ai-drive'
     | '/api/telegram'
     | '/category/$slug'
@@ -389,15 +449,20 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AlgeriaDesignRoute: typeof AlgeriaDesignRoute
+  AnimeRoute: typeof AnimeRoute
   CatalogueRoute: typeof CatalogueRoute
   CheckoutRoute: typeof CheckoutRoute
+  FootballRoute: typeof FootballRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   McpRoute: typeof McpRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SearchRoute: typeof SearchRoute
   SetupRoute: typeof SetupRoute
+  StreetwearRoute: typeof StreetwearRoute
   TrackRoute: typeof TrackRoute
+  AnimeSeriesRoute: typeof AnimeSeriesRoute
   ApiAiDriveRoute: typeof ApiAiDriveRoute
   ApiTelegramRoute: typeof ApiTelegramRoute
   CategorySlugRoute: typeof CategorySlugRoute
@@ -423,6 +488,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/algeria-design': {
+      id: '/algeria-design'
+      path: '/algeria-design'
+      fullPath: '/algeria-design'
+      preLoaderRoute: typeof AlgeriaDesignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/anime': {
+      id: '/anime'
+      path: '/anime'
+      fullPath: '/anime'
+      preLoaderRoute: typeof AnimeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/catalogue': {
       id: '/catalogue'
       path: '/catalogue'
@@ -435,6 +514,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout'
       fullPath: '/checkout'
       preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/football': {
+      id: '/football'
+      path: '/football'
+      fullPath: '/football'
+      preLoaderRoute: typeof FootballRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -477,6 +563,13 @@ declare module '@tanstack/react-router' {
       path: '/setup'
       fullPath: '/setup'
       preLoaderRoute: typeof SetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/streetwear': {
+      id: '/streetwear'
+      path: '/streetwear'
+      fullPath: '/streetwear'
+      preLoaderRoute: typeof StreetwearRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/track': {
@@ -555,6 +648,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/welcome'
       preLoaderRoute: typeof AdminWelcomeRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/anime_/$series': {
+      id: '/anime_/$series'
+      path: '/anime/$series'
+      fullPath: '/anime/$series'
+      preLoaderRoute: typeof AnimeSeriesRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/ai-drive': {
       id: '/api/ai-drive'
@@ -657,15 +757,20 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  AlgeriaDesignRoute: AlgeriaDesignRoute,
+  AnimeRoute: AnimeRoute,
   CatalogueRoute: CatalogueRoute,
   CheckoutRoute: CheckoutRoute,
+  FootballRoute: FootballRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   McpRoute: McpRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SearchRoute: SearchRoute,
   SetupRoute: SetupRoute,
+  StreetwearRoute: StreetwearRoute,
   TrackRoute: TrackRoute,
+  AnimeSeriesRoute: AnimeSeriesRoute,
   ApiAiDriveRoute: ApiAiDriveRoute,
   ApiTelegramRoute: ApiTelegramRoute,
   CategorySlugRoute: CategorySlugRoute,

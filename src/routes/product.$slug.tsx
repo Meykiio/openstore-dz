@@ -67,7 +67,7 @@ function ProductPage() {
         <RelatedProducts product={current} />
 
         <section className="flex flex-col gap-5" aria-labelledby="reviews-title">
-          <h2 id="reviews-title" className="font-display text-xl font-semibold">
+          <h2 id="reviews-title" className="section-title text-xl">
             {t("reviews.title")}
           </h2>
           <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
