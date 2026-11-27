@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AlgeriaDesignRouteImport } from './routes/algeria-design'
 import { Route as AnimeRouteImport } from './routes/anime'
 import { Route as CatalogueRouteImport } from './routes/catalogue'
 import { Route as CheckoutRouteImport } from './routes/checkout'
@@ -33,6 +34,7 @@ import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSlipsRouteImport } from './routes/admin.slips'
 import { Route as AdminWelcomeRouteImport } from './routes/admin.welcome'
+import { Route as AnimeSeriesRouteImport } from './routes/anime_.$series'
 import { Route as ApiAiDriveRouteImport } from './routes/api.ai-drive'
 import { Route as ApiTelegramRouteImport } from './routes/api.telegram'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
@@ -51,6 +53,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlgeriaDesignRoute = AlgeriaDesignRouteImport.update({
+  id: '/algeria-design',
+  path: '/algeria-design',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnimeRoute = AnimeRouteImport.update({
@@ -163,6 +170,11 @@ const AdminWelcomeRoute = AdminWelcomeRouteImport.update({
   path: '/welcome',
   getParentRoute: () => AdminRoute,
 } as any)
+const AnimeSeriesRoute = AnimeSeriesRouteImport.update({
+  id: '/anime_/$series',
+  path: '/anime/$series',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAiDriveRoute = ApiAiDriveRouteImport.update({
   id: '/api/ai-drive',
   path: '/api/ai-drive',
@@ -213,6 +225,7 @@ const AdminUploadCodeRoute = AdminUploadCodeRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/algeria-design': typeof AlgeriaDesignRoute
   '/anime': typeof AnimeRoute
   '/catalogue': typeof CatalogueRoute
   '/checkout': typeof CheckoutRoute
@@ -234,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/slips': typeof AdminSlipsRoute
   '/admin/welcome': typeof AdminWelcomeRoute
+  '/anime/$series': typeof AnimeSeriesRoute
   '/api/ai-drive': typeof ApiAiDriveRoute
   '/api/telegram': typeof ApiTelegramRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -247,6 +261,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/algeria-design': typeof AlgeriaDesignRoute
   '/anime': typeof AnimeRoute
   '/catalogue': typeof CatalogueRoute
   '/checkout': typeof CheckoutRoute
@@ -268,6 +283,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/slips': typeof AdminSlipsRoute
   '/admin/welcome': typeof AdminWelcomeRoute
+  '/anime/$series': typeof AnimeSeriesRoute
   '/api/ai-drive': typeof ApiAiDriveRoute
   '/api/telegram': typeof ApiTelegramRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -283,6 +299,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/algeria-design': typeof AlgeriaDesignRoute
   '/anime': typeof AnimeRoute
   '/catalogue': typeof CatalogueRoute
   '/checkout': typeof CheckoutRoute
@@ -304,6 +321,7 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/slips': typeof AdminSlipsRoute
   '/admin/welcome': typeof AdminWelcomeRoute
+  '/anime_/$series': typeof AnimeSeriesRoute
   '/api/ai-drive': typeof ApiAiDriveRoute
   '/api/telegram': typeof ApiTelegramRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -320,6 +338,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/algeria-design'
     | '/anime'
     | '/catalogue'
     | '/checkout'
@@ -341,6 +360,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/slips'
     | '/admin/welcome'
+    | '/anime/$series'
     | '/api/ai-drive'
     | '/api/telegram'
     | '/category/$slug'
@@ -354,6 +374,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/algeria-design'
     | '/anime'
     | '/catalogue'
     | '/checkout'
@@ -375,6 +396,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/slips'
     | '/admin/welcome'
+    | '/anime/$series'
     | '/api/ai-drive'
     | '/api/telegram'
     | '/category/$slug'
@@ -389,6 +411,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/algeria-design'
     | '/anime'
     | '/catalogue'
     | '/checkout'
@@ -410,6 +433,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/slips'
     | '/admin/welcome'
+    | '/anime_/$series'
     | '/api/ai-drive'
     | '/api/telegram'
     | '/category/$slug'
@@ -425,6 +449,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AlgeriaDesignRoute: typeof AlgeriaDesignRoute
   AnimeRoute: typeof AnimeRoute
   CatalogueRoute: typeof CatalogueRoute
   CheckoutRoute: typeof CheckoutRoute
@@ -437,6 +462,7 @@ export interface RootRouteChildren {
   SetupRoute: typeof SetupRoute
   StreetwearRoute: typeof StreetwearRoute
   TrackRoute: typeof TrackRoute
+  AnimeSeriesRoute: typeof AnimeSeriesRoute
   ApiAiDriveRoute: typeof ApiAiDriveRoute
   ApiTelegramRoute: typeof ApiTelegramRoute
   CategorySlugRoute: typeof CategorySlugRoute
@@ -460,6 +486,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/algeria-design': {
+      id: '/algeria-design'
+      path: '/algeria-design'
+      fullPath: '/algeria-design'
+      preLoaderRoute: typeof AlgeriaDesignRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/anime': {
@@ -616,6 +649,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminWelcomeRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/anime_/$series': {
+      id: '/anime_/$series'
+      path: '/anime/$series'
+      fullPath: '/anime/$series'
+      preLoaderRoute: typeof AnimeSeriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/ai-drive': {
       id: '/api/ai-drive'
       path: '/api/ai-drive'
@@ -717,6 +757,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  AlgeriaDesignRoute: AlgeriaDesignRoute,
   AnimeRoute: AnimeRoute,
   CatalogueRoute: CatalogueRoute,
   CheckoutRoute: CheckoutRoute,
@@ -729,6 +770,7 @@ const rootRouteChildren: RootRouteChildren = {
   SetupRoute: SetupRoute,
   StreetwearRoute: StreetwearRoute,
   TrackRoute: TrackRoute,
+  AnimeSeriesRoute: AnimeSeriesRoute,
   ApiAiDriveRoute: ApiAiDriveRoute,
   ApiTelegramRoute: ApiTelegramRoute,
   CategorySlugRoute: CategorySlugRoute,

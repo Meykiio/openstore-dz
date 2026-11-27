@@ -6,6 +6,24 @@ All notable changes to OpenStore DZ. Format follows
 
 ## [Unreleased]
 
+**Changed: four universes, and Anime opens on its collections.** Anime, Streetwear,
+Algeria Design and Football Design are the shop's four universes; Football keeps its
+`/football` route and links, and Algeria Design is new at `/algeria-design`. The Anime
+page is collection first: a 3 x 3 grid of the nine series (Attack on Titan, Blue Lock,
+Dandadan, Demon Slayer, Dragon Ball, Hunter x Hunter, Jujutsu Kaisen, Naruto, One Piece),
+in that order, each with its own catalogue at `/anime/$series` that shows only that
+series' pieces, a back link to the grid, chips to the other eight, and a clean empty
+state. Collection cards use the first real product photo of the series and fall back to a
+typographic panel, never a stock image. A piece belongs to exactly one universe, decided
+in the order Anime, Football, Algeria Design, Streetwear; the admin can also file a piece
+by category (`anime-<series>`, `algeria-design`, `football-design`) when its name says
+nothing. Classification moved to `src/lib/product-facets.ts`; `universes.ts` keeps the
+declaration and assembly. The bottom tab bar now carries the four universes and the cart.
+Verified: `tsc --noEmit` and `eslint .` clean; the classification rules checked with an
+equivalent Node harness (empty shelves, the nine collections in order, one universe per
+piece, category-driven filing, Algeria themes). `vitest`, `knip` and the production build
+must be re-run on a machine whose `node_modules` matches the platform before release.
+
 **Changed: the universes are declared, not inferred.** Anime, Streetwear and Football
 now have a fixed structure in `src/lib/universe-sections.ts` - six anime series including
 "Other anime", eight streetwear shelves, five European and five Algerian clubs plus

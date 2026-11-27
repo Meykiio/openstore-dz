@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
+import type { TranslationKey } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-context";
 import { productImage } from "@/lib/queries";
 import { UNIVERSES, universeConfig, type UniverseCatalog, type UniverseKey } from "@/lib/universes";
@@ -14,9 +15,12 @@ import { UNIVERSES, universeConfig, type UniverseCatalog, type UniverseKey } fro
 export function UniverseHero({
   catalog,
   universe,
+  ctaKey = "universe.allPieces",
 }: {
   catalog: UniverseCatalog;
   universe: UniverseKey;
+  /** Label of the accent button that scrolls to `#pieces`. */
+  ctaKey?: TranslationKey;
 }) {
   const { t } = useI18n();
   const config = universeConfig(universe);
@@ -59,7 +63,7 @@ export function UniverseHero({
           {catalog.members.length > 0 && (
             <div className="mt-8 flex flex-wrap gap-3">
               <a href="#pieces" className="store-btn store-btn--accent">
-                {t("universe.allPieces")}
+                {t(ctaKey)}
                 <ArrowUpRight size={15} aria-hidden="true" />
               </a>
               <Link to="/catalogue" className="store-btn store-btn--ghost">

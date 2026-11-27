@@ -1,10 +1,11 @@
 import type { Locale, TranslationKey } from "./i18n";
+import { ALGERIA_THEMES } from "./universe-algeria";
 import { CLUBS } from "./universe-clubs";
 import { SERIES } from "./universe-series";
 import { labelFor, type Named } from "./universe-taxonomy";
 
 /**
- * The declared shape of the three universes.
+ * The declared shape of the four universes.
  *
  * The shop's structure is a decision, not a consequence of what happens to be
  * in stock: Anime has five series and "Other anime", Football has European and
@@ -17,11 +18,12 @@ import { labelFor, type Named } from "./universe-taxonomy";
  * second category column.
  */
 
-export type UniverseKey = "anime" | "streetwear" | "football";
+export type UniverseKey = "anime" | "streetwear" | "algeria" | "football";
 
 export type EntryMatch =
   | { kind: "series"; key: string }
   | { kind: "club"; key: string }
+  | { kind: "theme"; key: string }
   | { kind: "type"; key: string }
   | { kind: "vibe"; key: string }
   | { kind: "category"; slug: string }
@@ -47,6 +49,7 @@ export type UniverseSection = {
 
 const SERIES_BY_KEY = new Map(SERIES.map((series) => [series.key, series]));
 const CLUB_BY_KEY = new Map(CLUBS.map((club) => [club.key, club]));
+const THEME_BY_KEY = new Map(ALGERIA_THEMES.map((theme) => [theme.key, theme]));
 
 const seriesEntry = (key: string): SectionEntry => ({
   id: `series:${key}`,
@@ -58,6 +61,12 @@ const clubEntry = (key: string): SectionEntry => ({
   id: `club:${key}`,
   named: CLUB_BY_KEY.get(key),
   any: [{ kind: "club", key }],
+});
+
+const themeEntry = (key: string): SectionEntry => ({
+  id: `theme:${key}`,
+  named: THEME_BY_KEY.get(key),
+  any: [{ kind: "theme", key }],
 });
 
 const typeEntry = (key: string, labelKey: TranslationKey): SectionEntry => ({
@@ -72,8 +81,26 @@ const categoryEntry = (slug: string, labelKey: TranslationKey): SectionEntry => 
   any: [{ kind: "category", slug }],
 });
 
-/** The five series the brief promotes; everything else is "Other anime". */
-const PRIMARY_SERIES = ["naruto", "one-piece", "jujutsu-kaisen", "dragon-ball", "bleach"];
+/**
+ * The nine Anime collections, in the order the storefront presents them.
+ * Everything else is "Other anime". The Anime page draws these as cards, and
+ * `/anime/$series` only accepts a key from this list.
+ */
+export const ANIME_COLLECTIONS = [
+  "attack-on-titan",
+  "blue-lock",
+  "dandadan",
+  "demon-slayer",
+  "dragon-ball",
+  "hunter-x-hunter",
+  "jujutsu-kaisen",
+  "naruto",
+  "one-piece",
+] as const;
+
+export function isAnimeCollection(key: string): boolean {
+  return (ANIME_COLLECTIONS as readonly string[]).includes(key);
+}
 
 /** The five clubs per region the brief promotes; the rest are "Other clubs". */
 const PRIMARY_CLUBS = {
@@ -88,12 +115,31 @@ export const UNIVERSE_SECTIONS: Record<UniverseKey, UniverseSection[]> = {
       labelKey: "universe.series",
       layout: "chips",
       entries: [
-        ...PRIMARY_SERIES.map(seriesEntry),
+        ...ANIME_COLLECTIONS.map(seriesEntry),
         {
           id: "series:other",
           labelKey: "universe.otherAnime",
-          any: [{ kind: "other-series", keys: PRIMARY_SERIES }],
+          any: [{ kind: "other-series", keys: [...ANIME_COLLECTIONS] }],
         },
+      ],
+    },
+  ],
+  algeria: [
+    {
+      id: "themes",
+      labelKey: "universe.algeriaThemes",
+      layout: "chips",
+      entries: ALGERIA_THEMES.map((theme) => themeEntry(theme.key)),
+    },
+    {
+      id: "types",
+      labelKey: "universe.types",
+      layout: "chips",
+      entries: [
+        typeEntry("tee", "universe.type.tee"),
+        typeEntry("hoodie", "universe.type.hoodie"),
+        typeEntry("tracksuit", "universe.type.tracksuit"),
+        typeEntry("sweatshirt", "universe.type.sweatshirt"),
       ],
     },
   ],

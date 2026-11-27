@@ -59,6 +59,13 @@ export const SERIES: Named[] = [
     aliases: ["demon slayer", "kimetsu", "قاتل الشياطين", "ديمون سلاير"],
   },
   {
+    key: "dandadan",
+    ar: "داندادان",
+    fr: "Dandadan",
+    en: "Dandadan",
+    aliases: ["dandadan", "danda dan", "داندادان", "دان دادان"],
+  },
+  {
     key: "chainsaw-man",
     ar: "تشينسو مان",
     fr: "Chainsaw Man",

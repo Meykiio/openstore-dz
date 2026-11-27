@@ -2,12 +2,12 @@ import { useI18n } from "@/lib/i18n-context";
 
 /** A primary storefront destination. `shop` marks the catalogue family. */
 export type StoreNavLink = {
-  to: "/" | "/catalogue" | "/anime" | "/streetwear" | "/football" | "/track";
+  to: "/" | "/catalogue" | "/anime" | "/streetwear" | "/algeria-design" | "/football" | "/track";
   label: string;
   shop?: boolean;
 };
 
-/** The six primary destinations, in reading order. */
+/** The primary destinations, in reading order: home, shop, the four universes, tracking. */
 export function useStoreNavLinks(): StoreNavLink[] {
   const { t } = useI18n();
   return [
@@ -15,6 +15,7 @@ export function useStoreNavLinks(): StoreNavLink[] {
     { to: "/catalogue", label: t("nav.shop"), shop: true },
     { to: "/anime", label: t("nav.anime") },
     { to: "/streetwear", label: t("nav.streetwear") },
+    { to: "/algeria-design", label: t("nav.algeriaDesign") },
     { to: "/football", label: t("nav.football") },
     { to: "/track", label: t("nav.trackOrder") },
   ];

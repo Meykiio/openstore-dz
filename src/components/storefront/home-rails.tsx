@@ -106,7 +106,7 @@ export function CollectionGrid({ collections }: { collections: CollectionItem[] 
   );
 }
 
-/** The three universes, each using the first piece the catalogue can answer. */
+/** The four universes, each using the first piece the catalogue can answer. */
 export function UniverseGrid({ products }: { products: CatalogueProduct[] }) {
   const { t } = useI18n();
 

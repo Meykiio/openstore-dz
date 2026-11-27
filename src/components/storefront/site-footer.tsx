@@ -10,7 +10,7 @@ import { waLink } from "@/lib/whatsapp";
 /**
  * Storefront footer.
  *
- * The editorial close of the page: wordmark, the three universes, the real
+ * The editorial close of the page: wordmark, the four universes, the real
  * service terms and the trader's identity. Algerian law 18-05 (article 11) and
  * law 18-07 require a commercial site to publish the trader's identity, contact
  * details, delivery terms and return policy, so every field comes from
@@ -60,6 +60,7 @@ export function SiteFooter() {
             <Link to="/catalogue">{t("nav.shop")}</Link>
             <Link to="/anime">{t("nav.anime")}</Link>
             <Link to="/streetwear">{t("nav.streetwear")}</Link>
+            <Link to="/algeria-design">{t("nav.algeriaDesign")}</Link>
             <Link to="/football">{t("nav.football")}</Link>
           </nav>
         </div>

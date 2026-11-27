@@ -4,7 +4,8 @@ export const frShop = {
     "Livraison dans les 69 wilayas · Paiement à la livraison · Retour sous {days} jours",
   "nav.anime": "Anime",
   "nav.streetwear": "Streetwear",
-  "nav.football": "Football",
+  "nav.algeriaDesign": "Algeria Design",
+  "nav.football": "Football Design",
   "nav.menu": "Menu",
   "home.hero.eyebrow": "Automne / Hiver 2026 — Algérie",
   "home.hero.line1": "Porte",
@@ -22,15 +23,18 @@ export const frShop = {
   "home.hero.vertical": "Pièces limitées — chaque pièce a une histoire",
   "home.hero.fallback":
     "La prochaine collection est en cours de shooting. Découvrez ce qui est déjà disponible.",
-  "home.universes.eyebrow": "Trois univers. Un seul style.",
+  "home.universes.eyebrow": "Quatre univers. Un seul style.",
   "home.universes.title": "Choisissez votre univers",
   "home.universes.body":
-    "De l'anime aux terrains et aux rues de la ville : chaque univers a ses pièces et son langage.",
+    "De l'anime aux terrains en passant par l'Algérie et les rues de la ville : chaque univers a ses pièces et son langage.",
   "home.universes.enter": "Entrer dans l'univers",
   "home.universes.count": "{count} pièces",
-  "home.universe.football": "Football",
+  "home.universe.football": "Football Design",
+  "home.universe.algeria": "Algeria Design",
   "home.universe.anime.body": "Séries, personnages et designs inspirés de l'anime.",
   "home.universe.streetwear.body": "Oversize, voitures, New York. Un vestiaire urbain assumé.",
+  "home.universe.algeria.body":
+    "Symboles algériens et amazighs, de la Casbah au Sahara, en pièces streetwear.",
   "home.universe.football.body":
     "Clubs algériens et européens en streetwear, pas en maillot de match.",
   "home.new.eyebrow": "Tout juste arrivé",
@@ -62,16 +66,31 @@ export const frShop = {
   "universe.anime.intro":
     "Des pièces inspirées des séries que vous suivez : Naruto, One Piece, Jujutsu Kaisen, L'Attaque des Titans. Choisissez votre série ou parcourez tout.",
   "universe.anime.enter": "Entrer dans l'univers Anime",
+  "universe.anime.viewCollections": "Voir les séries",
+  "universe.anime.collectionsEyebrow": "Parcourir par série",
+  "universe.anime.collectionsTitle": "Les séries anime",
+  "universe.anime.collectionsBody":
+    "Neuf séries, chacune avec son catalogue. Choisissez la vôtre et vous ne verrez que ses pièces.",
+  "universe.anime.backToCollections": "Retour aux séries",
+  "universe.algeria.kicker": "Algeria Design",
+  "universe.algeria.title": "Univers Algérie",
+  "universe.algeria.intro":
+    "Du drapeau à la Casbah en passant par le Sahara : des pièces qui portent les symboles de l'Algérie, avec une touche streetwear. Choisissez un thème ou parcourez tout.",
+  "universe.algeria.enter": "Entrer dans l'univers Algérie",
+  "universe.algeriaThemes": "Thèmes",
+  "universe.collectionEmptyTitle": "Cette série arrive bientôt",
+  "universe.collectionEmptyBody":
+    "Aucune pièce pour cette série pour le moment. Découvrez les autres séries ou la boutique complète.",
   "universe.streetwear.kicker": "Streetwear",
   "universe.streetwear.title": "Univers Street",
   "universe.streetwear.intro":
     "Oversize, voitures, New York, minimal. Des pièces du quotidien, assumées, faites pour être portées avec tout.",
   "universe.streetwear.enter": "Entrer dans l'univers Street",
-  "universe.football.kicker": "Football",
-  "universe.football.title": "Univers Football",
+  "universe.football.kicker": "Football Design",
+  "universe.football.title": "Univers Football Design",
   "universe.football.intro":
     "Clubs algériens et européens en streetwear : hoodies, oversize et ensembles. Choisissez votre club ou votre type de pièce.",
-  "universe.football.enter": "Entrer dans l'univers Football",
+  "universe.football.enter": "Entrer dans l'univers Football Design",
   "universe.series": "Séries",
   "universe.clubsAlgeria": "Clubs algériens",
   "universe.clubsEurope": "Clubs européens",

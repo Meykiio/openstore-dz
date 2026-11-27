@@ -3010,9 +3010,10 @@ html[dir="rtl"] .store .ticker-item {
 }
 
 /* ── Universe cards ───────────────────────────────────────────────────────── */
+/* Four universes, so a 2 x 2 wall reads better than a 3 + 1 row. */
 .store-universe-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -3382,6 +3383,67 @@ html[dir="rtl"] .store-collection-card .c-name {
   .store-collection-card {
     min-height: 220px;
   }
+}
+
+/* ── Anime collections ────────────────────────────────────────────────────── */
+/* Three across so the nine series read as a clean 3 x 3 grid. */
+.anime-collection-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.anime-collection-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline: 0;
+  height: 3px;
+  background: var(--u-accent);
+}
+
+.anime-collection-card .c-index {
+  position: absolute;
+  top: 18px;
+  inset-inline-start: 20px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  opacity: 0.78;
+}
+
+@media (max-width: 1023px) {
+  .anime-collection-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 479px) {
+  .anime-collection-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Return link on a collection's own catalogue. */
+.store-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 18px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--on-surface-muted);
+  text-decoration: none;
+}
+
+.store-back-link:hover {
+  color: var(--on-surface);
+}
+
+html[dir="rtl"] .store-back-link svg {
+  transform: scaleX(-1);
 }
 
 /* ── Trust, promo, reviews, closing ───────────────────────────────────────── */
@@ -4333,7 +4395,6 @@ html[dir="rtl"] .store-cross-card {
     animation: store-reveal 0.6s var(--store-ease) both;
   }
 }
-
 
 /* ── Header controls ──────────────────────────────────────────────────────── */
 .store .store-theme button,

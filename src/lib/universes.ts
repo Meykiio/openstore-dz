@@ -1,8 +1,7 @@
 import type { CatalogueProduct } from "./queries";
 import type { TranslationKey } from "./i18n";
 import { CLUBS } from "./universe-clubs";
-import { SERIES } from "./universe-series";
-import { PIECE_TYPES, VIBES, hasAlias, normalize } from "./universe-taxonomy";
+import { productFacets, type ProductFacets } from "./product-facets";
 import {
   UNIVERSE_SECTIONS,
   type EntryMatch,
@@ -12,18 +11,14 @@ import {
 } from "./universe-sections";
 
 export type { UniverseKey };
+export { productFacets };
 
 /**
- * Universe membership, derived from the catalogue the shop already has.
+ * Universe membership and assembly.
  *
- * A product carries a name, a description, a category and variants. That is
- * enough to file a "Barcelona 1999 hoodie" under Football -> Barcelona without a
- * second taxonomy, a migration or invented catalogue rows. The rules are
- * intentionally generous: a piece that mentions nothing specific belongs to
- * Streetwear, because that is the shop's general fashion floor.
- *
- * The shelves themselves are declared in `universe-sections.ts`; this file only
- * counts and matches against them.
+ * The classification lives in `product-facets.ts`; this file declares the four
+ * universes, the order they are presented in, and how one universe's catalogue
+ * is counted and assembled from the shelves in `universe-sections.ts`.
  */
 
 export type UniverseConfig = {
@@ -65,10 +60,22 @@ export const UNIVERSES: readonly UniverseConfig[] = [
     ctaKey: "universe.streetwear.enter",
   },
   {
+    key: "algeria",
+    to: "/algeria-design",
+    accent: "#3ee08a",
+    index: "03",
+    labelKey: "home.universe.algeria",
+    kickerKey: "universe.algeria.kicker",
+    titleKey: "universe.algeria.title",
+    bodyKey: "home.universe.algeria.body",
+    introKey: "universe.algeria.intro",
+    ctaKey: "universe.algeria.enter",
+  },
+  {
     key: "football",
     to: "/football",
     accent: "#ff6a3d",
-    index: "03",
+    index: "04",
     labelKey: "home.universe.football",
     kickerKey: "universe.football.kicker",
     titleKey: "universe.football.title",
@@ -82,84 +89,7 @@ export function universeConfig(key: UniverseKey): UniverseConfig {
   return UNIVERSES.find((universe) => universe.key === key) ?? UNIVERSES[0];
 }
 
-export type ProductFacets = {
-  universes: UniverseKey[];
-  clubs: string[];
-  series: string[];
-  types: string[];
-  vibes: string[];
-};
-
-const ANIME_WORDS = ["anime", "manga", "أنيمي", "انمي", "مانغا"];
-const FOOTBALL_WORDS = ["football", "soccer", "jersey", "maillot", "كرة القدم", "foot"];
 const CLUB_REGION = new Map(CLUBS.map((club) => [club.key, club.region]));
-
-function textOf(product: CatalogueProduct): string {
-  const variants = product.product_variants.flatMap((variant) => [
-    variant.size,
-    variant.color_name,
-    variant.sku,
-  ]);
-  return normalize(
-    [
-      product.name,
-      product.name_fr,
-      product.description,
-      product.description_fr,
-      product.slug,
-      product.categories?.name,
-      product.categories?.name_fr,
-      product.categories?.slug,
-      ...variants,
-    ]
-      .filter(Boolean)
-      .join(" "),
-  );
-}
-
-export function productFacets(product: CatalogueProduct): ProductFacets {
-  const text = textOf(product);
-  const clubs = CLUBS.filter((club) => club.aliases.some((alias) => hasAlias(text, alias)));
-  const series = SERIES.filter((entry) => entry.aliases.some((alias) => hasAlias(text, alias)));
-
-  const types = pieceTypesOf(text, product.kind);
-  const vibes = vibeKeysOf(text);
-  const anime = series.length > 0 || ANIME_WORDS.some((word) => hasAlias(text, word));
-  const football = clubs.length > 0 || FOOTBALL_WORDS.some((word) => hasAlias(text, word));
-
-  const universes: UniverseKey[] = [];
-  if (anime) universes.push("anime");
-  if (football) universes.push("football");
-  if (!anime && !football) universes.push("streetwear");
-
-  return {
-    universes,
-    clubs: clubs.map((club) => club.key),
-    series: series.map((entry) => entry.key),
-    types,
-    vibes,
-  };
-}
-
-/** Kept apart from `productFacets` only to keep both functions short. */
-function pieceTypesOf(text: string, kind: "single" | "pack"): string[] {
-  const matched = PIECE_TYPES.filter(
-    (type) => type.key !== "other" && type.aliases.some((alias) => hasAlias(text, alias)),
-  );
-  if (matched.length > 0) return matched.map((type) => type.key);
-  if (kind === "pack") return ["pack"];
-  return ["other"];
-}
-
-function vibeKeysOf(text: string): string[] {
-  return VIBES.filter((vibe) => vibe.aliases.some((alias) => hasAlias(text, alias))).map(
-    (vibe) => vibe.key,
-  );
-}
-
-export function universesOf(product: CatalogueProduct): UniverseKey[] {
-  return productFacets(product).universes;
-}
 
 function selectorMatches(
   product: CatalogueProduct,
@@ -171,6 +101,8 @@ function selectorMatches(
       return facets.series.includes(match.key);
     case "club":
       return facets.clubs.includes(match.key);
+    case "theme":
+      return facets.themes.includes(match.key);
     case "type":
       return facets.types.includes(match.key);
     case "vibe":
@@ -187,6 +119,10 @@ function selectorMatches(
         (key) => CLUB_REGION.get(key) === match.region && !match.keys.includes(key),
       );
   }
+}
+
+export function universesOf(product: CatalogueProduct): UniverseKey[] {
+  return productFacets(product).universes;
 }
 
 /** Whether a product sits on one declared shelf. Empty shelves still exist. */

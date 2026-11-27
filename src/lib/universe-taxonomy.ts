@@ -1,7 +1,7 @@
 import type { Locale, TranslationKey } from "./i18n";
 
 /**
- * The vocabulary of the three universes.
+ * The vocabulary of the four universes.
  *
  * These are names, not database rows. A shop can sell a Barcelona hoodie before
  * anyone creates a "Barcelona" category, and the storefront should still file it

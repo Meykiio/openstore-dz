@@ -10,7 +10,7 @@ import type { StoreNavLink } from "./site-nav";
 /**
  * Full-screen mobile navigation.
  *
- * The three universes are the shop's main structure, so on a phone they get
+ * The four universes are the shop's main structure, so on a phone they get
  * numbered editorial links rather than a cramped dropdown. The menu owns the
  * scroll lock and Escape handling because it is the layer that covers the page.
  */
@@ -66,7 +66,9 @@ export function SiteMobileMenu({
           ))}
         <Link to="/search" onClick={onClose}>
           <span>{t("nav.search")}</span>
-          <span>06</span>
+          <span>
+            {String(links.filter((link) => link.to !== "/track").length + 1).padStart(2, "0")}
+          </span>
         </Link>
         <Link to="/track" onClick={onClose}>
           <span>{t("nav.trackOrder")}</span>

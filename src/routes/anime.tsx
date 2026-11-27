@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { StoreLayout } from "@/components/storefront/store-layout";
-import { UniversePage } from "@/components/storefront/universe-page";
+import { AnimeBrowser } from "@/components/storefront/anime-browser";
 import { translate } from "@/lib/i18n";
 import { universeFeedQuery } from "@/lib/universe-feed";
 import { universeConfig } from "@/lib/universes";
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/anime")({
 function UniverseRoute() {
   return (
     <StoreLayout>
-      <UniversePage universe="anime" />
+      <AnimeBrowser />
     </StoreLayout>
   );
 }

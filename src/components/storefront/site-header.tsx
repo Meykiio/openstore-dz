@@ -15,7 +15,7 @@ import { isStoreNavActive, useStoreNavLinks } from "./site-nav";
  *
  * A three-part editorial masthead: wordmark, universe navigation, actions.
  * Under 1024px the navigation becomes a full-screen menu rather than a cramped
- * dropdown, because the three universes are the shop's primary structure. The
+ * dropdown, because the four universes are the shop's primary structure. The
  * cart count is announced politely so adding an item is not a silent change.
  */
 export function SiteHeader() {
