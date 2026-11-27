@@ -5,7 +5,32 @@ master files; they never weaken a `[HARD]` rule.
 
 ## Current State
 
-Last updated 2026-11-14. Everything in this section was run, not assumed.
+Last updated 2026-11-27. Everything in this section was run, not assumed.
+
+### Unreleased: storefront redesign (2026-11-26)
+
+- Anime, Streetwear and Football pages (`/anime`, `/streetwear`, `/football`) built from
+  the existing catalogue feed, with per-universe facets for series, Algerian and European
+  clubs, vibes, garment types and categories. Only facets the feed can answer are shown.
+- New masthead with a full-screen mobile menu, universe rails and cross-links, redesigned
+  product and catalogue pages. No backend, admin, auth, checkout, cart, delivery or API
+  change; `supabase/schema.sql` untouched.
+- Verified: `npm run check` green (typecheck, ESLint 0 errors, 156 unit tests, knip,
+  production build); Playwright at 320, 390 and 1440 px, AR/FR/EN, light and dark.
+- **The live catalogue has two demo products and no Anime or Football pieces**, so those
+  two universes render their empty state. They fill in as products are added; nothing is
+  seeded or invented.
+
+### Unreleased: declared universe structure (2026-11-27)
+
+- Anime, Streetwear and Football now have a fixed set of shelves in
+  `src/lib/universe-sections.ts` (six anime series, eight streetwear shelves, club and
+  type shelves for football). Each shelf renders even when empty, matched against text a
+  product already carries; a piece can sit on several shelves without being duplicated.
+- Nothing was written to the database: the ten owned products stay drafts in
+  `catalogue/openstore-catalogue.csv`, and no photos were added or moved.
+- Verified: `npm run check` green (165 tests, 9 new); the three pages checked in Chrome at
+  320, 390 and 1440 px, Arabic RTL and French LTR, empty shelves and their empty state.
 
 ### 0.4.0 (2026-11-14)
 

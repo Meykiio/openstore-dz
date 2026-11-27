@@ -6,6 +6,18 @@ All notable changes to OpenStore DZ. Format follows
 
 ## [Unreleased]
 
+**Changed: the universes are declared, not inferred.** Anime, Streetwear and Football
+now have a fixed structure in `src/lib/universe-sections.ts` - six anime series including
+"Other anime", eight streetwear shelves, five European and five Algerian clubs plus
+"Other clubs", and four football piece types - and every shelf renders with a count even
+when it is empty, muted at 0.5 opacity, opening on a clean empty state. Shelves are
+matched against the text a product already carries, so one piece can sit on several, and
+nothing was written to the database, seeded or published. Ten owned products remain
+drafts. Verified: `npm run check` (165 tests, 9 of them new for the structure); in the
+browser at 320, 390 and 1440 px: Anime shows 6 shelves, Streetwear 8, Football 12 club
+cards and 4 types, no horizontal overflow, RTL labels in Arabic, clicking an empty shelf
+shows "0 pieces" and a clear button.
+
 **Fixed.** On the public demo, opening `/reset-password` directly let the shared staff
 account set a new password. It now follows the same rule as My account, and both let the
 demo's owner change theirs. The language picker on the collapsed admin rail spilled out of
@@ -13,17 +25,31 @@ the 70px rail; it is now a round language button that opens the same native pick
 Verified: `npm run check` (156 tests); the rail measured on the production build (40px
 button collapsed, full-width picker expanded).
 
-**Changed: storefront design system and home page.** Paper, ink and one oxblood accent
-replace the reference orange; the palette now comes from the demo photography's warm cream
-backing. Geist carries the wordmark, hero and headings, Outfit carries the interface, and
-Fraunces is removed (68 KB to 32 KB of display font). Product cards lose their frame and
-show a second photo on hover; shelves are three-up; the home page fetches one 24-product
-feed instead of two overlapping queries; category and universe rails hide when they would
-lead to nothing; the header and bottom bar gain search; form labels drop ALL CAPS. The
-product gallery sticks while the direct-order form scrolls. Verified: typecheck, ESLint,
-156 unit tests, production build against the live database at 1440 and 390 px, light and
-dark, AR/FR/EN. **Knip did not finish in the build sandbox** (oxc-parser `ArrayBuffer`
-allocation); run `npm run check` on the machine before release.
+**Changed: the storefront, rebuilt around three universes.** The shop now opens on Anime,
+Streetwear and Football, each with its own page at `/anime`, `/streetwear` and `/football`,
+reached from the masthead, the home rails and a cross-link at the foot of every universe.
+Pieces are classified from the text the catalogue already holds — name, description,
+category and variant names, Arabic normalised — against a fixed list of series, clubs and
+garment types. A facet such as "Naruto" or "Barcelona" appears only when the feed can
+answer it, and a universe with nothing behind it says so rather than showing invented
+stock. The palette is bone paper, ink and one acid-lime accent (cyan, lime and orange per
+universe), Geist on the wordmark and headings, Outfit on the interface; Fraunces is gone
+(68 KB to 32 KB of display font); form labels drop ALL CAPS. The header is a three-part
+masthead whose navigation becomes a full-screen menu under 1024px (portalled to the body,
+scroll locked, Escape to close). Product cards lose their frame and show a second photo on
+hover; the home page fetches one 24-product feed instead of two overlapping queries, and
+its category and universe rails hide when they would lead to nothing; the three universes
+share one 96-product feed. The catalogue and product pages carry the same identity, and
+the gallery sticks while the direct-order form scrolls.
+Verified: `npm run check` green (typecheck, ESLint 0 errors, 156 unit tests, knip,
+production build). Playwright at 320, 390 and 1440 px: `/`, `/catalogue`, `/anime`,
+`/streetwear`, `/football`, `/search`, `/product/shirt-demo`, `/product/pack-demo` and
+`/checkout` all render with no horizontal overflow; Arabic RTL and French/English LTR;
+light and dark; catalogue filters, universe facets, add-to-cart, the cart drawer. **The
+live catalogue holds two demo products and two categories and no Anime or Football
+pieces**, so those two universes show their empty state until matching products exist. No
+backend, admin, auth, product data, checkout, cart, delivery or API change; no schema
+update needed.
 
 ## [0.4.0] - 2026-11-14
 
